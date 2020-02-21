@@ -5,14 +5,14 @@
 	"homepage_url": "https://github.com/LostAbaddon/ArticleUtils",
 	"manifest_version": 2,
 	"description": "内容辅助实用工具集",
-	"permissions": [ "tabs", "<all_urls>" ],
+	"permissions": [ "webRequest", "<all_urls>", "tabs", "<all_urls>" ],
 	"web_accessible_resources": [ "MathJax2.5/*" ],
 	"icons": {
 		"128": "utils.png"
 	},
-	// "background": {
-	// 	"scripts": ["common.js", "background.js"]
-	// },
+	"background": {
+		"scripts": ["common.js", "background.js"]
+	},
 	// "browser_action": {
 	// 	"default_title": "内容辅助",
 	// 	"default_icon": "utils.png",
