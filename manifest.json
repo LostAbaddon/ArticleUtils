@@ -4,7 +4,7 @@
 	"author": "LostAbaddon",
 	"homepage_url": "https://github.com/LostAbaddon/ArticleUtils",
 	"manifest_version": 2,
-	"description": "内容辅助实用工具集",
+	"description": "内容辅助实用工具集：显示 LaTeX",
 	"permissions": [ "webRequest", "<all_urls>", "tabs", "<all_urls>" ],
 	"web_accessible_resources": [ "MathJax2.5/*" ],
 	"icons": {
