@@ -3,102 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>快捷菜单</title>
-<style type="text/css">
-	body {
-		width: 350px;
-		font-size: 14px;
-	}
-	div.title {
-		font-size: 16px;
-		font-weight: bolder;
-	}
-	div.box > p.line {
-		display: inline-block;
-		margin-top: 0px;
-		margin-bottom: 0px;
-		margin-left: 5px;
-		margin-right: 5px;
-		cursor: pointer;
-		user-select: none;
-	}
-	div.box > p.line.disabled {
-		color: rgb(175, 175, 175);
-		pointer-events: none;
-	}
-	div.box > p.line > input {
-		position: relative;
-		top: 2px;
-	}
-	div.sepline {
-		display: block;
-		height: 1px;
-		width: 100%;
-		margin-bottom: 10px;
-		background-color: rgb(127, 127, 127);
-	}
-	div.box button {
-		width: 70px;
-		padding: 5px 10px;
-		border: none;
-		outline: none;
-		background-color: white;
-		box-shadow: inset 0px 0px 3px rgba(127, 127, 127, 0.6);
-		cursor: pointer;
-	}
-	div.box.replacer p.buttons {
-		display: block;
-		width: 100%;
-		padding: 0px;
-		margin: 0px;
-		margin-bottom: 5px;
-	}
-	div.box.replacer button {
-		display: inline-block;
-		width: 50%;
-		height: 25px;
-		box-sizing: border-box;
-		margin: 0px;
-		padding: 0px;
-	}
-	div.box.replacer button:last-child {
-		float: right;
-	}
-	div.box.replacer > textarea {
-		width: 336px;
-		height: 100px;
-		padding: 5px;
-		margin: 0px;
-		outline: none;
-		resize: none;
-	}
-	div.box.auto_decrypt {
-		margin-bottom: 10px;
-	}
-</style>
+<link type="text/css" rel="stylesheet" href="badge.css">
 </head>
 <body>
-<div class="box mosaic">
-	<p><button name="ToggleMosaic">混淆</button></p>
-	<p class="line" name="MosaicType"><input type="checkbox" name="replace"><label>替换</label></p>
-	<p class="line" name="MosaicType"><input type="checkbox" name="rearrange" checked><label>乱序</label></p>
-	<p class="line" name="MosaicType"><input type="checkbox" name="encrypt"><label>加密</label></p>
-	<p></p>
-</div>
-<div class="sepline"></div>
-<div class="box auto_decrypt">
-	<div class="test"></div>
-	<p class="line" name="AutoDecrypt"><input type="checkbox" name="autodecrypt"><label>自动解码</label></p>
-</div>
-<div class="sepline"></div>
-<div class="box replacer">
-	<textarea name="inputter"></textarea>
-	<p class="buttons">
-		<button name="LaunchMosaic">混淆</button>
-		<button name="LaunchDecrypt">解码</button>
-	</p>
-	<textarea name="result"></textarea>
+<div class="container">
+	<div class="option-item">
+		<div class="option-line option-checkbox">
+			<input type="checkbox" name="AutoMath"><label>自动转义数学公式</label>
+		</div>
+	</div>
 </div>
 <script type="text/javascript" src="./common.js"></script>
+<script type="text/javascript" src="./param.js"></script>
 <script type="text/javascript" src="./badge.js"></script>
+<script type="text/javascript" src="./config.js"></script>
+<script type="text/javascript" src="./setting.js"></script>
 </body>
 </html>

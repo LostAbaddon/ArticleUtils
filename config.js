@@ -1,0 +1,3 @@
+window.DefaultExtConfig = {
+	AutoMath: false
+};
