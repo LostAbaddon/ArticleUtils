@@ -1,5 +1,15 @@
 const autoMath = () => {
-	if (!!window.MathJax) return;
+	var hasMathJax = [].some.call(document.querySelectorAll('script'), script => {
+		return script.src.toLowerCase().indexOf('mathjax') >= 0;
+	});
+	if (hasMathJax) return;
+
+	var content = document.body.innerText.split(/\n{2,}/);
+	hasMathJax = content.some(line => {
+		if (!!line.match(/\$[^\n\$]+?\$/)) return true;
+		if (!!line.match(/\$\$\n[^\$]+?\n\$\$/)) return true;
+	});
+	if (!hasMathJax) return;
 
 	var config = newEle('script');
 	config.type = 'text/x-mathjax-config';
