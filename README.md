@@ -12,7 +12,7 @@
 	+	功能：
 		*	使用 MathJax 2.5，支持 AMSmath 与 AMSsymbols 包
 		*	对 MathJax 进行裁剪，不支持增加新包，只能输出为 HTML，不支持 MathML
-	+	使用（开发中）：
+	+	使用：
 		*	选项页开关
 		*	键列开关（ctrl+ctrl+m）
 	+	下一步（开发中）：

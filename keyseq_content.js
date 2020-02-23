@@ -2,7 +2,6 @@
 	var injected = [].some.call(document.querySelectorAll('script'), s => {
 		return s.src.indexOf('/keyseq.js') >= 0;
 	});
-	console.log('ArticleUtils:', injected);
 
 	var loaded = false;
 

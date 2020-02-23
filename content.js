@@ -26,10 +26,13 @@ ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 });
 
 (() => {
-	RegiestKeySeq('ctrl+ctrl+x', 'test', () => {
-		console.log('Fuck You!!!');
-	});
-	RegiestKeySeq('ctrl+ctrl+y', 'ShowCryption', () => {
-		console.log('Meow~~~');
+	RegiestKeySeq('ctrl+ctrl+m', 'test', async () => {
+		var last = ExtConfigManager.get('AutoMath');
+		await ExtConfigManager.set('AutoMath', !last);
+		if (last) {
+			window.location.reload();
+		} else {
+			autoMath();
+		}
 	});
 }) ();

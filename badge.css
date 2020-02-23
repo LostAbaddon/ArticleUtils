@@ -34,6 +34,7 @@ div.option-item input[type="checkbox"] {
 	top: 2px;
 }
 div.option-item label {
+	margin-left: 10px;
 	cursor: pointer;
 	font-size: 1rem;
 	user-select: none;
