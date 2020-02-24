@@ -35,6 +35,16 @@ const onInit = async config => {
 		await wait();
 	}
 
+	window.SearchInjection.init([{
+		id: 'book',
+		name: '书籍'
+	}, {
+		id: 'video',
+		name: '影视'
+	}, {
+		id: 'common',
+		name: '其它'
+	}]);
 	findResources();
 };
 
@@ -73,19 +83,7 @@ const findResources = () => {
 	});
 };
 const onGetResource = resource => {
-	console.log('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
-	console.log(' VVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
-	console.log('   VVVVVVVVVVVVVVVVVVVVVVVVV');
-	console.log('      VVVVVVVVVVVVVVVVVVV');
-	console.log('          VVVVVVVVVVV');
-	console.log('               V');
-	console.log(resource);
-	console.log('               V');
-	console.log('              VVV');
-	console.log('            VVVVVVV');
-	console.log('         VVVVVVVVVVVVV');
-	console.log('     VVVVVVVVVVVVVVVVVVVVV');
-	console.log('VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV');
+	window.SearchInjection.show(resource);
 };
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {

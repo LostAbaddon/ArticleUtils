@@ -1,0 +1,161 @@
+div.search_item_frame {
+	position: fixed;
+	display: block;
+	box-sizing: border-box;
+	top: 0px;
+	right: 0px;
+	z-index: 10000;
+	width: 500px;
+	height: 100%;
+	padding: 0px;
+	transition: 500ms all ease-in-out;
+}
+div.search_item_frame.collapsed {
+	right: -500px;
+}
+div.search_item_frame.occupied {
+	right: -540px;
+}
+
+div.search_item_frame div.search_item_tab {
+	position: absolute;
+	display: block;
+	box-sizing: border-box;
+	bottom: 0px;
+	left: -40px;
+	width: 40px;
+	height: 80px;
+	border-radius: 10px 0px 0px 10px;
+	box-shadow: 2px 2px 3px 3px rgba(127, 127, 127, 0.5);
+	background-color: white;
+	cursor: pointer;
+}
+div.search_item_frame div.search_item_tab.tab_1 {
+	top: 25px;
+	background-color: rgb(240, 124, 130);
+}
+div.search_item_frame div.search_item_tab.tab_2 {
+	top: 105px;
+	background-color: rgb(18, 170, 156);
+}
+div.search_item_frame div.search_item_tab.tab_3 {
+	top: 185px;
+	background-color: rgb(15, 89, 164);
+	color: rgb(208, 223, 230);
+}
+div.search_item_frame div.search_item_tab.tab_4 {
+	top: 265px;
+	background-color: rgb(254, 215, 26);
+}
+div.search_item_frame div.search_item_tab.disabled {
+	pointer-events: none;
+	background-color: rgb(181, 152, 161);
+	color: rgb(209, 194, 211);
+}
+div.search_item_frame div.search_item_tab div.search_item_captain {
+	position: absolute;
+	display: block;
+	box-sizing: border-box;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	font-size: 18px;
+	line-height: 25px;
+	text-shadow: 1px 1px 2px rgba(84, 30, 36, 0.3), 1px 1px 1px rgba(226, 225, 228, 0.5);
+	user-select: none;
+}
+
+div.search_item_frame div.search_item_content {
+	position: relative;
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;	
+	padding: 10px 15px;
+	background-color: rgb(192, 196, 195);
+	box-shadow: inset 10px 0px 5px -5px rgba(53, 53, 53, 0.5);
+	overflow-x: hidden;
+	overflow-y: auto;
+}
+div.search_item_frame div.search_item_content::-webkit-scrollbar {
+	width: 12px;
+	background-color: transparent;
+}
+div.search_item_frame div.search_item_content::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+	background-color: rgb(128, 118, 110);
+	box-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.5);
+}
+div.search_item_frame div.search_item_content::-webkit-scrollbar-track {
+	border-radius: 6px;
+	background-color: rgba(238, 247, 242, 0.1);
+	box-shadow: inset 2px 2px 3px rgba(43, 49, 44, 0.2);
+}
+
+div.search_item_frame div.search_item_content div.search_item_pad {
+	position: relative;
+	margin-bottom: 20px;
+}
+div.search_item_frame div.search_item_content div.search_item_pad:last-child {
+	margin-bottom: 0px;
+}
+div.search_item_frame div.search_item_content div.search_item_pad div.search_item_pad_captain {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 5px 10px;
+	font-size: 18px;
+	font-weight: bolder;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	background-color: white;
+	box-shadow: 0px 0px 1px rgba(53, 53, 53, 0.8);
+	cursor: pointer;
+	transition: 300ms all ease-in-out;
+}
+div.search_item_frame div.search_item_content div.search_item_pad:hover div.search_item_pad_captain {
+	box-shadow: 3px 3px 5px rgba(53, 53, 53, 0.5);
+}
+div.search_item_frame div.search_item_content div.search_item_pad div.search_item_pad_captain div.search_item_pad_collapser {
+	position: absolute;
+	top: 2px;
+	right: 5px;
+	font-size: 20px;
+	text-align: right;
+	pointer-events: none;
+}
+div.search_item_frame div.search_item_content div.search_item_pad div.search_item_pad_line {
+	display: block;
+	box-sizing: border-box;
+	height: 23px;
+	margin-top: 6px;
+	margin-left: 10px;
+	margin-right: 10px;
+	padding: 2px 5px;
+	background-color: white;
+	font-size: 14px;
+	line-height: 19px;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.8);
+	transition: 300ms all ease-in-out;
+}
+div.search_item_frame div.search_item_content div.search_item_pad.collapsed div.search_item_pad_line {
+	height: 0px;
+	margin-top: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+div.search_item_frame div.search_item_content div.search_item_pad div.search_item_pad_line:hover {
+	margin-left: 0px;
+	margin-right: 0px;
+	box-shadow: 2px 2px 5px rgba(53, 53, 53, 0.3);
+}
+div.search_item_frame div.search_item_content div.search_item_pad div.search_item_pad_line a {
+	color: black;
+	background-color: transparent;
+	text-decoration: none;
+	user-select: none;
+}

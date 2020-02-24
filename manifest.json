@@ -1,12 +1,12 @@
 {
 	"name": "内容辅助工具集",
-	"version": "0.0.3",
+	"version": "0.0.4",
 	"author": "LostAbaddon",
 	"homepage_url": "https://github.com/LostAbaddon/ArticleUtils",
 	"manifest_version": 2,
-	"description": "内容辅助实用工具集：显示 LaTeX",
+	"description": "内容辅助实用工具集：显示 LaTeX；搜索当前页种的所有可下载资源",
 	"permissions": [ "storage" ],
-	"web_accessible_resources": [ "keyseq/keyseq.js", "MathJax2.5/*" ],
+	"web_accessible_resources": [ "keyseq/*", "search/*", "MathJax2.5/*" ],
 	"icons": {
 		"128": "utils.png"
 	},
@@ -21,7 +21,14 @@
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
-			"js": ["common/common.js", "keyseq/keyseq_content.js", "common/param.js", "config.js", "core/content.js"]
+			"js": [
+				"common/common.js",
+				"keyseq/keyseq_content.js",
+				"common/param.js",
+				"config.js",
+				"search/inject.js",
+				"core/content.js"
+			]
 		}
 	]
 }

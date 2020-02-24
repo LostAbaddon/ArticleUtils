@@ -7,10 +7,10 @@ const ExtHost = chrome.extension.getURL('');
 const onInit = config => {
 	chrome.runtime.onMessage.addListener((msg, sender, response) => {
 		if (msg.event === 'FindResource') {
-			// searchResources(msg.targets, config, sender.tab.id);
-			store.get('result', result => {
-				sendBackResource(sender.tab.id, result);
-			});
+			searchResources(msg.targets, config, sender.tab.id);
+			// store.get('result', result => {
+			// 	sendBackResource(sender.tab.id, result);
+			// });
 		}
 	});
 };
@@ -19,22 +19,23 @@ const searchResources = (targets, config, tabID) => {
 	var result = {}, task = targets.length;
 	if (task === 0) return;
 	targets.forEach(async (t) => {
-		var list = await searchResource(t, config);
-		if (!!list) result[t] = list;
-
-		task --;
-		if (task === 0) analyzeResource(tabID, result);
+		searchResource(t, config, list => {
+			if (!list) return;
+			result[t] = list;
+			analyzeResource(tabID, result);
+		});
 	});
 };
-const searchResource = (target, config) => new Promise(res => {
-	if (!!target.match(UnavailableChars)) return res();
+const searchResource = (target, config, callback) => {
+	if (!!target.match(UnavailableChars)) return callback();
 
-	var task = 3, result = {};
+	// var task = 3, result = {};
+	var result = {};
 	var done = name => list => {
 		if (!!list) result[name] = list;
-		task --;
-		if (task > 0) return;
-		res(result);
+		// task --;
+		// if (task > 0) return;
+		callback(result);
 	};
 
 	SearchItem.forEach(name => {
@@ -42,7 +43,7 @@ const searchResource = (target, config) => new Promise(res => {
 		engine = config[engine + 'Source'];
 		search(target, engine, done(name));
 	});
-});
+};
 const search = (target, engine, callback) => {
 	var result = {}, task = engine.length;
 	var done = (list) => {
