@@ -5,23 +5,23 @@
 	"homepage_url": "https://github.com/LostAbaddon/ArticleUtils",
 	"manifest_version": 2,
 	"description": "内容辅助实用工具集：显示 LaTeX",
-	"permissions": [ "storage", "webRequest", "<all_urls>" ],
-	"web_accessible_resources": [ "keyseq.js", "MathJax2.5/*" ],
+	"permissions": [ "storage" ],
+	"web_accessible_resources": [ "keyseq/keyseq.js", "MathJax2.5/*" ],
 	"icons": {
 		"128": "utils.png"
 	},
 	"background": {
-		"scripts": ["common.js", "background.js"]
+		"scripts": ["common/common.js", "common/param.js", "config.js", "core/background.js"]
 	},
 	"browser_action": {
 		"default_title": "辅助工具",
 		"default_icon": "utils.png",
-		"default_popup": "badge.html"
+		"default_popup": "badge/badge.html"
 	},
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
-			"js": ["common.js", "keyseq_content.js", "param.js", "config.js", "content.js"]
+			"js": ["common/common.js", "keyseq/keyseq_content.js", "common/param.js", "config.js", "core/content.js"]
 		}
 	]
 }

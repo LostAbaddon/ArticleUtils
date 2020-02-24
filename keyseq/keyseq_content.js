@@ -41,5 +41,5 @@
 		}
 	};
 
-	if (!injected) loadJS(chrome.extension.getURL('keyseq.js'));
+	if (!injected) loadJS(chrome.extension.getURL('keyseq/keyseq.js'));
 }) ();

@@ -23,7 +23,17 @@
 		return result;
 	};
 
-	root.newEle = tagName => document.createElement(tagName);
+	root.newEle = (tagName, id, classList) => {
+		var ele = document.createElement(tagName);
+		if (!!id) ele.id = id;
+		if (!!classList) {
+			if (isString(classList)) classList = classList.split(' ');
+			if (classList instanceof Array) {
+				classList.forEach(c => ele.classList.add(c));
+			}
+		}
+		return ele;
+	};
 	root.loadJS = (src, callback) => {
 		var script = newEle('script');
 		script.type = 'text/javascript';
@@ -31,6 +41,23 @@
 		if (!!callback) script.onload = callback;
 		document.body.appendChild(script);
 	};
+
+	root.xhr = (url, method='get', data, callback) => new Promise(res => {
+		if (data instanceof Function) {
+			callback = data;
+			data = null;
+		}
+
+		var xhr = new XMLHttpRequest();
+		xhr.open(method, url, true);
+		xhr.onreadystatechange = (...args) => {
+			if (xhr.readyState == 4) {
+				if (!!callback) callback(xhr.responseText);
+				res([xhr.responseText, xhr.responseURL]);
+			}
+		};
+		xhr.send();
+	});
 
 	root.store = {
 		set: (key, value, cb) => new Promise(res => {
