@@ -57,21 +57,35 @@ const findResources = () => {
 	var content = document.body.innerText.match(/<[^\n]+?>|《[^\n]+?》/gi);
 	if (!!content) content = content.map(title => title.substring(1, title.length - 1).trim());
 	else content = [];
-	var headers = [...document.querySelectorAll('h1'), ...document.querySelectorAll('h1')];
+
+	var title = document.title.trim(), titleLen = title.length;
+	var headers = [...document.querySelectorAll('h1')];
 	if (!!headers) {
 		headers = headers.map(head => {
-			if (head.children.length === 0) return head.innerText.trim();
-			var title = head.innerText.trim();
-			[].some.call(head.children, ele => {
-				var name = ele.innerText;
-				if (!name) return;
-				name = name.trim();
-				if (name.length === 0) return;
-				title = name;
-				return true;
-			});
-			return title;
-		});
+			var ttl = head.innerText.replace(/^[ \n\t\r]+|[ \n\t\r]+$/gi, '');
+			var len = ttl.length, target = '';
+			if (len < titleLen) {
+				for (let i = 0; i < len; i ++) {
+					for (let j = 1; j <= len - i; j ++) {
+						let str = ttl.substr(i, j);
+						if (title.indexOf(str) < 0) break;
+						if (target.length < str.length) target = str;
+					}
+					if (i + target.length > titleLen) break;
+				}
+			} else {
+				for (let i = 0; i < titleLen; i ++) {
+					for (let j = 1; j <= titleLen - i; j ++) {
+						let str = title.substr(i, j);
+						if (ttl.indexOf(str) < 0) break;
+						if (target.length < str.length) target = str;
+					}
+					if (i + target.length > len) break;
+				}
+			}
+
+			return target;
+		}).filter(t => !!t && t.length / (titleLen + 1) > 0.5);
 		headers = [...content, ...headers];
 	} else {
 		headers = content;

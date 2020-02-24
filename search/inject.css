@@ -28,6 +28,7 @@ div.search_item_frame div.search_item_tab {
 	border-radius: 10px 0px 0px 10px;
 	box-shadow: 2px 2px 3px 3px rgba(127, 127, 127, 0.5);
 	background-color: white;
+	color: black;
 	cursor: pointer;
 }
 div.search_item_frame div.search_item_tab.tab_1 {
@@ -95,6 +96,7 @@ div.search_item_frame div.search_item_content::-webkit-scrollbar-track {
 div.search_item_frame div.search_item_content div.search_item_pad {
 	position: relative;
 	margin-bottom: 20px;
+	color: black;
 }
 div.search_item_frame div.search_item_content div.search_item_pad:last-child {
 	margin-bottom: 0px;
