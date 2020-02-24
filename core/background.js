@@ -19,23 +19,22 @@ const searchResources = (targets, config, tabID) => {
 	var result = {}, task = targets.length;
 	if (task === 0) return;
 	targets.forEach(async (t) => {
-		searchResource(t, config, list => {
+		searchResource(t, config, (list, target, name) => {
 			if (!list) return;
 			result[t] = list;
-			analyzeResource(tabID, result);
+			analyzeResource(tabID, result, target, name);
 		});
 	});
 };
 const searchResource = (target, config, callback) => {
 	if (!!target.match(UnavailableChars)) return callback();
 
-	// var task = 3, result = {};
 	var result = {};
 	var done = name => list => {
-		if (!!list) result[name] = list;
-		// task --;
-		// if (task > 0) return;
-		callback(result);
+		if (!!list && Object.keys(list) > 0) {
+			result[name] = list;
+			callback(result, target, name);
+		}
 	};
 
 	SearchItem.forEach(name => {
@@ -91,7 +90,7 @@ const search = (target, engine, callback) => {
 		page = page.replace(/^[ \n\t\r]+|[ \n\t\r]+$/g, '');
 		if (page.length === 0) return done();
 
-		var container = newEle('div', 'MainContainer');
+		var container = newEle('div', null, 'MainContainer');
 		container.innerHTML = page;
 		await wait();
 
@@ -124,7 +123,7 @@ const search = (target, engine, callback) => {
 		done(list);
 	});
 };
-const analyzeResource = (tabID, resources) => {
+const analyzeResource = (tabID, resources, targetName, targetType) => {
 	var result = {};
 	Object.keys(resources).forEach(name => {
 		var list = resources[name];
@@ -185,13 +184,15 @@ const analyzeResource = (tabID, resources) => {
 		});
 	});
 
-	// For Test
-	store.set('result', result);
-
-	sendBackResource(tabID, result);
+	sendBackResource(tabID, result, targetName, targetType);
 };
-const sendBackResource = (tabID, resource) => {
-	chrome.tabs.sendMessage(tabID, { event: 'GotResource', resource });
+const sendBackResource = (tabID, resource, targetName, targetType) => {
+	chrome.tabs.sendMessage(tabID, {
+		event: 'GotResource',
+		resource,
+		targetName,
+		targetType
+	});
 };
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {

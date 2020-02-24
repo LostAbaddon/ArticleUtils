@@ -9,13 +9,13 @@ class SearchItem {
 	constructor (title) {
 		this.name = title;
 
-		this.pad = newEle('div', null, 'search_item_pad');
+		this.pad = newEle('div', 'search_item_pad');
 
-		this.#title = newEle('div', null, 'search_item_pad_captain');
+		this.#title = newEle('div', 'search_item_pad_captain');
 		this.#title.innerText = title;
 		this.#title.name = title;
 
-		this.#btn = newEle('div', null, 'search_item_pad_collapser');
+		this.#btn = newEle('div', 'search_item_pad_collapser');
 		this.#btn.innerText = '-';
 		this.#title.appendChild(this.#btn);
 
@@ -23,8 +23,8 @@ class SearchItem {
 	}
 	setContent (content) {
 		content.forEach(item => {
-			var ui = newEle('div', null, 'search_item_pad_line');
-			var link = newEle('a', null);
+			var ui = newEle('div', 'search_item_pad_line');
+			var link = newEle('a');
 			link.innerText = item[0];
 			link.href = item[1];
 			link.target = '_blank';
@@ -54,7 +54,6 @@ class SearchItem {
 		}
 	}
 }
-
 class SearchFrame {
 	frame;
 	tab;
@@ -65,10 +64,10 @@ class SearchFrame {
 	toggleCB;
 
 	constructor (id, title, index) {
-		this.frame = newEle('div', null, 'search_item_frame collapsed');
+		this.frame = newEle('div', 'search_item_frame collapsed');
 
-		this.tab = newEle('div', null, 'search_item_tab disabled tab_' + index);
-		this.tab.captain = newEle('div', null, 'search_item_captain');
+		this.tab = newEle('div', 'search_item_tab disabled tab_' + index);
+		this.tab.captain = newEle('div', 'search_item_captain');
 		this.tab.captain.innerText = title.split('').join('\n');
 		this.tab.appendChild(this.tab.captain);
 		this.tab.addEventListener('click', () => {
@@ -79,7 +78,7 @@ class SearchFrame {
 		});
 		this.frame.appendChild(this.tab);
 
-		this.content = newEle('div', null, 'search_item_content');
+		this.content = newEle('div', 'search_item_content');
 		this.frame.appendChild(this.content);
 
 		this.frame.addEventListener('click', evt => {
@@ -139,17 +138,21 @@ class SearchFrame {
 	}
 }
 
+var initialed = false;
 window.SearchInjection = {};
-
 window.SearchInjection.init = tabs => {
-	var style = newEle('link');
-	style.rel = 'stylesheet';
-	style.href = chrome.extension.getURL('/search/inject.css');
-	document.body.appendChild(style);
+	if (!initialed) {
+		let style = newEle('link');
+		style.rel = 'stylesheet';
+		style.href = chrome.extension.getURL('/search/inject.css');
+		document.body.appendChild(style);
+		initialed = true;
+	}
 
-	window.SearchInjection.tabs = {};
-	tabs.forEach((tab, i) => {
-		var frame = new SearchFrame(tab.id, tab.name, i + 1);
+	window.SearchInjection.tabs = window.SearchInjection.tabs || {};
+	tabs.forEach(tab => {
+		if (!!window.SearchInjection.tabs[tab.id]) return;
+		var frame = new SearchFrame(tab.id, tab.name, Object.keys(window.SearchInjection.tabs).length + 1);
 		window.SearchInjection.tabs[tab.id] = frame;
 		frame.onToggle((id, show) => {
 			Object.keys(window.SearchInjection.tabs).forEach(tab => {
@@ -161,7 +164,6 @@ window.SearchInjection.init = tabs => {
 	});
 };
 window.SearchInjection.show = resource => {
-	console.log('>>>> SHOW <<<<', resource);
 	var used = [];
 	Object.keys(resource).forEach(type => {
 		var list = resource[type];

@@ -23,7 +23,7 @@
 		return result;
 	};
 
-	root.newEle = (tagName, id, classList) => {
+	root.newEle = (tagName, classList, id) => {
 		var ele = document.createElement(tagName);
 		if (!!id) ele.id = id;
 		if (!!classList) {

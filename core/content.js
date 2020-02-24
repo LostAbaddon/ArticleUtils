@@ -35,6 +35,12 @@ const onInit = async config => {
 		await wait();
 	}
 
+	if (config.AutoSearch) {
+		initSearch();
+		findResources();
+	}
+};
+const initSearch = () => {
 	window.SearchInjection.init([{
 		id: 'book',
 		name: '书籍'
@@ -45,7 +51,6 @@ const onInit = async config => {
 		id: 'common',
 		name: '其它'
 	}]);
-	findResources();
 };
 
 const findResources = () => {
@@ -82,7 +87,8 @@ const findResources = () => {
 		targets: content
 	});
 };
-const onGetResource = resource => {
+const onGetResource = (resource, name, type) => {
+	console.log('Get Resource:', name, type);
 	window.SearchInjection.show(resource);
 };
 
@@ -99,7 +105,11 @@ RegiestKeySeq('ctrl+ctrl+m', 'ConvertMath', async () => {
 		autoMath();
 	}
 });
+RegiestKeySeq('ctrl+ctrl+s', 'SearchResource', async () => {
+	initSearch();
+	findResources();
+});
 
 chrome.runtime.onMessage.addListener(msg => {
-	if (msg.event === 'GotResource') onGetResource(msg.resource);
+	if (msg.event === 'GotResource') onGetResource(msg.resource, msg.targetName, msg.targetType);
 });

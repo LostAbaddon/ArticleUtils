@@ -1,5 +1,6 @@
 window.DefaultExtConfig = {
 	AutoMath: true,
+	AutoSearch: true,
 	CommonSource: [
 		{
 			url: "https://www.google.com/search?q={title}",
