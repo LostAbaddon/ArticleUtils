@@ -174,7 +174,19 @@
 			await Promise.all(list.map(name => store.del(name)));
 			if (!!callback) callback();
 			res();
-		})
+		}),
+		changeExpire: value => {
+			if (!isNumber(value)) return;
+			if (value < 0 || value > 1) return;
+			resourceExpire = value * 1000 * 3600;
+			removeExpired();
+		},
+		changeRate: value => {
+			if (!isNumber(value)) return;
+			if (value < 0 || value >= 100) return;
+			resourceRate = value / 100;
+			updateExpire(true);
+		}
 	};
 
 	window.cacheStorage = storage;

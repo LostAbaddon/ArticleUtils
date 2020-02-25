@@ -2,8 +2,6 @@ const UnavailableChars = /\\\//gi;
 const ForbiddenNames = [ 'cache', '快照', '广告', 'here', 'next', 'prev', 'see all', 'see more' ];
 const ForbiddenPaths = [ 'cache', 'translate', 'translator', 'ad.', 'javascript:' ];
 const SearchItem = ['common', 'book', 'video'];
-const TagResourceStorage = 'RESOURCE::';
-const ExpireResource = 1000 * 60 * 60; // 资源缓存一小时
 const ExtHost = chrome.extension.getURL('');
 
 const onInit = config => {
@@ -13,6 +11,10 @@ const onInit = config => {
 		}
 	});
 	window.cacheStorage.init(config.ResourceExpire, config.CacheRateLimit);
+};
+const onUpdate = (key, value) => {
+	if (key === 'ResourceExpire') window.cacheStorage.changeExpire(value);
+	else if (key === 'CacheRateLimit') window.cacheStorage.changeRate(value);
 };
 
 const searchResources = (targets, config, tabID) => {
@@ -205,4 +207,5 @@ const sendBackResource = (tabID, resource, targetName, targetType) => {
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 	if (event === 'init') onInit(key);
+	else if (event === 'update') onUpdate(key, value);
 });

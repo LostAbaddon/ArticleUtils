@@ -24,18 +24,42 @@ div.option-item:last-child {
 }
 div.option-item > div.option-line {
 	margin: 0px;
+	margin-bottom: 5px;
 	padding: 0px;
 }
-div.option-item input {
+div.option-item > div.option-line:last-child {
+	margin-bottom: 0px;
+}
+div.option-line input {
 	font-size: 1rem;
 }
-div.option-item input[type="checkbox"] {
+div.option-line input[type="checkbox"] {
 	position: relative;
 	top: 2px;
 }
-div.option-item label {
-	margin-left: 10px;
+div.option-line label {
 	cursor: pointer;
 	font-size: 1rem;
 	user-select: none;
+}
+div.option-line.option-checkbox label {
+	margin-left: 10px;
+}
+div.option-line.option-inputer label {
+	margin-right: 10px;
+}
+div.option-line.option-inputer label.post {
+	margin-left: 5px;
+	margin-right: 0px;
+}
+div.option-line input {
+	border: none;
+	border-bottom: 1px solid black;
+	outline: none;
+}
+div.option-line.option-inputer input {
+	width: 100px;
+}
+div.option-line.option-inputer input.short {
+	width: 45px;
 }
