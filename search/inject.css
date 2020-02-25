@@ -30,6 +30,7 @@ div.search_item_frame div.search_item_tab {
 	background-color: white;
 	color: black;
 	cursor: pointer;
+	transition: 300ms left ease-in-out;
 }
 div.search_item_frame div.search_item_tab.tab_1 {
 	top: 25px;
@@ -49,9 +50,10 @@ div.search_item_frame div.search_item_tab.tab_4 {
 	background-color: rgb(254, 215, 26);
 }
 div.search_item_frame div.search_item_tab.disabled {
-	pointer-events: none;
+	left: -10px;
 	background-color: rgb(181, 152, 161);
 	color: rgb(209, 194, 211);
+	pointer-events: none;
 }
 div.search_item_frame div.search_item_tab div.search_item_captain {
 	position: absolute;

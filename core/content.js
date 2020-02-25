@@ -1,3 +1,23 @@
+const ResourceTypes = {
+	'book': '书籍',
+	'video': '影视',
+	'common': '其它'
+};
+
+var showSearchNotify = false;
+
+const onInit = async config => {
+	if (config.AutoMath) {
+		await autoMath();
+		await wait();
+	}
+
+	if (config.AutoSearch) {
+		showSearchNotify = config.ShowSearchNotify;
+		initSearch();
+		findResources();
+	}
+};
 const autoMath = () => new Promise(res => {
 	var hasMathJax = [].some.call(document.querySelectorAll('script'), script => {
 		return script.src.toLowerCase().indexOf('mathjax') >= 0;
@@ -28,18 +48,6 @@ const autoMath = () => new Promise(res => {
 		res();
 	});
 });
-
-const onInit = async config => {
-	if (config.AutoMath) {
-		await autoMath();
-		await wait();
-	}
-
-	if (config.AutoSearch) {
-		initSearch();
-		findResources();
-	}
-};
 const initSearch = () => {
 	window.SearchInjection.init([{
 		id: 'book',
@@ -51,8 +59,24 @@ const initSearch = () => {
 		id: 'common',
 		name: '其它'
 	}]);
+	if (showSearchNotify) TextNotifier.init();
 };
 
+const startSearch = () => {
+	initSearch();
+	var selection = document.getSelection().toString();
+	selection = selection.replace(/^[ \n\t\r]+|[ \n\t\r]+$/gi, '');
+	if (selection.length === 0) {
+		TextNotifier.notify('开始寻找页面资源');
+		findResources();
+	} else {
+		TextNotifier.notify('开始寻找指定资源');
+		chrome.runtime.sendMessage({
+			event: 'FindResource',
+			targets: [selection]
+		});
+	}
+};
 const findResources = () => {
 	var content = document.body.innerText.match(/<[^\n]+?>|《[^\n]+?》/gi);
 	if (!!content) content = content.map(title => title.substring(1, title.length - 1).trim());
@@ -102,7 +126,7 @@ const findResources = () => {
 	});
 };
 const onGetResource = (resource, name, type) => {
-	console.log('Get Resource:', name, type);
+	TextNotifier.notify('找到资源：' + name + '（'  + ResourceTypes[type] + '）');
 	window.SearchInjection.show(resource);
 };
 
@@ -119,11 +143,9 @@ RegiestKeySeq('ctrl+ctrl+m', 'ConvertMath', async () => {
 		autoMath();
 	}
 });
-RegiestKeySeq('ctrl+ctrl+s', 'SearchResource', async () => {
-	initSearch();
-	findResources();
-});
+RegiestKeySeq('ctrl+ctrl+s', 'SearchResource', startSearch);
 
 chrome.runtime.onMessage.addListener(msg => {
 	if (msg.event === 'GotResource') onGetResource(msg.resource, msg.targetName, msg.targetType);
+	else if (msg.event === 'ToggleSearch') startSearch();
 });

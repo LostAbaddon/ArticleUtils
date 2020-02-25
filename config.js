@@ -1,6 +1,7 @@
 window.DefaultExtConfig = {
 	AutoMath: true,
 	AutoSearch: true,
+	ShowSearchNotify: true,
 	ResourceExpire: 12, // 单位：小时
 	CacheRateLimit: 80, // 资源占用百分比
 	CommonSource: [

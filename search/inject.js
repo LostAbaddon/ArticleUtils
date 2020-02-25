@@ -138,15 +138,15 @@ class SearchFrame {
 	}
 }
 
-var initialed = false;
 window.SearchInjection = {};
+window.SearchInjection._initialed = false;
 window.SearchInjection.init = tabs => {
-	if (!initialed) {
+	if (!SearchInjection._initialed) {
 		let style = newEle('link');
 		style.rel = 'stylesheet';
 		style.href = chrome.extension.getURL('/search/inject.css');
 		document.body.appendChild(style);
-		initialed = true;
+		SearchInjection._initialed = true;
 	}
 
 	window.SearchInjection.tabs = window.SearchInjection.tabs || {};

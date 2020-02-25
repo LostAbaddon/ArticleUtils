@@ -209,3 +209,20 @@ ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 	if (event === 'init') onInit(key);
 	else if (event === 'update') onUpdate(key, value);
 });
+
+chrome.contextMenus.create({
+	id: 'search_resource',
+	title: '搜索资源(ctrl+ctrl+s)',
+	contexts: [ 'selection' ]
+});
+chrome.contextMenus.onClicked.addListener(evt => {
+	switch (evt.menuItemId) {
+		case 'search_resource':
+			chrome.tabs.getSelected(tab => {
+				chrome.tabs.sendMessage(tab.id, {
+					action: "ToggleSearch"
+				});
+			});
+		break;
+	}
+});
