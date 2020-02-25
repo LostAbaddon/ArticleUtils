@@ -83,6 +83,12 @@
 				if (!!cb) cb(result);
 				res(result);
 			});
+		}),
+		del: (key, cb) => new Promise(res => {
+			chrome.storage.local.del(key, () => {
+				if (!!cb) cb();
+				res();
+			});
 		})
 	};
 	root.syncstore = {
@@ -108,6 +114,12 @@
 				}
 				if (!!cb) cb(result);
 				res(result);
+			});
+		}),
+		del: (key, cb) => new Promise(res => {
+			chrome.storage.sync.del(key, () => {
+				if (!!cb) cb();
+				res();
 			});
 		})
 	};

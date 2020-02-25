@@ -1,6 +1,8 @@
 window.DefaultExtConfig = {
 	AutoMath: true,
 	AutoSearch: true,
+	ResourceExpire: 1, // 单位：小时
+	CacheRateLimit: 80, // 资源占用百分比
 	CommonSource: [
 		{
 			url: "https://www.google.com/search?q={title}",

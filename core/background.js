@@ -12,30 +12,9 @@ const onInit = config => {
 			searchResources(msg.targets, config, sender.tab.id);
 		}
 	});
+	window.cacheStorage.init(config.ResourceExpire, config.CacheRateLimit);
 };
 
-const sendRequest = url => new Promise(async res => {
-	var tag = TagResourceStorage + url;
-	var info = await store.get(tag);
-	if (!!info) {
-		let stamp = info.stamp || 0;
-		let now = Date.now();
-		if (now - stamp >= ExpireResource) {
-			info = null;
-			chrome.storage.local.remove(tag);
-		}
-	}
-	if (!info) {
-		let [page, resp] = await xhr(url);
-		info = {
-			stamp: Date.now(),
-			content: page,
-			url: resp
-		};
-		store.set(tag, info);
-	}
-	res([info.content, info.url]);
-});
 const searchResources = (targets, config, tabID) => {
 	var result = {}, task = targets.length;
 	if (task === 0) return;
@@ -82,21 +61,10 @@ const search = (target, engine, callback) => {
 		}
 
 		var query = target.replace(/ +/g, cfg.connector || '+');
-		var url = cfg.url.replace(/\{title\}/g, query), page, list;
-		var saveTag = TagResourceStorage + url;
+		var url = cfg.url.replace(/\{title\}/g, query), page;
 
-		var info = await store.get(saveTag);
-		if (!!info) {
-			let stamp = info.stamp;
-			let now = Date.now();
-			if (now - stamp >= ExpireResource) {
-				info = null;
-				chrome.storage.local.remove(saveTag);
-			}
-		}
-		if (!!info) {
-			list = info.content;
-		} else {
+		var list = await window.cacheStorage.get(url);
+		if (!list) {
 			[page, url] = await xhr(url);
 
 			if (!!cfg.redirect) {
@@ -128,6 +96,7 @@ const search = (target, engine, callback) => {
 
 			container = container.querySelectorAll(cfg.container);
 			if (!container || container.length === 0) return done();
+
 			list = [];
 			container.forEach(link => {
 				var name, url;
@@ -153,13 +122,7 @@ const search = (target, engine, callback) => {
 				list.push([name, url]);
 			});
 
-			info = {
-				stamp: Date.now(),
-				content: list
-			};
-			try {
-				store.set(saveTag, info);
-			} catch {}
+			await window.cacheStorage.set(url, list);
 		}
 
 		done(list);
