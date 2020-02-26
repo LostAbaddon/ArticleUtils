@@ -62,6 +62,32 @@ const initSearch = () => {
 	if (showSearchNotify) TextNotifier.init();
 };
 
+const getLongestCommonPart = (stra, strb) => {
+	var lena = stra.length, lenb = strb.length, target = '';
+
+	if (lena < lenb) {
+		for (let i = 0; i < lena; i ++) {
+			for (let j = 1; j <= lena - i; j ++) {
+				let str = stra.substr(i, j);
+				if (strb.indexOf(str) < 0) break;
+				if (target.length < j) target = str;
+			}
+			if (i + target.length > lena) break;
+		}
+	} else {
+		for (let i = 0; i < lenb; i ++) {
+			for (let j = 1; j <= lenb - i; j ++) {
+				let str = strb.substr(i, j);
+				if (stra.indexOf(str) < 0) break;
+				if (target.length < j) target = str;
+			}
+			if (i + target.length > lenb) break;
+		}
+	}
+
+	return target;
+};
+
 const startSearch = () => {
 	initSearch();
 	var selection = document.getSelection().toString();
@@ -87,28 +113,7 @@ const findResources = () => {
 	if (!!headers) {
 		headers = headers.map(head => {
 			var ttl = head.innerText.replace(/^[ \n\t\r]+|[ \n\t\r]+$/gi, '');
-			var len = ttl.length, target = '';
-			if (len < titleLen) {
-				for (let i = 0; i < len; i ++) {
-					for (let j = 1; j <= len - i; j ++) {
-						let str = ttl.substr(i, j);
-						if (title.indexOf(str) < 0) break;
-						if (target.length < str.length) target = str;
-					}
-					if (i + target.length > titleLen) break;
-				}
-			} else {
-				for (let i = 0; i < titleLen; i ++) {
-					for (let j = 1; j <= titleLen - i; j ++) {
-						let str = title.substr(i, j);
-						if (ttl.indexOf(str) < 0) break;
-						if (target.length < str.length) target = str;
-					}
-					if (i + target.length > len) break;
-				}
-			}
-
-			return target;
+			return getLongestCommonPart(ttl, title);
 		}).filter(t => !!t && t.length / (titleLen + 1) > 0.5);
 		headers = [...content, ...headers];
 	} else {
@@ -127,6 +132,28 @@ const findResources = () => {
 };
 const onGetResource = (resource, name, type) => {
 	TextNotifier.notify('找到资源：' + name + '（'  + ResourceTypes[type] + '）');
+	Object.keys(resource).forEach(type => {
+		var res = resource[type];
+		Object.keys(res).forEach(name => {
+			var item = res[name];
+			if (item.length === 0) {
+				delete res[name];
+				return;
+			}
+			item = item.map(kv => {
+				var sim = getLongestCommonPart(kv[0], name);
+				var last = sim;
+				sim = sim.replace(/[a-z]+/gi, 'X');
+				sim = sim.replace(/[0-9]+/gi, '0');
+				sim = sim.replace(/[,\.\?\!\(\)\[\]\+\-\*\\\/，。！？、（）【】《》<>—…·`]/gi, '');
+				sim = sim.replace(/ +/gi, '');
+				kv.push(sim.length);
+				return kv;
+			});
+			item.sort((la, lb) => lb[2] - la[2]);
+			res[name] = item.map(kv => [kv[0], kv[1]]);
+		});
+	});
 	window.SearchInjection.show(resource);
 };
 

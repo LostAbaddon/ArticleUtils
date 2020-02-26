@@ -1,14 +1,19 @@
 class Message {
 	ele;
+	message;
 	#content;
 	#isTop = false;
 	#isLeft = true;
+	#duration = 0;
 	#alive = true;
 	#callback;
+	#closer;
 
 	constructor (message, duration, isLeft, isTop) {
 		this.#isTop = isTop;
 		this.#isLeft = isLeft;
+		this.#duration = duration;
+		this.message = message;
 
 		this.ele = newEle('div', 'notify_frame');
 		if (isLeft) this.ele.classList.add('notify_left')
@@ -25,9 +30,16 @@ class Message {
 		else this.ele.style.right = '-105%';
 		document.body.appendChild(this.ele);
 
-		setTimeout(() => {
+		this.#closer = setTimeout(() => {
 			this.hide();
 		}, duration);
+	}
+	continue () {
+		if (!this.#alive) return;
+		if (!!this.#closer) clearTimeout(this.#closer);
+		this.#closer = setTimeout(() => {
+			this.hide();
+		}, this.#duration);
 	}
 	onFade (cb) {
 		this.#callback = cb;
@@ -51,9 +63,9 @@ class Message {
 
 		if (this.#isLeft) this.ele.style.left = '-105%';
 		else this.ele.style.right = '-105%';
-		if (!!this.#callback) this.#callback();
 
 		await wait(1000);
+		if (!!this.#callback) this.#callback();
 
 		this.ele.removeEventListener('click', this.hide);
 		document.body.removeChild(this.ele);
@@ -61,6 +73,8 @@ class Message {
 
 		this.#content = null;
 		this.ele = null;
+		this.#closer = null;
+		this.message = null;
 	}
 	get height () {
 		var rect = this.ele.getBoundingClientRect();
@@ -89,21 +103,34 @@ window.TextNotifier.init = (top=TextNotifier._isTop, left=TextNotifier._isLeft, 
 	document.body.appendChild(style);
 };
 window.TextNotifier.notify = message => {
-	var offset = 20;
-	TextNotifier._MessageList.forEach(msg => {
-		var rect = msg.ele.getBoundingClientRect();
-		offset += rect.height + 5;
+	var msg;
+	TextNotifier._MessageList.some(m => {
+		if (m.message === message) {
+			msg = m;
+			return true;
+		}
 	});
 
-	var msg = new Message(message, TextNotifier._duration, TextNotifier._isLeft, TextNotifier._isTop);
-	TextNotifier._MessageList.push(msg);
+	if (!msg) {
+		let offset = 20;
+		TextNotifier._MessageList.forEach(msg => {
+			var rect = msg.ele.getBoundingClientRect();
+			offset += rect.height + 5;
+		});
 
-	msg.onFade(() => {
-		var index = TextNotifier._MessageList.indexOf(msg);
-		if (index >= 0) TextNotifier._MessageList.splice(index, 1);
-		TextNotifier._onMessageFade();
-	}); 
-	msg.show(offset);
+		msg = new Message(message, TextNotifier._duration, TextNotifier._isLeft, TextNotifier._isTop);
+		TextNotifier._MessageList.push(msg);
+
+		msg.onFade(() => {
+			var index = TextNotifier._MessageList.indexOf(msg);
+			if (index >= 0) TextNotifier._MessageList.splice(index, 1);
+			TextNotifier._onMessageFade();
+		}); 
+		msg.show(offset);
+	} else {
+		msg.continue();
+	}
+
 };
 window.TextNotifier._onMessageFade = () => {
 	var offset = 20;
