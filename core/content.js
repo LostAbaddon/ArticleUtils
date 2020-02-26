@@ -105,8 +105,10 @@ const startSearch = () => {
 };
 const findResources = () => {
 	var content = document.body.innerText.match(/<[^\n]+?>|《[^\n]+?》/gi);
-	if (!!content) content = content.map(title => title.substring(1, title.length - 1).trim());
-	else content = [];
+	if (!!content) {
+		content = content.map(title => title.substring(1, title.length - 1).trim());
+		content = content.filter(title => !title.match(/^[前后]页[ \b]|[ \b][前后]页[ \b]|[ \b][前后]页$/));
+	} else content = [];
 
 	var title = document.title.trim(), titleLen = title.length;
 	var headers = [...document.querySelectorAll('h1')];
