@@ -42,7 +42,7 @@
 		document.body.appendChild(script);
 	};
 
-	root.xhr = (url, method='get', data, callback) => new Promise(res => {
+	root.xhr = (url, method='get', data, callback) => new Promise((res, rej) => {
 		if (data instanceof Function) {
 			callback = data;
 			data = null;
@@ -50,8 +50,9 @@
 
 		var xhr = new XMLHttpRequest();
 		xhr.open(method, url, true);
-		xhr.onreadystatechange = (...args) => {
+		xhr.onreadystatechange = () => {
 			if (xhr.readyState == 4) {
+				if (xhr.status === 0 || xhr.response === '') return rej(new Error('Connection Failed'));
 				if (!!callback) callback(xhr.responseText);
 				res([xhr.responseText, xhr.responseURL]);
 			}

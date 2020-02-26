@@ -63,73 +63,82 @@ const search = (target, engine, callback) => {
 		}
 
 		var query = target.replace(/ +/g, cfg.connector || '+');
-		var url = cfg.url.replace(/\{title\}/g, query), page;
+		var url = cfg.url.replace(/\{title\}/g, query), page, resp;
 
 		var list = await window.cacheStorage.get(url);
 		if (!list) {
-			[page, url] = await xhr(url);
+			try {
+				[page, resp] = await xhr(url);
+			} catch {
+				return done();
+			}
 
 			if (!!cfg.redirect) {
 				let reg = new RegExp(cfg.redirect);
-				if (url.match(reg)) return done([[target, url]]);
+				if (resp.match(reg)) list = [[target, resp]];
 			}
-
-			var low = page.toLowerCase();
-			var pos = low.indexOf('<body');
-			if (pos < 0) return done();
-			page = page.substring(pos, page.length);
-			low = low.substring(pos, low.length);
-			pos = low.indexOf('>');
-			if (pos < 0) return done();
-			page = page.substring(pos + 1, page.length);
-			low = low.substring(pos + 1, low.length);
-			pos = low.indexOf('</body>');
-			if (pos < 0) return done();
-			page = page.substring(0, pos);
-			page = page.replace(/<img.*?\/?>/gi, '');
-			page = page.replace(/<script.*?>[\w\W]*?<\/script>/gi, '');
-			page = page.replace(/<style.*?>[\w\W]*?<\/style>/gi, '');
-			page = page.replace(/^[ \n\t\r]+|[ \n\t\r]+$/g, '');
-			if (page.length === 0) return done();
-
-			var container = newEle('div', null, 'MainContainer');
-			container.innerHTML = page;
-			await wait();
-
-			container = container.querySelectorAll(cfg.container);
-			if (!container || container.length === 0) return done();
-
-			list = [];
-			container.forEach(link => {
-				var name, url;
-				if (!!cfg.title) {
-					name = link.querySelector(cfg.title);
-					if (!name) name = link;
-					name = name.innerText;
-				}
-				else name = link.innerText;
-				name = name.replace(/^[ \n\t\r]+|[ \n\t\r]+$/g, '');
-				url = link.href;
-
-				if (name.length === 0 || url.length === 0) return;
-
-				var test = name.toLowerCase();
-				var forbid = ForbiddenNames.some(f => test.indexOf(f) >= 0);
-				if (forbid) return;
-				test = url.toLowerCase();
-				forbid = ForbiddenPaths.some(f => test.indexOf(f) >= 0);
-				if (forbid) return;
-				url = url.replace(ExtHost, cfg.host);
-
-				list.push([name, url]);
-			});
+			if (!list) list = await analyzePage(page, cfg);
 
 			await window.cacheStorage.set(url, list);
+			chrome.storage.local.getBytesInUse(bytes => console.log('更新资源搜索记录缓存，缓存池已用 ' + bytes + ' B'))
 		}
 
 		done(list);
 	});
 };
+const analyzePage = (page, cfg) => new Promise(async res => {
+	var low = page.toLowerCase();
+	var pos = low.indexOf('<body');
+	if (pos < 0) return res([]);
+	page = page.substring(pos, page.length);
+	low = low.substring(pos, low.length);
+	pos = low.indexOf('>');
+	if (pos < 0) return res([]);
+	page = page.substring(pos + 1, page.length);
+	low = low.substring(pos + 1, low.length);
+	pos = low.indexOf('</body>');
+	if (pos < 0) return res([]);
+	page = page.substring(0, pos);
+	page = page.replace(/<img.*?\/?>/gi, '');
+	page = page.replace(/<script.*?>[\w\W]*?<\/script>/gi, '');
+	page = page.replace(/<style.*?>[\w\W]*?<\/style>/gi, '');
+	page = page.replace(/^[ \n\t\r]+|[ \n\t\r]+$/g, '');
+	if (page.length === 0) return res([]);
+
+	var container = newEle('div', null, 'MainContainer');
+	container.innerHTML = page;
+	await wait();
+
+	container = container.querySelectorAll(cfg.container);
+	if (!container || container.length === 0) return res([]);
+
+	var list = [];
+	container.forEach(link => {
+		var name, url;
+		if (!!cfg.title) {
+			name = link.querySelector(cfg.title);
+			if (!name) name = link;
+			name = name.innerText;
+		}
+		else name = link.innerText;
+		name = name.replace(/^[ \n\t\r]+|[ \n\t\r]+$/g, '');
+		url = link.href;
+
+		if (name.length === 0 || url.length === 0) return;
+
+		var test = name.toLowerCase();
+		var forbid = ForbiddenNames.some(f => test.indexOf(f) >= 0);
+		if (forbid) return;
+		test = url.toLowerCase();
+		forbid = ForbiddenPaths.some(f => test.indexOf(f) >= 0);
+		if (forbid) return;
+		url = url.replace(ExtHost, cfg.host);
+
+		list.push([name, url]);
+	});
+
+	res(list);
+});
 const analyzeResource = (tabID, resources, targetName, targetType) => {
 	var result = {};
 	Object.keys(resources).forEach(name => {
@@ -220,7 +229,7 @@ chrome.contextMenus.onClicked.addListener(evt => {
 		case 'search_resource':
 			chrome.tabs.getSelected(tab => {
 				chrome.tabs.sendMessage(tab.id, {
-					action: "ToggleSearch"
+					event: "ToggleSearch"
 				});
 			});
 		break;
