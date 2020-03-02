@@ -6,6 +6,7 @@ div.notify_frame {
 	z-index: 9999;
 	background-color: white;
 	box-shadow: 3px 3px 5px rgba(127, 127, 127, 0.5);
+	color: black;
 	user-select: none;
 	transition: 800ms all ease-out;
 }

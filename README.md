@@ -2,7 +2,7 @@
 
 内容相关工具集，很实用的瑞士军刀~
 
-- **版本**： 0.0.7
+- **版本**： 0.0.8
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
@@ -30,6 +30,7 @@
 
 -	自定义搜索引擎
 -	搜索文章、新闻和百科
+-	支持 Form 表单查询
 
 ## 2.0.0（计划中）
 

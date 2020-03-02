@@ -171,6 +171,7 @@ const analyzeResource = (tabID, resources, targetName, targetType) => {
 
 				low = title.toLowerCase();
 				if (low.indexOf('电子书') >= 0
+					|| low.indexOf('阅读') >= 0
 					|| !!low.match(/pdf|mobi|epub|txt/i)) {
 					list.book[link] = title;
 					delete commons[link];
@@ -178,9 +179,11 @@ const analyzeResource = (tabID, resources, targetName, targetType) => {
 					|| low.indexOf('视频') >= 0
 					|| low.indexOf('磁力') >= 0
 					|| low.indexOf('高清') >= 0
+					|| low.indexOf('超清') >= 0
 					|| low.indexOf('双语') >= 0
 					|| low.indexOf('双字') >= 0
 					|| low.indexOf('蓝光') >= 0
+					|| low.indexOf('免费观看') >= 0
 					|| !!low.match(/BT *下载/i)
 					|| (!!low.match(/^movie\.|\bmovie\./i) && !low.match(/^movie\.douban\.|\bmovie\.douban\./i))) {
 					list.video[link] = title;
