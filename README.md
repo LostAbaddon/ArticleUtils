@@ -2,7 +2,7 @@
 
 内容相关工具集，很实用的瑞士军刀~
 
-- **版本**： 0.9.1
+- **版本**： 0.9.2
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
@@ -53,6 +53,7 @@
 
 -	增加不自动搜索网址设置
 -	搜索文章、新闻和百科
+-	到处配置
 
 ## 2.0.0（计划中）
 

@@ -208,3 +208,13 @@ div.option-switch-container div.option-title.clickable {
 div.option-switch-container div.option-title.nonclickable {
 	pointer-events: none;
 }
+
+textarea.option-full-textarea {
+	box-sizing: border-box;
+	width: 100%;
+	height: 496px;
+	margin: 0px;
+	padding: 10px;
+	outline: none;
+	resize: none;
+}

@@ -4,6 +4,13 @@ const ChangeConfig = (key, value) => {
 	ExtConfigManager.set(key, value);
 };
 
+const ToggleAction = action => {
+	if (!window.PageActions) return;
+	action = window.PageActions[action];
+	if (!action) return;
+	action();
+};
+
 document.querySelectorAll('div.option-list-container').forEach(ele => {
 	var cfgList;
 
@@ -156,6 +163,8 @@ document.querySelectorAll('div.option-switcher').forEach(ele => {
 	var target = ele.getAttribute('target');
 	if ([undefined, null].includes(target)) return;
 
+	var currAction = ele.getAttribute('action');
+
 	var group = ele.getAttribute('group');
 	group = group || 'default';
 
@@ -165,11 +174,16 @@ document.querySelectorAll('div.option-switcher').forEach(ele => {
 	target = targetEle;
 	targetEle = null;
 
-	var checked = ![undefined, null].includes(ele.getAttribute('checked'));
-	if (checked) {
+	var nextAction = target.getAttribute('action');
+
+	var toggleSwitcher = () => {
+		ToggleAction(currAction);
 		target.classList.remove('hidden');
 		target.classList.add('shown');
-	}
+		ToggleAction(nextAction);
+	};
+	var checked = ![undefined, null].includes(ele.getAttribute('checked'));
+	if (checked) toggleSwitcher();
 
 	ele.addEventListener('click', () => {
 		var prev = document.querySelector('div.option-switch-container.shown[group=' + group + ']');
@@ -178,7 +192,6 @@ document.querySelectorAll('div.option-switcher').forEach(ele => {
 			prev.classList.remove('shown');
 			prev.classList.add('hidden');
 		}
-		target.classList.remove('hidden');
-		target.classList.add('shown');
+		toggleSwitcher();
 	});
 });
