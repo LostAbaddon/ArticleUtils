@@ -1,5 +1,5 @@
 (() => {
-	if (!!window.RegiestKeySeq) return;
+	if (!!window.RegiestKeySeq || !window.postMessage) return;
 
 	const ShortcutDelay = 250;
 	const ShortcutMin = 2;

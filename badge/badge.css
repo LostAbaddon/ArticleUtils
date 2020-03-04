@@ -1,16 +1,65 @@
 body {
 	box-sizing: border-box;
-	width: 300px;
+	min-width: 300px;
 	margin: 0px;
 	padding: 10px;
 	font-size: 12px;
 }
 div.container {
 	box-sizing: border-box;
-	width: 100%;
+	height: 500px;
 	margin: 0px;
 	padding: 0px;
 	font-size: 0px;
+}
+
+div.container-column {
+	display: inline-block;
+	position: relative;
+	box-sizing: border-box;
+	height: 100%;
+	vertical-align: top;
+	padding-left: 10px;
+	padding-right: 10px;
+	border-right: 1px solid rgb(173, 173, 173);
+	overflow: auto;
+}
+div.container-column.column-1 {
+	width: 100px;
+}
+div.container-column.column-2 {
+	width: 200px;
+}
+div.container-column.column-3 {
+	width: 300px;
+}
+div.container-column.column-4 {
+	width: 400px;
+}
+div.container-column.column-5 {
+	width: 500px;
+}
+div.container-column.column-6 {
+	width: 600px;
+}
+div.container-column.column-7 {
+	width: 700px;
+}
+div.container-column.column-8 {
+	width: 800px;
+}
+div.container-column.column-9 {
+	width: 900px;
+}
+div.container-column.column-10 {
+	width: 1000px;
+}
+div.container > div.container-column:first-child {
+	padding-left: 0px;
+}
+div.container > div.container-column:last-child {
+	padding-right: 0px;
+	border-right: none;
 }
 
 div.option-item {
@@ -48,6 +97,11 @@ div.option-line.option-checkbox label {
 div.option-line.option-inputer label {
 	margin-right: 10px;
 }
+div.option-line.option-inputer label.pre {
+	display: inline-block;
+	min-width: 80px;
+	text-align: right;
+}
 div.option-line.option-inputer label.post {
 	margin-left: 5px;
 	margin-right: 0px;
@@ -62,4 +116,95 @@ div.option-line.option-inputer input {
 }
 div.option-line.option-inputer input.short {
 	width: 45px;
+}
+
+div.option-sepline {
+	display: block;
+	width: 100%;
+	height: 1px;
+	background-color: rgb(173, 173, 173);
+}
+div.option-blankline {
+	display: block;
+	height: 20px;
+}
+
+div.option-item div.option-switcher {
+	font-size: 16px;
+	font-weight: bolder;
+	text-align: center;
+	cursor: pointer;
+}
+
+div.option-switch-container {
+	display: block;
+	position: relative;
+	font-size: 14px;
+}
+div.option-switch-container.hidden {
+	display: none;
+}
+
+div.option-list-container div.option-list-item {
+	box-sizing: border-box;
+	margin-bottom: 10px;
+	padding: 2px 5px;
+	border-left: 5px solid rgb(53, 53, 53);
+	box-shadow: 1px 1px 3px rgba(173, 173, 173, 0.3);
+	transition: all 300ms ease-in-out;
+}
+div.option-list-container div.option-list-item:hover {
+	border-left: 8px solid rgb(53, 53, 153);
+	padding-left: 2px;
+	box-shadow: 2px 2px 5px rgba(173, 173, 173, 0.6);
+}
+div.option-list-container div.option-list-item:last-child {
+	margin-bottom: 0px;
+}
+div.option-list-container div.option-list-item div.option-list-line {
+	margin-bottom: 2px;
+}
+div.option-list-container div.option-list-item span.hint {
+	display: inline-block;
+	min-width: 80px;
+	text-align: right;
+}
+div.option-list-container div.option-list-item span.inline-blank {
+	display: inline-block;
+	width: 50px;
+}
+div.option-list-container div.option-list-item input {
+	display: inline-block;
+	padding: 1px 5px;
+	width: 250px;
+	border: none;
+	border-bottom: 1px solid rgb(53, 53, 53);
+	outline: none;
+}
+div.option-list-container div.option-list-item input[type=checkbox] {
+	position: relative;
+	top: 2px;
+	width: 15px;
+	padding: 0px;
+}
+div.option-list-container div.option-list-item button {
+	padding: 1px 10px;
+	cursor: pointer;
+}
+div.option-list-container div.option-list-item .option-input-hint-label {
+	cursor: pointer;
+	user-select: none;
+}
+
+div.option-switch-container div.option-title {
+	margin-bottom: 15px;
+	font-size: 16px;
+	font-weight: bolder;
+}
+div.option-switch-container div.option-title.clickable {
+	cursor: pointer;
+	user-select: none;
+}
+div.option-switch-container div.option-title.nonclickable {
+	pointer-events: none;
 }

@@ -5,24 +5,77 @@
 <title>插件设置</title>
 <link type="text/css" rel="stylesheet" href="./badge.css">
 </head>
-<body>
+<body style="width: 620px;">
 <div class="container">
-	<div class="option-item">
-		<div class="option-line option-checkbox">
-			<input type="checkbox" name="AutoMath"><label>自动转义数学公式</label>
+	<div class="container-column column-2">
+		<div class="option-item">
+			<div class="option-line option-checkbox">
+				<input type="checkbox" name="AutoMath"><label>自动转义数学公式</label>
+			</div>
+			<div class="option-line option-checkbox">
+				<input type="checkbox" name="AutoSearch"><label>自动搜索资源</label>
+			</div>
+			<div class="option-line option-checkbox">
+				<input type="checkbox" name="ShowSearchNotify"><label>显示搜索结果提醒</label>
+			</div>
+			<div class="option-line option-inputer number-inputer">
+				<label class="pre">缓存时长：</label><input type="number" name="ResourceExpire" class="short"><label class="post">小时</label>
+			</div>
+			<div class="option-line option-inputer number-inputer">
+				<label class="pre">GC比例：</label><input type="number" name="CacheRateLimit" class="short"><label class="post">%</label>
+			</div>
 		</div>
-		<div class="option-line option-checkbox">
-			<input type="checkbox" name="AutoSearch"><label>自动搜索资源</label>
+		<div class="option-blankline"></div>
+		<div class="option-sepline"></div>
+		<div class="option-blankline"></div>
+		<div class="option-item">
+			<div class="option-switcher" target="BookSearchEngine">书籍搜索引擎设置</div>
 		</div>
-		<div class="option-line option-checkbox">
-			<input type="checkbox" name="ShowSearchNotify"><label>显示搜索结果提醒</label>
+		<div class="option-item">
+			<div class="option-switcher" target="VideoSearchEngine">影视搜索引擎设置</div>
 		</div>
-		<div class="option-line option-inputer number-inputer">
-			<label>缓存时长：</label><input type="number" name="ResourceExpire" class="short"><label class="post">小时</label>
+		<div class="option-item">
+			<div class="option-switcher" target="CommonSearchEngine" checked>综合搜索引擎设置</div>
 		</div>
-		<div class="option-line option-inputer number-inputer">
-			<label>GC比例：</label><input type="number" name="CacheRateLimit" class="short"><label class="post">%</label>
+		<div class="option-item">
+			<div class="option-switcher" target="IgnoreDomain">禁用域名设置</div>
 		</div>
+	</div>
+	<div class="container-column column-4">
+		<div class="option-switch-container hidden" name="BookSearchEngine">
+			<div class="option-list-container" name="BookSource" title="增加书籍引擎" clickable>
+				<div class="option-list-line"><span class="hint">地址：</span><input type="text" name="url"></div>
+				<div class="option-list-line"><span class="hint"></span><input type="checkbox" name="using"><label class="option-input-hint-label" target="checkbox">启用</label><span class="inline-blank"></span><button event="delete">删除</button></div>
+				<div class="option-list-line"><span class="hint">Form词：</span><input type="text" name="form"></div>
+				<div class="option-list-line"><span class="hint">连接词：</span><input type="text" name="connector"></div>
+				<div class="option-list-line"><span class="hint">容器UI：</span><input type="text" name="container"></div>
+				<div class="option-list-line"><span class="hint">标题UI：</span><input type="text" name="title"></div>
+				<div class="option-list-line"><span class="hint">跳转条件：</span><input type="text" name="redirect"></div>
+			</div>
+		</div>
+		<div class="option-switch-container hidden" name="VideoSearchEngine">
+			<div class="option-list-container" name="VideoSource" title="增加影视引擎" clickable>
+				<div class="option-list-line"><span class="hint">地址：</span><input type="text" name="url"></div>
+				<div class="option-list-line"><span class="hint"></span><input type="checkbox" name="using"><label class="option-input-hint-label" target="checkbox">启用</label><span class="inline-blank"></span><button event="delete">删除</button></div>
+				<div class="option-list-line"><span class="hint">Form词：</span><input type="text" name="form"></div>
+				<div class="option-list-line"><span class="hint">连接词：</span><input type="text" name="connector"></div>
+				<div class="option-list-line"><span class="hint">容器UI：</span><input type="text" name="container"></div>
+				<div class="option-list-line"><span class="hint">标题UI：</span><input type="text" name="title"></div>
+				<div class="option-list-line"><span class="hint">跳转条件：</span><input type="text" name="redirect"></div>
+			</div>
+		</div>
+		<div class="option-switch-container hidden" name="CommonSearchEngine">
+			<div class="option-list-container" name="CommonSource" title="增加综合引擎" clickable>
+				<div class="option-list-line"><span class="hint">地址：</span><input type="text" name="url"></div>
+				<div class="option-list-line"><span class="hint"></span><input type="checkbox" name="using"><label class="option-input-hint-label" target="checkbox">启用</label><span class="inline-blank"></span><button event="delete">删除</button></div>
+				<div class="option-list-line"><span class="hint">Form词：</span><input type="text" name="form"></div>
+				<div class="option-list-line"><span class="hint">连接词：</span><input type="text" name="connector"></div>
+				<div class="option-list-line"><span class="hint">容器UI：</span><input type="text" name="container"></div>
+				<div class="option-list-line"><span class="hint">标题UI：</span><input type="text" name="title"></div>
+				<div class="option-list-line"><span class="hint">跳转条件：</span><input type="text" name="redirect"></div>
+			</div>
+		</div>
+		<div class="option-switch-container hidden" name="IgnoreDomain">Aloha Kosmos!!!!</div>
 	</div>
 </div>
 <script type="text/javascript" src="../common/common.js"></script>

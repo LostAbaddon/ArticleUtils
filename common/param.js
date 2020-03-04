@@ -3,6 +3,22 @@ const ExtConfig = {};
 window.ExtConfigManager = (config, callback) => new Promise(res => {
 	Object.keys(config).forEach(key => ExtConfig[key] = config[key]);
 
+	var available = false;
+	try {
+		if (!!chrome && !!chrome.storage) {
+			available = true;
+		} else {
+			available = false;
+		}
+	} catch {
+		available = false;
+	}
+
+	if (!available) {
+		if (!!callback) callback('init', config);
+		return res(config);
+	}
+
 	chrome.storage.sync.get(Object.keys(config), params => {
 		if (!params) params = {};
 		var notYet = {};

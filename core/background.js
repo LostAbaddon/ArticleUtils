@@ -46,6 +46,8 @@ const searchResource = (target, config, callback) => {
 	});
 };
 const search = (target, engine, callback) => {
+	console.info('开始搜索资源：' + target);
+
 	var result = {};
 	var done = (list) => {
 		if (!!list && list.length > 0) {
@@ -64,11 +66,20 @@ const search = (target, engine, callback) => {
 
 		var query = target.replace(/ +/g, cfg.connector || '+');
 		var url = cfg.url.replace(/\{title\}/g, query), page, resp;
+		var saveTag = url;
+		if (!!cfg.form && isString(cfg.form) && cfg.form.length > 0) {
+			saveTag = url + "||" + cfg.form + "=" + query;
+		}
 
-		var list = await window.cacheStorage.get(url);
+		var list = await window.cacheStorage.get(saveTag);
 		if (!list) {
 			try {
-				[page, resp] = await xhr(url);
+				if (!!cfg.form && isString(cfg.form) && cfg.form.length > 0) {
+					let data = cfg.form + '=' + query;
+					[page, resp] = await xhr(url, 'post', data);
+				} else {
+					[page, resp] = await xhr(url);
+				}
 			} catch {
 				return done();
 			}
@@ -79,7 +90,7 @@ const search = (target, engine, callback) => {
 			}
 			if (!list) list = await analyzePage(page, cfg);
 
-			await window.cacheStorage.set(url, list);
+			await window.cacheStorage.set(saveTag, list);
 			chrome.storage.local.getBytesInUse(bytes => console.log('更新资源搜索记录缓存，缓存池已用 ' + bytes + ' B'))
 		}
 
@@ -109,7 +120,7 @@ const analyzePage = (page, cfg) => new Promise(async res => {
 	container.innerHTML = page;
 	await wait();
 
-	container = container.querySelectorAll(cfg.container);
+	container = container.querySelectorAll(cfg.container || 'a');
 	if (!container || container.length === 0) return res([]);
 
 	var list = [];

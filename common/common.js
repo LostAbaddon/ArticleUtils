@@ -57,7 +57,8 @@
 				res([xhr.responseText, xhr.responseURL]);
 			}
 		};
-		xhr.send();
+		if (!!data) xhr.send(data);
+		else xhr.send();
 	});
 
 	root.store = {

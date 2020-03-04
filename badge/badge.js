@@ -4,6 +4,117 @@ const ChangeConfig = (key, value) => {
 	ExtConfigManager.set(key, value);
 };
 
+document.querySelectorAll('div.option-list-container').forEach(ele => {
+	var cfgList;
+
+	var target = ele.getAttribute('name');
+	if (!isString(target)) return;
+
+	var template = ele.innerHTML.trim();
+	if (template.length === 0) return;
+	ele.innerHTML = '';
+
+	var areaTitle = ele.getAttribute('title');
+	var clickable = ele.getAttribute('clickable');
+	if (!!areaTitle && areaTitle.length > 0) {
+		let t = newEle('div', 'option-title');
+		t.innerText = areaTitle;
+		if (isString(clickable)) t.classList.add('clickable');
+		else t.classList.add('nonclickable');
+		ele.appendChild(t);
+	}
+
+	var onChange = (id, key, value) => {
+		id *= 1;
+		if (!isNumber(id)) return;
+
+		if (key === 'delete') {
+			ele.querySelectorAll('[data-id]').forEach(item => {
+				var iid = item.dataset.id * 1;
+				if (iid < id) return;
+				if (iid > id) {
+					item.dataset.id = iid - 1;
+					return;
+				}
+				if (!item.classList.contains('option-list-item')) return;
+				item.parentElement.removeChild(item);
+			});
+			cfgList.splice(id, 1);
+		} else {
+			let item = cfgList[id];
+			if (!item) return;
+			item[key] = value;
+		}
+		ChangeConfig(target, cfgList);
+	};
+	ele.addEventListener('change', evt => {
+		var target = evt.target;
+		var itemID = target.dataset.id;
+		if (!itemID) return;
+		var name = target.name || target.getAttribute('name');
+		var value;
+		if (target.type.toLowerCase() === 'checkbox') value = target.checked;
+		else value = target.innerText || target.value;
+
+		onChange(itemID, name, value);
+	});
+	ele.addEventListener('click', evt => {
+		var target = evt.target;
+		if (target.classList.contains('option-title')) {
+			let ui = newEle('div', 'option-list-item');
+			ui.innerHTML = template;
+			ele.appendChild(ui);
+			let index = cfgList.length;
+			cfgList.push({});
+			ui.querySelectorAll('[name]').forEach(line => line.dataset.id = index);
+			ui.querySelectorAll('button').forEach(btn => btn.dataset.id = index);
+			return;
+		}
+
+		var next = target.target || target.getAttribute('target');
+		if (!!next) {
+			let ui = target.parentElement.querySelector('input[type=' + next + ']')
+			if (next === 'checkbox') {
+				ui.checked = !ui.checked;
+			} else {
+				ui.focus();
+			}
+			target = ui;
+		} else if (target.tagName.toLowerCase() !== 'button') return;
+		var itemID = target.dataset.id;
+		if (!itemID) return;
+		var name = target.name || target.getAttribute('name') || target.getAttribute('event');
+		var value;
+		if (target.type.toLowerCase() === 'checkbox') value = target.checked;
+		else value = target.innerText || target.value;
+
+		onChange(itemID, name, value);
+	});
+
+	ExtInitActions[target] = value => {
+		cfgList = value;
+		value.forEach((item, index) => {
+			var ui = newEle('div', 'option-list-item');
+			ui.innerHTML = template;
+			ui.dataset.id = index;
+			ele.appendChild(ui);
+			ui.querySelectorAll('[name]').forEach(line => {
+				line.dataset.id = index;
+				var key = line.name || line.getAttribute('name');
+				if (line.tagName.toLowerCase() === 'input') {
+					if (line.type.toLowerCase() === 'checkbox') {
+						line.checked = item[key] || false;
+					} else {
+						line.value = item[key] || '';
+					}
+				} else {
+					line.innerText = item[key] || '';
+				}
+			});
+			ui.querySelectorAll('button').forEach(btn => btn.dataset.id = index);
+		});
+	};	
+});
 document.querySelectorAll('div.option-checkbox').forEach(ele => {
 	var checkbox = ele.querySelector('input');
 	var itemName = checkbox.name;
@@ -39,5 +150,35 @@ document.querySelectorAll('div.option-inputer').forEach(ele => {
 		if (!evt.key) return;
 		var key = evt.key.toLowerCase();
 		if (key === 'enter') change();
+	});
+});
+document.querySelectorAll('div.option-switcher').forEach(ele => {
+	var target = ele.getAttribute('target');
+	if ([undefined, null].includes(target)) return;
+
+	var group = ele.getAttribute('group');
+	group = group || 'default';
+
+	var targetEle = document.querySelector('div.option-switch-container[group=' + group + '][name=' + target + ']');
+	if (!targetEle) targetEle = document.querySelector('div.option-switch-container[name=' + target + ']');
+	if (!targetEle) return;
+	target = targetEle;
+	targetEle = null;
+
+	var checked = ![undefined, null].includes(ele.getAttribute('checked'));
+	if (checked) {
+		target.classList.remove('hidden');
+		target.classList.add('shown');
+	}
+
+	ele.addEventListener('click', () => {
+		var prev = document.querySelector('div.option-switch-container.shown[group=' + group + ']');
+		if (!prev) prev = document.querySelector('div.option-switch-container.shown');
+		if (!!prev && prev !== target) {
+			prev.classList.remove('shown');
+			prev.classList.add('hidden');
+		}
+		target.classList.remove('hidden');
+		target.classList.add('shown');
 	});
 });

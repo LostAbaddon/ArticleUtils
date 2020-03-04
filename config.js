@@ -54,5 +54,11 @@ window.DefaultExtConfig = {
 			container: 'section.container div.content div.m-movies article > a',
 			title: 'h2'
 		},
+		{
+			url: "https://gaoqing.la/?s={title}",
+			using: true,
+			connector: '+',
+			container: 'div.container ul li.post div.article h2 a'
+		},
 	]
 };

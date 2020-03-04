@@ -89,6 +89,7 @@ const getLongestCommonPart = (stra, strb) => {
 };
 
 const startSearch = () => {
+	if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) return;
 	initSearch();
 	var selection = document.getSelection().toString();
 	selection = selection.replace(/^[ \n\t\r]+|[ \n\t\r]+$/gi, '');
