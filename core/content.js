@@ -88,21 +88,68 @@ const getLongestCommonPart = (stra, strb) => {
 	return target;
 };
 
+const getSelectedText = () => {
+	var selection = document.getSelection();
+	var text = selection.toString();
+	return text.replace(/^[ \n\t\r]+|[ \n\t\r]+$/gi, '');
+
+	if (text.length === 0) {
+		let sel = selection.getRangeAt(0);
+		sel = sel.startContainer;
+		let tag = sel.tagName;
+		if (!!tag) {
+			tag = tag.toLowerCase();
+			if (tag === 'input' || tag === 'textarea') {
+				text = sel.value;
+			} else {
+				let ele = sel.querySelector('input');
+				if (!ele) ele = sel.querySelector('textarea');
+				if (!!ele) {
+					text = ele.value;
+				}
+			}
+		}
+	} else {
+		text = text.replace(/^[ \n\t\r]+|[ \n\t\r]+$/gi, '');
+	}
+
+	return text;
+};
 const startSearch = () => {
 	if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) return;
 	initSearch();
-	var selection = document.getSelection().toString();
-	selection = selection.replace(/^[ \n\t\r]+|[ \n\t\r]+$/gi, '');
-	if (selection.length === 0) {
+
+	var text = getSelectedText();
+	if (!text || text.length === 0) {
 		TextNotifier.notify('开始寻找页面资源');
 		findResources();
 	} else {
 		TextNotifier.notify('开始寻找指定资源');
 		chrome.runtime.sendMessage({
 			event: 'FindResource',
-			targets: [selection]
+			action: 'all',
+			engine: null,
+			targets: [text]
 		});
 	}
+};
+const searchItem = (type, id) => {
+	if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) return;
+	initSearch();
+
+	var text = getSelectedText();
+	if (text.length === 0) return;
+
+	if (type === 'book') TextNotifier.notify('开始寻找书籍资源');
+	else if (type === 'video') TextNotifier.notify('开始寻找影视资源');
+	else if (type === 'common') TextNotifier.notify('开始寻找综合资源');
+	else return;
+	chrome.runtime.sendMessage({
+		event: 'FindResource',
+		action: type,
+		engine: id,
+		targets: [text]
+	});
 };
 const findResources = () => {
 	var content = document.body.innerText.match(/<[^\n]+?>|《[^\n]+?》/gi);
@@ -130,6 +177,8 @@ const findResources = () => {
 
 	chrome.runtime.sendMessage({
 		event: 'FindResource',
+		action: 'all',
+		engine: null,
 		targets: content
 	});
 };
@@ -177,5 +226,13 @@ RegiestKeySeq('ctrl+ctrl+s', 'SearchResource', startSearch);
 
 chrome.runtime.onMessage.addListener(msg => {
 	if (msg.event === 'GotResource') onGetResource(msg.resource, msg.targetName, msg.targetType);
-	else if (msg.event === 'ToggleSearch') startSearch();
+	else if (msg.event === 'ToggleSearch') {
+		let action = msg.action || 'All';
+		let id = msg.id;
+
+		if (action === 'All') startSearch();
+		else if (action === 'Book') searchItem('book', id);
+		else if (action === 'Video') searchItem('video', id);
+		else if (action === 'Common') searchItem('common', id);
+	}
 });
