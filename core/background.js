@@ -43,11 +43,12 @@ const searchResource = (target, type, engine, config, callback) => {
 		if (type !== 'all' && name !== type) return;
 		var engines = name.substr(0, 1).toUpperCase() + name.substr(1, name.length).toLowerCase();
 		engines = config[engines + 'Source'];
-		if (isNumber(engine)) engines = [engines[engine]];
-		search(target, engines, done(name));
+		var force = isNumber(engine);
+		if (force) engines = [engines[engine]];
+		search(target, engines, force, done(name));
 	});
 };
-const search = (target, engine, callback) => {
+const search = (target, engine, force, callback) => {
 	console.info('开始搜索资源：' + target);
 
 	var result = {};
@@ -59,7 +60,7 @@ const search = (target, engine, callback) => {
 	};
 
 	engine.forEach(async cfg => {
-		if (!cfg.using) return done();
+		if (!cfg.using && !force) return done();
 		if (!cfg.host) {
 			cfg.host = cfg.url.split('/');
 			cfg.host.splice(3, cfg.host.length);
