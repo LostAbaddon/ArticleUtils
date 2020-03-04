@@ -69,6 +69,12 @@ const search = (target, engine, force, callback) => {
 
 		var query = target.replace(/ +/g, cfg.connector || '+');
 		var url = cfg.url.replace(/\{title\}/g, query), page, resp;
+
+		if (force) {
+			chrome.tabs.create({ url, active: true });
+			return done();
+		}
+
 		var saveTag = url;
 		if (!!cfg.form && isString(cfg.form) && cfg.form.length > 0) {
 			saveTag = url + "||" + cfg.form + "=" + query;
