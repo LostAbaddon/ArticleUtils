@@ -161,8 +161,11 @@ const searchItem = (type, id) => {
 	var text = getSelectedText();
 	if (text.length === 0) return;
 
-	if (type === 'book') TextNotifier.notify('开始寻找书籍资源');
+	if (type === 'article') TextNotifier.notify('开始寻找文章资源');
+	else if (type === 'book') TextNotifier.notify('开始寻找书籍资源');
+	else if (type === 'pedia') TextNotifier.notify('开始寻找百科资源');
 	else if (type === 'video') TextNotifier.notify('开始寻找影视资源');
+	else if (type === 'news') TextNotifier.notify('开始寻找新闻资源');
 	else if (type === 'common') TextNotifier.notify('开始寻找综合资源');
 	else return;
 	chrome.runtime.sendMessage({
@@ -251,9 +254,13 @@ chrome.runtime.onMessage.addListener(msg => {
 		let action = msg.action || 'All';
 		let id = msg.id;
 
+		console.log(action, id);
 		if (action === 'All') startSearch();
+		else if (action === 'Article') searchItem('article', id);
 		else if (action === 'Book') searchItem('book', id);
+		else if (action === 'Pedia') searchItem('pedia', id);
 		else if (action === 'Video') searchItem('video', id);
+		else if (action === 'News') searchItem('news', id);
 		else if (action === 'Common') searchItem('common', id);
 	}
 });

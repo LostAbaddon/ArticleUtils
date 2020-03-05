@@ -307,9 +307,19 @@ const UpdateContentMenu = async () => {
 
 	actions = [];
 	actions.push(createMenu('search_resource', '搜索所有资源(ctrl+ctrl+s)', 'search_resource_entry'));
+	actions.push(createMenu('search_article_entry', '搜索文章', 'search_resource_entry'));
 	actions.push(createMenu('search_book_entry', '搜索书籍', 'search_resource_entry'));
+	actions.push(createMenu('search_pedia_entry', '搜索百科', 'search_resource_entry'));
 	actions.push(createMenu('search_video_entry', '搜索视频', 'search_resource_entry'));
+	actions.push(createMenu('search_news_entry', '搜索新闻', 'search_resource_entry'));
 	actions.push(createMenu('search_common_entry', '综合搜索', 'search_resource_entry'));
+	await Promise.all(actions);
+
+	actions = [];
+	actions.push(createMenu('search_article', '搜索所有引擎', 'search_article_entry'));
+	ExtConfigManager.get('ArticleSource').forEach((eng, index) => {
+		actions.push(createMenu('search_article::' + index, eng.name, 'search_article_entry'));
+	});
 	await Promise.all(actions);
 
 	actions = [];
@@ -320,9 +330,23 @@ const UpdateContentMenu = async () => {
 	await Promise.all(actions);
 
 	actions = [];
+	actions.push(createMenu('search_pedia', '搜索所有引擎', 'search_pedia_entry'));
+	ExtConfigManager.get('PediaSource').forEach((eng, index) => {
+		actions.push(createMenu('search_pedia::' + index, eng.name, 'search_pedia_entry'));
+	});
+	await Promise.all(actions);
+
+	actions = [];
 	actions.push(createMenu('search_video', '搜索所有引擎', 'search_video_entry'));
 	ExtConfigManager.get('VideoSource').forEach((eng, index) => {
 		actions.push(createMenu('search_video::' + index, eng.name, 'search_video_entry'));
+	});
+	await Promise.all(actions);
+
+	actions = [];
+	actions.push(createMenu('search_news', '搜索所有引擎', 'search_news_entry'));
+	ExtConfigManager.get('NewsSource').forEach((eng, index) => {
+		actions.push(createMenu('search_news::' + index, eng.name, 'search_news_entry'));
 	});
 	await Promise.all(actions);
 
@@ -349,12 +373,21 @@ chrome.contextMenus.onClicked.addListener(evt => {
 
 	if (target === 'search_resource') {
 		sendMenuAction('All', null);
+	} else if (target === 'search_article') {
+		if (isNumber(id)) sendMenuAction('Article', id);
+		else sendMenuAction('Article', null);
 	} else if (target === 'search_book') {
 		if (isNumber(id)) sendMenuAction('Book', id);
 		else sendMenuAction('Book', null);
+	} else if (target === 'search_pedia') {
+		if (isNumber(id)) sendMenuAction('Pedia', id);
+		else sendMenuAction('Pedia', null);
 	} else if (target === 'search_video') {
 		if (isNumber(id)) sendMenuAction('Video', id);
 		else sendMenuAction('Video', null);
+	} else if (target === 'search_news') {
+		if (isNumber(id)) sendMenuAction('News', id);
+		else sendMenuAction('News', null);
 	} else if (target === 'search_common') {
 		if (isNumber(id)) sendMenuAction('Common', id);
 		else sendMenuAction('Common', null);
