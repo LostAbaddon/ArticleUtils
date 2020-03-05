@@ -3,7 +3,7 @@
 内容相关工具集，很实用的瑞士军刀~
 （所有配置都可在选项页导出。）
 
-- **版本**： 0.10.2
+- **版本**： 0.10.3
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
@@ -70,6 +70,7 @@
 ## 1.0.0 TODO:
 
 -	搜索文章、新闻和百科
+-	可选择搜索分类
 
 ## 2.0.0（计划中）
 

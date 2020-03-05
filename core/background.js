@@ -72,9 +72,9 @@ const search = (target, engines, force, callback) => {
 		if (!force) {
 			if (!cfg.using) return done();
 			if (isEng) {
-				if (cfg.english !== true) return done();
+				if (cfg.english === false) return done();
 			} else {
-				if (cfg.chinese !== true) return done();
+				if (cfg.chinese === false) return done();
 			}
 		}
 		if (!cfg.host) {
@@ -116,7 +116,7 @@ const search = (target, engines, force, callback) => {
 			if (!list) list = await analyzePage(page, cfg);
 
 			await window.cacheStorage.set(saveTag, list);
-			chrome.storage.local.getBytesInUse(bytes => console.log('更新资源搜索记录缓存，缓存池已用 ' + bytes + ' B (' + (Math.round(bytes / chrome.storage.local.QUOTA_BYTES * 10000) / 100) + '%)'))
+			chrome.storage.local.getBytesInUse(bytes => console.info('更新资源搜索记录缓存，缓存池已用 ' + bytes + ' B (' + (Math.round(bytes / chrome.storage.local.QUOTA_BYTES * 10000) / 100) + '%)'))
 		}
 
 		done(list);
