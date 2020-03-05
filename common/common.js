@@ -87,7 +87,7 @@
 			});
 		}),
 		del: (key, cb) => new Promise(res => {
-			chrome.storage.local.del(key, () => {
+			chrome.storage.local.remove(key, () => {
 				if (!!cb) cb();
 				res();
 			});
@@ -119,7 +119,7 @@
 			});
 		}),
 		del: (key, cb) => new Promise(res => {
-			chrome.storage.sync.del(key, () => {
+			chrome.storage.sync.remove(key, () => {
 				if (!!cb) cb();
 				res();
 			});

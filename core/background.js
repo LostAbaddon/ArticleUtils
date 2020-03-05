@@ -7,28 +7,28 @@ const ExtHost = chrome.extension.getURL('');
 const onInit = config => {
 	chrome.runtime.onMessage.addListener((msg, sender, response) => {
 		if (msg.event === 'FindResource') {
-			searchResources(msg.targets, msg.action, msg.engine, config, sender.tab.id);
+			searchResources(msg.targets, msg.action, msg.engine, msg.force, config, sender.tab.id);
 		}
 	});
-	window.cacheStorage.init(config.ResourceExpire, config.CacheRateLimit);
+	window.cacheStorage.init(config.ResourceExpire * 1, config.CacheRateLimit * 1);
 };
 const onUpdate = (key, value) => {
 	if (key === 'ResourceExpire') window.cacheStorage.changeExpire(value);
 	else if (key === 'CacheRateLimit') window.cacheStorage.changeRate(value);
 };
 
-const searchResources = (targets, type, engine, config, tabID) => {
+const searchResources = (targets, type, engine, force, config, tabID) => {
 	var result = {}, task = targets.length;
 	if (task === 0) return;
 	targets.forEach(async (t) => {
-		searchResource(t, type, engine, config, (list, target, name) => {
+		searchResource(t, type, engine, force, config, (list, target, name) => {
 			if (!list) return;
 			result[t] = list;
 			analyzeResource(tabID, result, target, name);
 		});
 	});
 };
-const searchResource = (target, type, engine, config, callback) => {
+const searchResource = (target, type, engine, force, config, callback) => {
 	if (!!target.match(UnavailableChars)) return callback();
 
 	var result = {};
@@ -43,8 +43,7 @@ const searchResource = (target, type, engine, config, callback) => {
 		if (type !== 'all' && name !== type) return;
 		var engines = name.substr(0, 1).toUpperCase() + name.substr(1, name.length).toLowerCase();
 		engines = config[engines + 'Source'];
-		var force = isNumber(engine);
-		if (force) engines = [engines[engine]];
+		if (isNumber(engine)) engines = [engines[engine]];
 		search(target, engines, force, done(name));
 	});
 };
@@ -278,16 +277,19 @@ ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 });
 
 const menus = [];
-const createMenu = (id, title, parent) => new Promise(res => {
+const createMenu = (id, title, parent, onlySelection=false) => new Promise(res => {
 	if (menus.includes(id)) return;
 	menus.push(id);
 
 	var option = {
 		id,
 		title,
-		contexts: [ 'selection' ]
+		contexts: []
 	};
 	if (!!parent) option.parentId = parent;
+	if (onlySelection) option.contexts.push('selection');
+	else option.contexts.push('page', 'selection');
+
 	chrome.contextMenus.create(option, res);
 });
 const removeMenu = id => new Promise(res => {
@@ -318,42 +320,42 @@ const UpdateContentMenu = async () => {
 	actions = [];
 	actions.push(createMenu('search_article', '搜索所有引擎', 'search_article_entry'));
 	ExtConfigManager.get('ArticleSource').forEach((eng, index) => {
-		actions.push(createMenu('search_article::' + index, eng.name, 'search_article_entry'));
+		actions.push(createMenu('search_article::' + index, eng.name, 'search_article_entry', true));
 	});
 	await Promise.all(actions);
 
 	actions = [];
 	actions.push(createMenu('search_book', '搜索所有引擎', 'search_book_entry'));
 	ExtConfigManager.get('BookSource').forEach((eng, index) => {
-		actions.push(createMenu('search_book::' + index, eng.name, 'search_book_entry'));
+		actions.push(createMenu('search_book::' + index, eng.name, 'search_book_entry', true));
 	});
 	await Promise.all(actions);
 
 	actions = [];
 	actions.push(createMenu('search_pedia', '搜索所有引擎', 'search_pedia_entry'));
 	ExtConfigManager.get('PediaSource').forEach((eng, index) => {
-		actions.push(createMenu('search_pedia::' + index, eng.name, 'search_pedia_entry'));
+		actions.push(createMenu('search_pedia::' + index, eng.name, 'search_pedia_entry', true));
 	});
 	await Promise.all(actions);
 
 	actions = [];
 	actions.push(createMenu('search_video', '搜索所有引擎', 'search_video_entry'));
 	ExtConfigManager.get('VideoSource').forEach((eng, index) => {
-		actions.push(createMenu('search_video::' + index, eng.name, 'search_video_entry'));
+		actions.push(createMenu('search_video::' + index, eng.name, 'search_video_entry', true));
 	});
 	await Promise.all(actions);
 
 	actions = [];
 	actions.push(createMenu('search_news', '搜索所有引擎', 'search_news_entry'));
 	ExtConfigManager.get('NewsSource').forEach((eng, index) => {
-		actions.push(createMenu('search_news::' + index, eng.name, 'search_news_entry'));
+		actions.push(createMenu('search_news::' + index, eng.name, 'search_news_entry', true));
 	});
 	await Promise.all(actions);
 
 	actions = [];
 	actions.push(createMenu('search_common', '搜索所有引擎', 'search_common_entry'));
 	ExtConfigManager.get('CommonSource').forEach((eng, index) => {
-		actions.push(createMenu('search_common::' + index, eng.name, 'search_common_entry'));
+		actions.push(createMenu('search_common::' + index, eng.name, 'search_common_entry', true));
 	});
 	await Promise.all(actions);
 };

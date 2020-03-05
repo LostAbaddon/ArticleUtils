@@ -1,7 +1,6 @@
 (() => {
 	const TagMenu = 'ResourceCacheMenu';
 	const TagResource = 'Resource::';
-	const RemoveRate = 1 - (Math.sqrt(5) - 1) / 2;
 
 	var resourceExpire = Infinity;
 	var resourceRate = 1;
@@ -24,6 +23,7 @@
 				removed.sort((a, b) => b - a);
 				removed.forEach(i => cacheRecords.splice(i, 1));
 				await store.set(TagMenu, cacheRecords);
+				console.info('删除过期项 ' + removed.length + ' 条！');
 				res();
 			}
 		});
@@ -41,7 +41,8 @@
 			if (r === 0) r = a[2] - b[2];
 			return r;
 		});
-		now = Math.ceil(sorted.length * RemoveRate);
+		var removeRate = await getRemoveRate();
+		now = Math.ceil(sorted.length * removeRate);
 		sorted = sorted.filter((_, i) => i <= now);
 		sorted.sort((a, b) => b[4] - a[4]);
 		now = sorted.length;
@@ -51,6 +52,7 @@
 			now --;
 			if (now === 0) {
 				await store.set(TagMenu, cacheRecords);
+				console.info('强制回收缓存项 ' + sorted.length + ' 条！');
 				if (cacheRecords.length > 0) {
 					if (await didOverUsed()) {
 						await removeUnderRated();
@@ -60,7 +62,16 @@
 			}
 		});
 	});
-	const didOverUsed = () => new Promise(res => chrome.storage.local.getBytesInUse(bytes => res(bytes >= chrome.storage.local.QUOTA_BYTES * resourceRate)));
+	const didOverUsed = () => new Promise(res => {
+		chrome.storage.local.getBytesInUse(bytes => {
+			res(bytes >= chrome.storage.local.QUOTA_BYTES * resourceRate);
+		});
+	});
+	const getRemoveRate = () => new Promise(res => {
+		chrome.storage.local.getBytesInUse(bytes => {
+			res(chrome.storage.local.QUOTA_BYTES * resourceRate / bytes);
+		});
+	});
 	const updateExpire = (gc=true) => new Promise(async res => {
 		await removeExpired();
 		if (cacheRecords.length === 0) return res();

@@ -3,7 +3,7 @@
 内容相关工具集，很实用的瑞士军刀~
 （所有配置都可在选项页导出。）
 
-- **版本**： 0.11.2
+- **版本**： 0.11.3
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
@@ -78,3 +78,4 @@
 -	根据术语表，在每个页面进行自动划词以便快捷搜索
 -	Markdown2RichText 搬家工具
 -	搜索资源缓存改用 IndexedDB 或 WebSQL（chrome.storage.local 的可用空间太小）
+-	更好地识别页面中的资源

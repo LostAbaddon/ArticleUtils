@@ -27,7 +27,16 @@ const onInit = async config => {
 		});
 		if (shouldIgnore) return;
 
-		findResources();
+		var content = findResources();
+		if (content.length === 0) return;
+
+		chrome.runtime.sendMessage({
+			event: 'FindResource',
+			action: 'all',
+			engine: null,
+			force: false,
+			targets: content
+		});
 	}
 };
 const autoMath = () => new Promise(res => {
@@ -136,30 +145,18 @@ const getSelectedText = () => {
 
 	return text;
 };
-const startSearch = () => {
-	if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) return;
-	initSearch();
-
-	var text = getSelectedText();
-	if (!text || text.length === 0) {
-		TextNotifier.notify('开始寻找页面资源');
-		findResources();
-	} else {
-		TextNotifier.notify('开始寻找指定资源');
-		chrome.runtime.sendMessage({
-			event: 'FindResource',
-			action: 'all',
-			engine: null,
-			targets: [text]
-		});
-	}
-};
 const searchItem = (type, id) => {
 	if (!chrome || !chrome.runtime || !chrome.runtime.sendMessage) return;
 	initSearch();
 
-	var text = getSelectedText();
-	if (text.length === 0) return;
+	var text = getSelectedText(), force;
+	if (text.length === 0) {
+		text = findResources();
+		force = false;
+	} else {
+		text = [text];
+		force = isNumber(id);
+	}
 
 	if (type === 'article') TextNotifier.notify('开始寻找文章资源');
 	else if (type === 'book') TextNotifier.notify('开始寻找书籍资源');
@@ -167,16 +164,19 @@ const searchItem = (type, id) => {
 	else if (type === 'video') TextNotifier.notify('开始寻找影视资源');
 	else if (type === 'news') TextNotifier.notify('开始寻找新闻资源');
 	else if (type === 'common') TextNotifier.notify('开始寻找综合资源');
-	else return;
+	else if (force) TextNotifier.notify('开始寻找指定资源');
+	else TextNotifier.notify('开始寻找页面资源');
+
 	chrome.runtime.sendMessage({
 		event: 'FindResource',
 		action: type,
 		engine: id,
-		targets: [text]
+		force,
+		targets: text
 	});
 };
 const findResources = () => {
-	var content = document.body.innerText.match(/<[^\n]+?>|《[^\n]+?》/gi);
+	var content = document.body.innerText.match(/《[^\n]+?》/gi);
 	if (!!content) {
 		content = content.map(title => title.substring(1, title.length - 1).trim());
 		content = content.filter(title => !title.match(/^[前后]页[ \b]|[ \b][前后]页[ \b]|[ \b][前后]页$/));
@@ -199,12 +199,7 @@ const findResources = () => {
 		content.push(title);
 	});
 
-	chrome.runtime.sendMessage({
-		event: 'FindResource',
-		action: 'all',
-		engine: null,
-		targets: content
-	});
+	return content;
 };
 const onGetResource = (resource, name, type) => {
 	TextNotifier.notify('找到资源：' + name + '（'  + ResourceTypes[type] + '）');
@@ -246,7 +241,9 @@ RegiestKeySeq('ctrl+ctrl+m', 'ConvertMath', async () => {
 		autoMath();
 	}
 });
-RegiestKeySeq('ctrl+ctrl+s', 'SearchResource', startSearch);
+RegiestKeySeq('ctrl+ctrl+s', 'SearchResource', () => {
+	searchItem('all', null);
+});
 
 chrome.runtime.onMessage.addListener(msg => {
 	if (msg.event === 'GotResource') onGetResource(msg.resource, msg.targetName, msg.targetType);
@@ -254,8 +251,7 @@ chrome.runtime.onMessage.addListener(msg => {
 		let action = msg.action || 'All';
 		let id = msg.id;
 
-		console.log(action, id);
-		if (action === 'All') startSearch();
+		if (action === 'All') searchItem('all', null);
 		else if (action === 'Article') searchItem('article', id);
 		else if (action === 'Book') searchItem('book', id);
 		else if (action === 'Pedia') searchItem('pedia', id);
