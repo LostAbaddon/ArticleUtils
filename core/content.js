@@ -15,6 +15,8 @@ const onInit = async config => {
 	if (config.AutoSearch) {
 		showSearchNotify = config.ShowSearchNotify;
 		initSearch();
+		// console.log(location);
+		// console.log(config);
 		findResources();
 	}
 };

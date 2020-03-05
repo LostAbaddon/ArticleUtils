@@ -3,9 +3,22 @@
 内容相关工具集，很实用的瑞士军刀~
 （所有配置都可在选项页导出。）
 
-- **版本**： 0.9.3
+- **版本**： 0.9.4
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
+
+- **Chrome Web Store发行版本**：暂未发布
+- **Chrome Web Store发行地址**：暂未发布
+
+## 使用方法
+
+1，通过 Chrome Web Store 安装到浏览器并使用（暂未发布）
+
+2，通过源码载入浏览器并使用：
+	-	下载源码
+	-	启用浏览器开发者模式
+	-	载入源码所在目录
+	-	正常使用
 
 ## LaTeX 公式转换
 
