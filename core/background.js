@@ -1,7 +1,7 @@
 const UnavailableChars = /\\\//gi;
 const ForbiddenNames = [ 'cache', '快照', '广告', 'here', 'next', 'prev', 'see all', 'see more' ];
 const ForbiddenPaths = [ 'cache', 'translate', 'translator', 'ad.', 'javascript:' ];
-const SearchItem = ['common', 'book', 'video'];
+const SearchItem = ['common', 'book', 'video', 'article', 'pedia', 'news'];
 const ExtHost = chrome.extension.getURL('');
 
 const onInit = config => {
@@ -109,7 +109,7 @@ const search = (target, engines, force, callback) => {
 				return done();
 			}
 
-			if (!!cfg.redirect) {
+			if (!!cfg.redirect && cfg.redirect.length > 0) {
 				let reg = new RegExp(cfg.redirect);
 				if (resp.match(reg)) list = [[target, resp]];
 			}
@@ -151,7 +151,7 @@ const analyzePage = (page, cfg) => new Promise(async res => {
 	var list = [];
 	container.forEach(link => {
 		var name, url;
-		if (!!cfg.title) {
+		if (!!cfg.title && cfg.title.length > 0) {
 			name = link.querySelector(cfg.title);
 			if (!name) name = link;
 			name = name.innerText;
@@ -175,6 +175,63 @@ const analyzePage = (page, cfg) => new Promise(async res => {
 
 	res(list);
 });
+const regulizeResource = (result, items, targets) => {
+	result.book = result.book || {};
+	result.video = result.video || {};
+	result.article = result.article || {};
+	result.pedia = result.pedia || {};
+
+	Object.keys(targets).forEach(link => {
+		var title = targets[link];
+		var has = items.some(item => !!result[item][link]);
+		if (has) {
+			delete targets[link];
+			return;
+		}
+
+		var low = link.toLowerCase();
+		if (low.indexOf('book') >= 0) {
+			result.book[link] = title;
+			delete targets[link];
+			return;
+		} else if (low.indexOf('video') >= 0
+			|| !!low.match(/^v\.|\bv\./)) {
+			result.video[link] = title;
+			delete targets[link];
+			return;
+		}
+
+		low = title.toLowerCase();
+		if (low.indexOf('电子书') >= 0
+			|| low.indexOf('阅读') >= 0
+			|| !!low.match(/pdf|mobi|epub|txt/i)) {
+			result.book[link] = title;
+			delete targets[link];
+		} else if (low.indexOf('电影') >= 0
+			|| low.indexOf('视频') >= 0
+			|| low.indexOf('磁力') >= 0
+			|| low.indexOf('高清') >= 0
+			|| low.indexOf('超清') >= 0
+			|| low.indexOf('双语') >= 0
+			|| low.indexOf('双字') >= 0
+			|| low.indexOf('蓝光') >= 0
+			|| low.indexOf('免费观看') >= 0
+			|| !!low.match(/BT *下载/i)
+			|| (!!low.match(/^movie\.|\bmovie\./i) && !low.match(/^movie\.douban\.|\bmovie\.douban\./i))) {
+			result.video[link] = title;
+			delete targets[link];
+		} else if (low.indexOf('学术') >= 0
+			|| low.indexOf('阅读') >= 0
+			|| low.indexOf('文库') >= 0) {
+			result.article[link] = title;
+			delete targets[link];
+		} else if (low.indexOf('百科') >= 0
+			|| low.indexOf('知道') >= 0) {
+			result.pedia[link] = title;
+			delete targets[link];
+		}
+	});
+};
 const analyzeResource = (tabID, resources, targetName, targetType) => {
 	var result = {};
 	Object.keys(resources).forEach(name => {
@@ -182,51 +239,12 @@ const analyzeResource = (tabID, resources, targetName, targetType) => {
 		list.book = list.book || {};
 		list.video = list.video || {};
 
-		var items = Object.keys(list).filter(n => n !== 'common');
-		var commons = list.common;
-		if (!!commons) {
-			Object.keys(commons).forEach(link => {
-				var title = commons[link];
-				var has = items.some(item => !!list[item][link]);
-				if (has) {
-					delete commons[link];
-					return;
-				}
-
-				var low = link.toLowerCase();
-				if (low.indexOf('book') >= 0) {
-					list.book[link] = title;
-					delete commons[link];
-					return;
-				} else if (low.indexOf('video') >= 0
-					|| !!low.match(/^v\.|\bv\./)) {
-					list.video[link] = title;
-					delete commons[link];
-					return;
-				}
-
-				low = title.toLowerCase();
-				if (low.indexOf('电子书') >= 0
-					|| low.indexOf('阅读') >= 0
-					|| !!low.match(/pdf|mobi|epub|txt/i)) {
-					list.book[link] = title;
-					delete commons[link];
-				} else if (low.indexOf('电影') >= 0
-					|| low.indexOf('视频') >= 0
-					|| low.indexOf('磁力') >= 0
-					|| low.indexOf('高清') >= 0
-					|| low.indexOf('超清') >= 0
-					|| low.indexOf('双语') >= 0
-					|| low.indexOf('双字') >= 0
-					|| low.indexOf('蓝光') >= 0
-					|| low.indexOf('免费观看') >= 0
-					|| !!low.match(/BT *下载/i)
-					|| (!!low.match(/^movie\.|\bmovie\./i) && !low.match(/^movie\.douban\.|\bmovie\.douban\./i))) {
-					list.video[link] = title;
-					delete commons[link];
-				}
-			});
-		}
+		var items = Object.keys(list).filter(n => n !== 'news');
+		var commons = list.news;
+		if (!!commons) regulizeResource(list, items, commons);
+		items = Object.keys(list).filter(n => n !== 'common');
+		commons = list.common;
+		if (!!commons) regulizeResource(list, items, commons);
 	});
 
 	Object.keys(resources).forEach(name => {

@@ -22,9 +22,9 @@ div.search_item_frame div.search_item_tab {
 	display: block;
 	box-sizing: border-box;
 	bottom: 0px;
-	left: -40px;
-	width: 40px;
-	height: 80px;
+	left: -32px;
+	width: 32px;
+	height: 60px;
 	border-radius: 10px 0px 0px 10px;
 	box-shadow: 2px 2px 3px 3px rgba(127, 127, 127, 0.5);
 	background-color: white;
@@ -37,17 +37,27 @@ div.search_item_frame div.search_item_tab.tab_1 {
 	background-color: rgb(240, 124, 130);
 }
 div.search_item_frame div.search_item_tab.tab_2 {
-	top: 105px;
+	top: 85px;
 	background-color: rgb(18, 170, 156);
+	color: rgb(208, 223, 230);
 }
 div.search_item_frame div.search_item_tab.tab_3 {
-	top: 185px;
+	top: 145px;
 	background-color: rgb(15, 89, 164);
 	color: rgb(208, 223, 230);
 }
 div.search_item_frame div.search_item_tab.tab_4 {
-	top: 265px;
+	top: 205px;
 	background-color: rgb(254, 215, 26);
+}
+div.search_item_frame div.search_item_tab.tab_5 {
+	top: 265px;
+	background-color: rgb(110, 81, 30);
+	color: rgb(208, 223, 230);
+}
+div.search_item_frame div.search_item_tab.tab_6 {
+	top: 325px;
+	background-color: rgb(240, 252, 255);
 }
 div.search_item_frame div.search_item_tab.disabled {
 	left: -10px;
@@ -62,8 +72,8 @@ div.search_item_frame div.search_item_tab div.search_item_captain {
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	font-size: 18px;
-	line-height: 25px;
+	font-size: 16px;
+	line-height: 20px;
 	text-shadow: 1px 1px 2px rgba(84, 30, 36, 0.3), 1px 1px 1px rgba(226, 225, 228, 0.5);
 	user-select: none;
 }

@@ -29,10 +29,19 @@
 		<div class="option-sepline"></div>
 		<div class="option-blankline"></div>
 		<div class="option-item">
+			<div class="option-switcher" target="ArticleSearchEngine">文章搜索引擎设置</div>
+		</div>
+		<div class="option-item">
 			<div class="option-switcher" target="BookSearchEngine">书籍搜索引擎设置</div>
 		</div>
 		<div class="option-item">
 			<div class="option-switcher" target="VideoSearchEngine">影视搜索引擎设置</div>
+		</div>
+		<div class="option-item">
+			<div class="option-switcher" target="PediaSearchEngine">百科搜索引擎设置</div>
+		</div>
+		<div class="option-item">
+			<div class="option-switcher" target="NewsSearchEngine">新闻搜索引擎设置</div>
 		</div>
 		<div class="option-item">
 			<div class="option-switcher" target="CommonSearchEngine" checked>综合搜索引擎设置</div>
@@ -45,8 +54,60 @@
 		</div>
 	</div>
 	<div class="container-column column-4">
+		<div class="option-switch-container hidden" name="ArticleSearchEngine">
+			<div class="option-list-container" name="ArticleSource" title="增加文章引擎" clickable>
+				<div class="option-list-line"><span class="hint">名称：</span><input type="text" name="name"></div>
+				<div class="option-list-line"><span class="hint">地址：</span><input type="text" name="url"></div>
+				<div class="option-list-line">
+					<span class="hint"></span>
+					<input type="checkbox" name="using">
+					<label class="option-input-hint-label" target="using">自动触发</label>
+					<span class="inline-blank"></span>
+					<button event="delete">删除</button>
+				</div>
+				<div class="option-list-line">
+					<span class="hint"></span>
+					<input type="checkbox" name="chinese">
+					<label class="option-input-hint-label" target="chinese">应用于中文</label>
+					<span class="inline-blank"></span>
+					<input type="checkbox" name="english">
+					<label class="option-input-hint-label" target="english">应用于英文</label>
+				</div>
+				<div class="option-list-line"><span class="hint">Form词：</span><input type="text" name="form"></div>
+				<div class="option-list-line"><span class="hint">连接词：</span><input type="text" name="connector"></div>
+				<div class="option-list-line"><span class="hint">容器UI：</span><input type="text" name="container"></div>
+				<div class="option-list-line"><span class="hint">标题UI：</span><input type="text" name="title"></div>
+				<div class="option-list-line"><span class="hint">跳转条件：</span><input type="text" name="redirect"></div>
+			</div>
+		</div>
 		<div class="option-switch-container hidden" name="BookSearchEngine">
 			<div class="option-list-container" name="BookSource" title="增加书籍引擎" clickable>
+				<div class="option-list-line"><span class="hint">名称：</span><input type="text" name="name"></div>
+				<div class="option-list-line"><span class="hint">地址：</span><input type="text" name="url"></div>
+				<div class="option-list-line">
+					<span class="hint"></span>
+					<input type="checkbox" name="using">
+					<label class="option-input-hint-label" target="using">自动触发</label>
+					<span class="inline-blank"></span>
+					<button event="delete">删除</button>
+				</div>
+				<div class="option-list-line">
+					<span class="hint"></span>
+					<input type="checkbox" name="chinese">
+					<label class="option-input-hint-label" target="chinese">应用于中文</label>
+					<span class="inline-blank"></span>
+					<input type="checkbox" name="english">
+					<label class="option-input-hint-label" target="english">应用于英文</label>
+				</div>
+				<div class="option-list-line"><span class="hint">Form词：</span><input type="text" name="form"></div>
+				<div class="option-list-line"><span class="hint">连接词：</span><input type="text" name="connector"></div>
+				<div class="option-list-line"><span class="hint">容器UI：</span><input type="text" name="container"></div>
+				<div class="option-list-line"><span class="hint">标题UI：</span><input type="text" name="title"></div>
+				<div class="option-list-line"><span class="hint">跳转条件：</span><input type="text" name="redirect"></div>
+			</div>
+		</div>
+		<div class="option-switch-container hidden" name="PediaSearchEngine">
+			<div class="option-list-container" name="PediaSource" title="增加百科引擎" clickable>
 				<div class="option-list-line"><span class="hint">名称：</span><input type="text" name="name"></div>
 				<div class="option-list-line"><span class="hint">地址：</span><input type="text" name="url"></div>
 				<div class="option-list-line">
@@ -81,6 +142,32 @@
 					<label class="option-input-hint-label" target="using">自动触发</label>
 					<span class="inline-blank"></span>
 					<button event="delete">删除</button>
+				</div>
+				<div class="option-list-line"><span class="hint">Form词：</span><input type="text" name="form"></div>
+				<div class="option-list-line"><span class="hint">连接词：</span><input type="text" name="connector"></div>
+				<div class="option-list-line"><span class="hint">容器UI：</span><input type="text" name="container"></div>
+				<div class="option-list-line"><span class="hint">标题UI：</span><input type="text" name="title"></div>
+				<div class="option-list-line"><span class="hint">跳转条件：</span><input type="text" name="redirect"></div>
+			</div>
+		</div>
+		<div class="option-switch-container hidden" name="NewsSearchEngine">
+			<div class="option-list-container" name="NewsSource" title="增加新闻呢引擎" clickable>
+				<div class="option-list-line"><span class="hint">名称：</span><input type="text" name="name"></div>
+				<div class="option-list-line"><span class="hint">地址：</span><input type="text" name="url"></div>
+				<div class="option-list-line">
+					<span class="hint"></span>
+					<input type="checkbox" name="using">
+					<label class="option-input-hint-label" target="using">自动触发</label>
+					<span class="inline-blank"></span>
+					<button event="delete">删除</button>
+				</div>
+				<div class="option-list-line">
+					<span class="hint"></span>
+					<input type="checkbox" name="chinese">
+					<label class="option-input-hint-label" target="chinese">应用于中文</label>
+					<span class="inline-blank"></span>
+					<input type="checkbox" name="english">
+					<label class="option-input-hint-label" target="english">应用于英文</label>
 				</div>
 				<div class="option-list-line"><span class="hint">Form词：</span><input type="text" name="form"></div>
 				<div class="option-list-line"><span class="hint">连接词：</span><input type="text" name="connector"></div>

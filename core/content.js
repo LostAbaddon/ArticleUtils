@@ -1,6 +1,9 @@
 const ResourceTypes = {
+	'article': '文章',
 	'book': '书籍',
+	'pedia': '百科',
 	'video': '影视',
+	'news': '新闻',
 	'common': '其它'
 };
 
@@ -59,11 +62,20 @@ const autoMath = () => new Promise(res => {
 });
 const initSearch = () => {
 	window.SearchInjection.init([{
+		id: 'article',
+		name: '文章'
+	}, {
 		id: 'book',
 		name: '书籍'
 	}, {
+		id: 'pedia',
+		name: '百科'
+	}, {
 		id: 'video',
 		name: '影视'
+	}, {
+		id: 'news',
+		name: '新闻'
 	}, {
 		id: 'common',
 		name: '其它'

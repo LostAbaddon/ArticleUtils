@@ -16,6 +16,34 @@ window.DefaultExtConfig = {
 		{
 			"url": "bing.com",
 			"using": true
+		},
+		{
+			"url": "shuge.org",
+			"using": true
+		},
+		{
+			"url": "epubw.com",
+			"using": true
+		},
+		{
+			"url": "lingocn.com",
+			"using": true
+		},
+		{
+			"url": "txtbook.com",
+			"using": true
+		},
+		{
+			"url": "ituring.com",
+			"using": true
+		},
+		{
+			"url": "booksc.xyz",
+			"using": true
+		},
+		{
+			"url": "epubee.com",
+			"using": true
 		}
 	],
 	"CommonSource": [
@@ -42,6 +70,56 @@ window.DefaultExtConfig = {
 			"using": true
 		}
 	],
+	"ArticleSource": [
+		{
+			"name": "简书",
+			"url": "https://www.jianshu.com/search?q={title}&type=note",
+			"connector": "%20",
+			"container": "div.row div.search-content ul li div.content a.title",
+			"chinese": true,
+			"english": true,
+			"using": false
+		},
+		{
+			"name": "豆瓣",
+			"url": "https://www.douban.com/search?cat=1015&q={title}",
+			"connector": "%20",
+			"container": "div.result-list div.result div.content div.title a",
+			"chinese": true,
+			"english": true,
+			"using": true
+		},
+		{
+			"name": "知乎",
+			"url": "https://www.zhihu.com/search?type=content&q={title}",
+			"connector": "%20",
+			"container": "div.Search-container div.List div.SearchResult-Card div.List-item h2.ContentItem-title a",
+			"title": "span",
+			"chinese": true,
+			"english": true,
+			"using": true
+		},
+		{
+			"name": "Medium",
+			"url": "https://medium.com/search?q={title}",
+			"connector": "%20",
+			"container": "div[data-source=search_post] div.postArticle-content a",
+			"title": "h3",
+			"chinese": true,
+			"english": true,
+			"using": true
+		},
+		{
+			"name": "Matters",
+			"url": "https://matters.news/search?q={title}",
+			"connector": "%20",
+			"container": "main section article section[role=listitem] section.title a",
+			"title": "h2.title",
+			"chinese": true,
+			"english": true,
+			"using": true
+		}
+	],
 	"BookSource": [
 		{
 			"name": "ePUBw",
@@ -49,6 +127,8 @@ window.DefaultExtConfig = {
 			"connector": "+",
 			"container": "section.container div.content div.row.equal article div.caption p:first-child a",
 			"redirect": "epubw\\.com\\/\\d+\\.html",
+			"chinese": true,
+			"english": false,
 			"using": false
 		},
 		{
@@ -56,6 +136,8 @@ window.DefaultExtConfig = {
 			"url": "http://www.lingocn.com/?s={title}",
 			"connector": "+",
 			"container": "div.post-list div.simplebar-mask div.simplebar-content article a.entry-title",
+			"chinese": true,
+			"english": false,
 			"using": true
 		},
 		{
@@ -63,6 +145,8 @@ window.DefaultExtConfig = {
 			"url": "http://www.txtbook.com.cn/search?keyword={title}",
 			"connector": "+",
 			"container": "table > tbody td.downCont > a[href^=\"/\"]",
+			"chinese": true,
+			"english": true,
 			"using": true
 		},
 		{
@@ -70,6 +154,8 @@ window.DefaultExtConfig = {
 			"url": "https://www.ituring.com.cn/search?q={title}",
 			"connector": "+",
 			"container": "div#search-result-books ul.block-items li.block-item h4.name a",
+			"chinese": true,
+			"english": true,
 			"using": true
 		},
 		{
@@ -77,7 +163,8 @@ window.DefaultExtConfig = {
 			"url": "https://booksc.xyz/s/{title}",
 			"connector": "%20",
 			"container": "table tbody td h3 a",
-			"form": "",
+			"chinese": false,
+			"english": true,
 			"using": true
 		},
 		{
@@ -85,6 +172,8 @@ window.DefaultExtConfig = {
 			"url": "https://new.shuge.org/?s={title}",
 			"connector": "+",
 			"container": "article header h2 a",
+			"chinese": true,
+			"english": true,
 			"using": true
 		},
 		{
@@ -92,8 +181,53 @@ window.DefaultExtConfig = {
 			"url": "http://cn.epubee.com/books/?s={title}",
 			"connector": "%20",
 			"container": "div#get_ebook_list div.ebookitem div.list_title a",
+			"chinese": true,
+			"english": false,
 			"using": true
 		}
+	],
+	"PediaSource": [
+		{
+			"name": "中文维基",
+			"url": "https://zh.wikipedia.org/w/index.php?search={title}",
+			"connector": "+",
+			"container": "div#content div#bodyContent div.searchresults ul.mw-search-results li.mw-search-result div.mw-search-result-heading a",
+			"chinese": true,
+			"english": false,
+			"using": true
+		}, {
+			"name": "英文维基",
+			"url": "https://en.wikipedia.org/w/index.php?search={title}",
+			"connector": "+",
+			"container": "div#content div#bodyContent div.searchresults ul.mw-search-results li.mw-search-result div.mw-search-result-heading a",
+			"chinese": false,
+			"english": true,
+			"using": true
+		}, {
+			"name": "松鼠会",
+			"url": "https://songshuhui.net/?s={title}",
+			"connector": "+",
+			"container": "div#wrapper div#content div.step div h3.storytitle a",
+			"chinese": true,
+			"english": true,
+			"using": true
+		}, {
+			"name": "Nature",
+			"url": "https://www.nature.com/subjects/{title}",
+			"connector": "-",
+			"container": "div.grid ul li article h3 a",
+			"chinese": false,
+			"english": true,
+			"using": true
+		}, {
+			"name": "Science",
+			"url": "https://search.sciencemag.org/?searchTerm={title}",
+			"connector": "%20",
+			"container": "div.super-search div.ss-container ul.headline-list li div.media div.media__body h2.media__headline a",
+			"chinese": false,
+			"english": true,
+			"using": true
+		},
 	],
 	"VideoSource": [
 		{
@@ -118,5 +252,48 @@ window.DefaultExtConfig = {
 			"container": "div.container ul li.post div.article h2 a",
 			"using": true
 		}
-	]
+	],
+	"NewsSource": [
+		{
+			"name": "谷歌新闻",
+			"url": "https://news.google.com/search?q={title}",
+			"connector": "%20",
+			"container": "body > c-wiz > div > div > div > div > main > c-wiz > div > div > div > article > h3 > a[href]",
+			"chinese": true,
+			"english": true,
+			"using": true
+		}, {
+			"name": "百度新闻",
+			"url": "https://www.baidu.com/s?tn=news&word=%E7%A7%91%E6%8A%80%20%E5%8F%91%E5%B1%95",
+			"connector": "%20",
+			"container": "#content_left div.result h3.c-title > a",
+			"chinese": true,
+			"english": true,
+			"using": true
+		}, {
+			"name": "财新",
+			"url": "http://search.caixin.com/search/search.jsp?keyword={title}&channel=0",
+			"connector": "+",
+			"container": "div.searchbox div.searchboxCon div.searchboxR div.searchtext ul li div.searchxt a",
+			"chinese": true,
+			"english": false,
+			"using": true
+		}, {
+			"name": "BBC",
+			"url": "https://www.bbc.co.uk/search?q={title}&filter=news",
+			"connector": "+",
+			"container": "section.search-content ol.search-results li article > div > h1 > a",
+			"chinese": false,
+			"english": true,
+			"using": true
+		}, {
+			"name": "CNN",
+			"url": "https://edition.cnn.com/search?q={title}",
+			"connector": "+",
+			"container": "div.cnn-search div.l-container div.cnn-search__results div.cnn-search__results-list div.cnn-search__result div.cnn-search__result-contents h3.cnn-search__result-headline a",
+			"chinese": false,
+			"english": true,
+			"using": true
+		},
+	],
 };
