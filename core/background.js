@@ -48,7 +48,7 @@ const searchResource = (target, type, engine, config, callback) => {
 		search(target, engines, force, done(name));
 	});
 };
-const search = (target, engine, force, callback) => {
+const search = (target, engines, force, callback) => {
 	console.info('开始搜索资源：' + target);
 
 	var result = {};
@@ -59,8 +59,24 @@ const search = (target, engine, force, callback) => {
 		}
 	};
 
-	engine.forEach(async cfg => {
-		if (!cfg.using && !force) return done();
+	var isEng = target.match(/[a-z0-9]/gi);
+	if (!isEng) isEng = false;
+	else {
+		isEng = isEng.join('');
+		isEng = isEng.length / target.replace(/[ \n\t\r]/gi, '').length;
+		if (isEng > 0.5) isEng = true;
+		else isEng = false;
+	}
+
+	engines.forEach(async cfg => {
+		if (!force) {
+			if (!cfg.using) return done();
+			if (isEng) {
+				if (cfg.english !== true) return done();
+			} else {
+				if (cfg.chinese !== true) return done();
+			}
+		}
 		if (!cfg.host) {
 			cfg.host = cfg.url.split('/');
 			cfg.host.splice(3, cfg.host.length);

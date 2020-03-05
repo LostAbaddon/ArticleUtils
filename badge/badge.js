@@ -87,8 +87,8 @@ document.querySelectorAll('div.option-list-container').forEach(ele => {
 
 		var next = target.target || target.getAttribute('target');
 		if (!!next) {
-			let ui = target.parentElement.querySelector('input[type=' + next + ']')
-			if (next === 'checkbox') {
+			let ui = target.parentElement.querySelector('input[name=' + next + ']')
+			if (ui.type === 'checkbox') {
 				ui.checked = !ui.checked;
 			} else {
 				ui.focus();
