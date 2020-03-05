@@ -18,7 +18,10 @@ const onInit = async config => {
 
 		var pagepath = location.protocol + '//' + location.host + location.pathname;
 		var ignoreList = config.IgnoreList || [];
-		var shouldIgnore = ignoreList.some(url => pagepath.indexOf(url) >= 0);
+		var shouldIgnore = ignoreList.some(item => {
+			if (!item.using) return false;
+			return pagepath.indexOf(item.url) >= 0;
+		});
 		if (shouldIgnore) return;
 
 		findResources();

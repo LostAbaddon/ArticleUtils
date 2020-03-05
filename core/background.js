@@ -100,7 +100,7 @@ const search = (target, engine, force, callback) => {
 			if (!list) list = await analyzePage(page, cfg);
 
 			await window.cacheStorage.set(saveTag, list);
-			chrome.storage.local.getBytesInUse(bytes => console.log('更新资源搜索记录缓存，缓存池已用 ' + bytes + ' B'))
+			chrome.storage.local.getBytesInUse(bytes => console.log('更新资源搜索记录缓存，缓存池已用 ' + bytes + ' B (' + (Math.round(bytes / chrome.storage.local.QUOTA_BYTES * 10000) / 100) + '%)'))
 		}
 
 		done(list);

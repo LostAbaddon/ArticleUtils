@@ -4,7 +4,20 @@ window.DefaultExtConfig = {
 	"ShowSearchNotify": true,
 	"ResourceExpire": "24",
 	"CacheRateLimit": "80",
-	"IgnoreList": [],
+	"IgnoreList": [
+		{
+			"url": "google.com",
+			"using": true
+		},
+		{
+			"url": "baidu.com",
+			"using": true
+		},
+		{
+			"url": "bing.com",
+			"using": true
+		}
+	],
 	"CommonSource": [
 		{
 			"name": "谷歌",
@@ -106,4 +119,4 @@ window.DefaultExtConfig = {
 			"using": true
 		}
 	]
-}
+};
