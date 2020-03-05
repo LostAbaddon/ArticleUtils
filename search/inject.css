@@ -1,3 +1,17 @@
+div.search_background_mask {
+	position: fixed;
+	display: none;
+	box-sizing: border-box;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	z-index: 9999;
+}
+div.search_background_mask.show {
+	display: block;
+}
+
 div.search_item_frame {
 	position: fixed;
 	display: block;

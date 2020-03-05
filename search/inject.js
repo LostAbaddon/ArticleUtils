@@ -146,6 +146,13 @@ window.SearchInjection.init = tabs => {
 		style.rel = 'stylesheet';
 		style.href = chrome.extension.getURL('/search/inject.css');
 		document.body.appendChild(style);
+
+		window.SearchInjection._background = newEle('div', 'search_background_mask');
+		window.SearchInjection._background.addEventListener('click', () => {
+			Object.keys(window.SearchInjection.tabs).forEach(tab => window.SearchInjection.tabs[tab].collapse(false));
+		});
+		document.body.appendChild(window.SearchInjection._background);
+
 		SearchInjection._initialed = true;
 	}
 
@@ -155,6 +162,8 @@ window.SearchInjection.init = tabs => {
 		var frame = new SearchFrame(tab.id, tab.name, Object.keys(window.SearchInjection.tabs).length + 1);
 		window.SearchInjection.tabs[tab.id] = frame;
 		frame.onToggle((id, show) => {
+			if (show) window.SearchInjection._background.classList.add('show');
+			else window.SearchInjection._background.classList.remove('show');
 			Object.keys(window.SearchInjection.tabs).forEach(tab => {
 				if (tab === id) return;
 				tab = window.SearchInjection.tabs[tab];
