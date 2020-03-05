@@ -15,8 +15,12 @@ const onInit = async config => {
 	if (config.AutoSearch) {
 		showSearchNotify = config.ShowSearchNotify;
 		initSearch();
-		// console.log(location);
-		// console.log(config);
+
+		var pagepath = location.protocol + '//' + location.host + location.pathname;
+		var ignoreList = config.IgnoreList || [];
+		var shouldIgnore = ignoreList.some(url => pagepath.indexOf(url) >= 0);
+		if (shouldIgnore) return;
+
 		findResources();
 	}
 };

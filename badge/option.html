@@ -81,7 +81,12 @@
 				<div class="option-list-line"><span class="hint">跳转条件：</span><input type="text" name="redirect"></div>
 			</div>
 		</div>
-		<div class="option-switch-container hidden" name="IgnoreDomain">Aloha Kosmos!!!!</div>
+		<div class="option-switch-container hidden" name="IgnoreDomain">
+			<div class="option-list-container" name="IgnoreList" title="增加不自动触发规则" clickable>
+				<div class="option-list-line"><span class="hint">地址：</span><input type="text" name="url"></div>
+				<div class="option-list-line"><span class="hint"></span><input type="checkbox" name="using"><label class="option-input-hint-label" target="checkbox">启用</label><span class="inline-blank"></span><button event="delete">删除</button></div>
+			</div>
+		</div>
 		<div class="option-switch-container hidden" name="ExportConfig" action="LoadConfig">
 			<textarea id="extension-export-config" class="option-full-textarea"></textarea>
 		</div>

@@ -12,7 +12,7 @@ const ToggleAction = action => {
 };
 
 document.querySelectorAll('div.option-list-container').forEach(ele => {
-	var cfgList;
+	var cfgList = [];
 
 	var target = ele.getAttribute('name');
 	if (!isString(target)) return;
@@ -47,6 +47,8 @@ document.querySelectorAll('div.option-list-container').forEach(ele => {
 				item.parentElement.removeChild(item);
 			});
 			cfgList.splice(id, 1);
+		} else if (key === '__ArrayItem__') {
+			cfgList[id] = value;
 		} else {
 			let item = cfgList[id];
 			if (!item) return;
@@ -59,6 +61,10 @@ document.querySelectorAll('div.option-list-container').forEach(ele => {
 		var itemID = target.dataset.id;
 		if (!itemID) return;
 		var name = target.name || target.getAttribute('name');
+		if (!name || name.length === 0) {
+			if (isString(target.getAttribute('arrayItem'))) name = '__ArrayItem__';
+			else return;
+		}
 		var value;
 		if (target.type.toLowerCase() === 'checkbox') value = target.checked;
 		else value = target.innerText || target.value;
@@ -74,6 +80,7 @@ document.querySelectorAll('div.option-list-container').forEach(ele => {
 			let index = cfgList.length;
 			cfgList.push({});
 			ui.querySelectorAll('[name]').forEach(line => line.dataset.id = index);
+			ui.querySelectorAll('[arrayItem]').forEach(line => line.dataset.id = index);
 			ui.querySelectorAll('button').forEach(btn => btn.dataset.id = index);
 			return;
 		}
@@ -91,6 +98,10 @@ document.querySelectorAll('div.option-list-container').forEach(ele => {
 		var itemID = target.dataset.id;
 		if (!itemID) return;
 		var name = target.name || target.getAttribute('name') || target.getAttribute('event');
+		if (!name || name.length === 0) {
+			if (isString(target.getAttribute('arrayItem'))) name = '__ArrayItem__';
+			else return;
+		}
 		var value;
 		if (target.type.toLowerCase() === 'checkbox') value = target.checked;
 		else value = target.innerText || target.value;
@@ -99,25 +110,40 @@ document.querySelectorAll('div.option-list-container').forEach(ele => {
 	});
 
 	ExtInitActions[target] = value => {
+		value = value || [];
 		cfgList = value;
 		value.forEach((item, index) => {
 			var ui = newEle('div', 'option-list-item');
 			ui.innerHTML = template;
 			ui.dataset.id = index;
 			ele.appendChild(ui);
-			ui.querySelectorAll('[name]').forEach(line => {
+			if (item instanceof Array) {
+				let line = ui.querySelector('[arrayItem]')
 				line.dataset.id = index;
-				var key = line.name || line.getAttribute('name');
 				if (line.tagName.toLowerCase() === 'input') {
 					if (line.type.toLowerCase() === 'checkbox') {
-						line.checked = item[key] || false;
+						line.checked = item || false;
 					} else {
-						line.value = item[key] || '';
+						line.value = item || '';
 					}
 				} else {
-					line.innerText = item[key] || '';
+					line.innerText = item || '';
 				}
-			});
+			} else {
+				ui.querySelectorAll('[name]').forEach(line => {
+					line.dataset.id = index;
+					var key = line.name || line.getAttribute('name');
+					if (line.tagName.toLowerCase() === 'input') {
+						if (line.type.toLowerCase() === 'checkbox') {
+							line.checked = item[key] || false;
+						} else {
+							line.value = item[key] || '';
+						}
+					} else {
+						line.innerText = item[key] || '';
+					}
+				});
+			}
 			ui.querySelectorAll('button').forEach(btn => btn.dataset.id = index);
 		});
 	};	

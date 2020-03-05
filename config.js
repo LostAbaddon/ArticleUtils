@@ -4,6 +4,7 @@ window.DefaultExtConfig = {
 	"ShowSearchNotify": true,
 	"ResourceExpire": "24",
 	"CacheRateLimit": "80",
+	"IgnoreList": [],
 	"CommonSource": [
 		{
 			"name": "谷歌",
