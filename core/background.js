@@ -11,7 +11,8 @@ const onInit = config => {
 			if (msg.auto) {
 				let protocol = sender.url.split('://')[0];
 				if (!protocol) return;
-				let url = sender.url.replace(protocol + '://', '');
+				let url = sender.url.split('?')[0];
+				url = url.replace(protocol + '://', '');
 				url = url.split('/');
 				if (url.length > 2) url.splice(2, url.length - 2);
 				url = url.join('/');

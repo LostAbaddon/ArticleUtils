@@ -6,11 +6,12 @@ window.PageActions.onLoad = config => {
 	};
 
 	chrome.tabs.getSelected(tab => {
-		var protocol = tab.url.split('://')[0];
+		var url = tab.url.split('?')[0];
+		var protocol = url.split('://')[0];
 		if (!protocol) return cancelRuleArea();
 		var low = protocol.toLowerCase();
 		if (low.indexOf('chrome') >= 0 || low.indexOf('devtool') >= 0) return cancelRuleArea();
-		var url = tab.url.replace(protocol + '://', '');
+		url = url.replace(protocol + '://', '');
 		url = url.split('/');
 		if (url.length > 2) url.splice(2, url.length - 2);
 		url = url.join('/');
