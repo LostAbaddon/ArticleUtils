@@ -150,6 +150,7 @@ window.SearchInjection.init = tabs => {
 		window.SearchInjection._background = newEle('div', 'search_background_mask');
 		window.SearchInjection._background.addEventListener('click', () => {
 			Object.keys(window.SearchInjection.tabs).forEach(tab => window.SearchInjection.tabs[tab].collapse(false));
+			window.SearchInjection._background.classList.remove('show');
 		});
 		document.body.appendChild(window.SearchInjection._background);
 
@@ -162,6 +163,7 @@ window.SearchInjection.init = tabs => {
 		var frame = new SearchFrame(tab.id, tab.name, Object.keys(window.SearchInjection.tabs).length + 1);
 		window.SearchInjection.tabs[tab.id] = frame;
 		frame.onToggle((id, show) => {
+			console.log('>>>>', id, show);
 			if (show) window.SearchInjection._background.classList.add('show');
 			else window.SearchInjection._background.classList.remove('show');
 			Object.keys(window.SearchInjection.tabs).forEach(tab => {
