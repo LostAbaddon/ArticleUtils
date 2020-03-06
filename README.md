@@ -3,7 +3,7 @@
 内容相关工具集，很实用的瑞士军刀~
 （所有配置都可在选项页导出。）
 
-- **版本**： 0.11.4
+- **版本**： 1.0.0
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
@@ -68,11 +68,16 @@
 -	键列开关（ctrl+ctrl+s），支持划词
 -	右键菜单，支持划词、选择分类、选择引擎
 
-## 2.0.0（计划中）
+## TODO
 
--	将当前页面的内容部分保存下来以便日后查阅
--	记录资源搜索的历史记录，建立术语表
--	根据术语表，在每个页面进行自动划词以便快捷搜索
--	Markdown2RichText 搬家工具
--	搜索资源缓存改用 IndexedDB 或 WebSQL（chrome.storage.local 的可用空间太小）
--	更好地识别页面中的资源
+-	搜索相关：
+	+	搜索资源缓存改用 IndexedDB 或 WebSQL（chrome.storage.local 的可用空间太小）
+	+	增加默认启用哪些搜索类别的设置
+	+	更好地识别页面中的资源
+-	文章相关：
+	+	自动识别页面中的正文
+	+	将当前页面的内容部分保存下来以便日后查阅
+	+	Markdown2RichText 搬家工具
+-	内容地图相关：
+	+	记录资源搜索的历史记录，建立术语表
+	+	根据术语表，在每个页面进行自动划词以便快捷搜索
