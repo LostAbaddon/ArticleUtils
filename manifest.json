@@ -1,6 +1,6 @@
 {
 	"name": "内容辅助工具集",
-	"version": "0.11.3",
+	"version": "0.11.4",
 	"author": "LostAbaddon",
 	"homepage_url": "https://github.com/LostAbaddon/ArticleUtils",
 	"manifest_version": 2,
@@ -22,10 +22,10 @@
 	"browser_action": {
 		"default_title": "辅助工具",
 		"default_icon": "utils.png",
-		"default_popup": "badge/badge.html"
+		"default_popup": "page/badge.html"
 	},
 	"options_ui": {
-		"page": "badge/option.html",
+		"page": "page/option.html",
 		"open_in_tab": false
 	},
 	"content_scripts": [
