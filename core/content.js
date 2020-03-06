@@ -230,6 +230,44 @@ const onGetResource = (resource, name, type) => {
 	window.SearchInjection.show(resource);
 };
 
+const launchGreatBonus = () => {
+	var [list, depth] = bonusAllNodes(document.body);
+	list.splice(0, 1);
+	list.forEach(async ele => {
+		var d = ele[1];
+		ele = ele[0];
+		if (ele !== document.body) ele.style.pointerEvents = 'none';
+		var delay = Math.round(600 + 800 * Math.random())
+		ele.style.transition = 'opacity ' + delay + 'ms ease-in-out';
+		var rate = 0.8 + 0.4 * Math.random();
+		await wait((depth - d) * rate * 300);
+		ele.style.opacity = '0';
+		if (ele !== document.body) return;
+		await wait(delay);
+		if (ele === document.body) ele.style.cursor = 'none';
+	});
+};
+const bonusAllNodes = (root, level=0, nodes) => {
+	if (!nodes || nodes.length === 0) {
+		nodes = new Map();
+		nodes.set('depth', level);
+		nodes.set(root, level);
+	}
+	if (isNumber(level)) level++;
+	else level = 1;
+	root.childNodes.forEach(node => {
+		var tag = node.tagName;
+		if (!tag) return;
+		tag = tag.toLowerCase();
+		if (['link', 'ref', 'meta', 'script', 'noscript'].includes(tag)) return;
+		if (nodes.has(node)) return;
+		nodes.set(node, level);
+		if (nodes.get('depth') < level) nodes.set('depth', level)
+		bonusAllNodes(node, level, nodes);
+	});
+	return [[...nodes], nodes.get('depth')];
+};
+
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 	if (event === 'init') onInit(key);
 });
@@ -246,6 +284,7 @@ RegiestKeySeq('ctrl+ctrl+m', 'ConvertMath', async () => {
 RegiestKeySeq('ctrl+ctrl+s', 'SearchResource', () => {
 	searchItem('all', null);
 });
+RegiestKeySeq('up+up+down+down+left+left+right+right+b+a+b+a', 'GreatBonus', launchGreatBonus);
 
 chrome.runtime.onMessage.addListener(msg => {
 	if (msg.event === 'GotResource') onGetResource(msg.resource, msg.targetName, msg.targetType);

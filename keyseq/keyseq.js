@@ -3,7 +3,7 @@
 
 	const ShortcutDelay = 250;
 	const ShortcutMin = 2;
-	const ShortcutMax = 10;
+	const ShortcutMax = 15;
 
 	const ShortcutManager = {};
 	const KeyChain = [];
@@ -42,6 +42,7 @@
 
 		var key = evt.key.toLowerCase();
 		if (key === 'control') key = 'ctrl';
+		else key = key.replace('arrow', '');
 		KeyChain.push(key + '(');
 		shouldStop = false;
 	});
