@@ -46,6 +46,7 @@ window.DefaultExtConfig = {
 			"using": true
 		}
 	],
+	"SilenceRules": {},
 	"CommonSource": [
 		{
 			"connector": "+",

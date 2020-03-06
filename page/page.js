@@ -151,17 +151,25 @@ document.querySelectorAll('div.option-list-container').forEach(ele => {
 document.querySelectorAll('div.option-checkbox').forEach(ele => {
 	var checkbox = ele.querySelector('input');
 	var itemName = checkbox.name;
-	ExtInitActions[itemName] = value => checkbox.checked = value;
+	var hooker = checkbox.getAttribute('hooker');
+	var useHooker = isString(hooker);
+
+	if (!useHooker) ExtInitActions[itemName] = value => checkbox.checked = value;
+	var callback = () => {
+		if (useHooker) {
+			let cb = window.PageActions[hooker];
+			if (!!cb) cb(itemName, checkbox.checked);
+		}
+		else ChangeConfig(itemName, checkbox.checked);
+	};
 
 	ele.querySelectorAll('label').forEach(label => {
 		label.addEventListener('click', () => {
 			checkbox.checked = !checkbox.checked;
-			ChangeConfig(itemName, checkbox.checked);
+			callback();
 		});
 	});
-	checkbox.addEventListener('click', () => {
-		ChangeConfig(itemName, checkbox.checked);
-	});
+	checkbox.addEventListener('click', callback);
 });
 document.querySelectorAll('div.option-inputer').forEach(ele => {
 	var inputter = ele.querySelector('input');

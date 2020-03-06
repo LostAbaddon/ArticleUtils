@@ -15,11 +15,44 @@
 			<input type="checkbox" name="AutoSearch"><label>自动搜索资源（触发键列：ctrl+ctrl+s）</label>
 		</div>
 	</div>
+	<div id="RuleArea">
+		<div class="option-sepline"></div>
+		<div class="option-blankline thin"></div>
+		<div class="option-item">
+			<div class="content">本域（<span id="DomainName" class="small"></span>）搜索规则：</div>
+		</div>
+		<div class="option-line option-checkbox">
+			<input type="checkbox" name="search:article" hooker="ChangeSearchRule">
+			<label target="search:article">自动搜索文章</label>
+		</div>
+		<div class="option-line option-checkbox">
+			<input type="checkbox" name="search:book" hooker="ChangeSearchRule">
+			<label target="search:book">自动搜索书籍</label>
+		</div>
+		<div class="option-line option-checkbox">
+			<input type="checkbox" name="search:pedia" hooker="ChangeSearchRule">
+			<label target="search:pedia">自动搜索百科</label>
+		</div>
+		<div class="option-line option-checkbox">
+			<input type="checkbox" name="search:video" hooker="ChangeSearchRule">
+			<label target="search:video">自动搜索影视</label>
+		</div>
+		<div class="option-line option-checkbox">
+			<input type="checkbox" name="search:news" hooker="ChangeSearchRule">
+			<label target="search:news">自动搜索新闻</label>
+		</div>
+		<div class="option-line option-checkbox">
+			<input type="checkbox" name="search:common" hooker="ChangeSearchRule">
+			<label target="search:common">自动综合搜索</label>
+		</div>
+		<div class="option-blankline thin"></div>
+	</div>
 </div>
 <script type="text/javascript" src="../common/common.js"></script>
 <script type="text/javascript" src="../common/param.js"></script>
 <script type="text/javascript" src="../page/page.js"></script>
 <script type="text/javascript" src="../config.js"></script>
+<script type="text/javascript" src="../page/badge.js"></script>
 <script type="text/javascript" src="../page/setting.js"></script>
 </body>
 </html>

@@ -35,6 +35,7 @@ const onInit = async config => {
 			action: 'all',
 			engine: null,
 			force: false,
+			auto: true,
 			targets: content
 		});
 	}
@@ -172,6 +173,7 @@ const searchItem = (type, id) => {
 		action: type,
 		engine: id,
 		force,
+		auto: false,
 		targets: text
 	});
 };

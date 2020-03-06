@@ -52,6 +52,7 @@ window.ExtConfigManager = (config, callback) => new Promise(res => {
 ExtConfigManager.all = () => ExtConfig;
 ExtConfigManager.get = key => ExtConfig[key];
 ExtConfigManager.set = (key, value, cb) => new Promise(res => {
+	if (ExtConfig[key] === undefined) return;
 	ExtConfig[key] = value;
 	var item = {};
 	item[key] = value;

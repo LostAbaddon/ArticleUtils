@@ -79,6 +79,12 @@ div.option-item > div.option-line {
 div.option-item > div.option-line:last-child {
 	margin-bottom: 0px;
 }
+div.option-item .content {
+	font-size: 16px;
+}
+div.option-item .small {
+	font-size: 14px;
+}
 div.option-line input {
 	font-size: 1rem;
 }
@@ -127,6 +133,9 @@ div.option-sepline {
 div.option-blankline {
 	display: block;
 	height: 20px;
+}
+div.option-blankline.thin {
+	height: 10px;
 }
 
 div.option-item div.option-switcher {

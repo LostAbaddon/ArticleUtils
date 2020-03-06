@@ -7,7 +7,48 @@ const ExtHost = chrome.extension.getURL('');
 const onInit = config => {
 	chrome.runtime.onMessage.addListener((msg, sender, response) => {
 		if (msg.event === 'FindResource') {
-			searchResources(msg.targets, msg.action, msg.engine, msg.force, config, sender.tab.id);
+			var engineList = {};
+			if (msg.auto) {
+				let protocol = sender.url.split('://')[0];
+				if (!protocol) return;
+				let url = sender.url.replace(protocol + '://', '');
+				url = url.split('/');
+				if (url.length > 2) url.splice(2, url.length - 2);
+				url = url.join('/');
+
+				let cfg = config.SilenceRules;
+				let rules = cfg[url];
+				if (!rules) {
+					rules = {
+						article: true,
+						book: true,
+						pedia: true,
+						video: true,
+						news: true,
+						common: true
+					};
+					cfg[url] = rules;
+				} else {
+					if (rules.article === undefined) rules.article = true;
+					if (rules.book === undefined) rules.book = true;
+					if (rules.pedia === undefined) rules.pedia = true;
+					if (rules.video === undefined) rules.video = true;
+					if (rules.news === undefined) rules.news = true;
+					if (rules.common === undefined) rules.common = true;
+				}
+				SearchItem.forEach(name => {
+					if (!rules[name]) return;
+					name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length).toLowerCase() + 'Source';
+					engineList[name] = config[name];
+				});
+			} else {
+				SearchItem.forEach(name => {
+					name = name.substring(0, 1).toUpperCase() + name.substring(1, name.length).toLowerCase() + 'Source';
+					engineList[name] = config[name];
+				});
+			}
+
+			searchResources(msg.targets, msg.action, msg.engine, msg.force, engineList, sender.tab.id);
 		}
 	});
 	window.cacheStorage.init(config.ResourceExpire * 1, config.CacheRateLimit * 1);
@@ -43,6 +84,7 @@ const searchResource = (target, type, engine, force, config, callback) => {
 		if (type !== 'all' && name !== type) return;
 		var engines = name.substr(0, 1).toUpperCase() + name.substr(1, name.length).toLowerCase();
 		engines = config[engines + 'Source'];
+		if (!engines) return;
 		if (isNumber(engine)) engines = [engines[engine]];
 		search(target, engines, force, done(name));
 	});
@@ -273,7 +315,6 @@ const sendBackResource = (tabID, resource, targetName, targetType) => {
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 	if (event === 'init') onInit(key);
 	else if (event === 'update') onUpdate(key, value);
-	UpdateContentMenu();
 });
 
 const menus = [];
@@ -293,7 +334,7 @@ const createMenu = (id, title, parent, onlySelection=false) => new Promise(res =
 	chrome.contextMenus.create(option, res);
 });
 const removeMenu = id => new Promise(res => {
-	if (!menus.includes(id)) return;
+	if (!menus.includes(id)) return res();
 
 	chrome.contextMenus.remove(id, () => {
 		var index = menus.indexOf(id);
@@ -302,12 +343,12 @@ const removeMenu = id => new Promise(res => {
 	});
 });
 const UpdateContentMenu = async () => {
-	var actions = menus.map(id => removeMenu(id));
-	await Promise.all(actions);
+	await removeMenu('search_resource_entry');
+	menus.splice(0, menus.length);
 
 	await createMenu('search_resource_entry', '搜索资源');
 
-	actions = [];
+	var actions = [];
 	actions.push(createMenu('search_resource', '搜索所有资源(ctrl+ctrl+s)', 'search_resource_entry'));
 	actions.push(createMenu('search_article_entry', '搜索文章', 'search_resource_entry'));
 	actions.push(createMenu('search_book_entry', '搜索书籍', 'search_resource_entry'));
@@ -394,4 +435,9 @@ chrome.contextMenus.onClicked.addListener(evt => {
 		if (isNumber(id)) sendMenuAction('Common', id);
 		else sendMenuAction('Common', null);
 	}
+});
+chrome.tabs.onActivated.addListener(evt => {
+	chrome.tabs.get(evt.tabId, tab => {
+		UpdateContentMenu(tab.url);
+	});
 });
