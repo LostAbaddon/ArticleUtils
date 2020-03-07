@@ -147,7 +147,7 @@
 		if (shouldRemoves.length + count > 0) {
 			console.info("一级清理删除 " + shouldRemoves.length + ' 条记录，修正 ' + count + ' 条记录。');
 		}
-		console.info("当前缓存共用了 " + totalSize + ' bytes。');
+		console.info("当前缓存共用了 " + totalSize + ' bytes (' + (Math.round(totalSize / resourceCacheLimit * 10000) / 100) + '%)');
 
 		await startGC();
 
@@ -329,6 +329,10 @@
 			resourceCacheLimit = value * 1024 * 1024;
 			startGC();
 		},
+		getUsage: () => new Promise(async res => {
+			var total = await cacheDB.get('status', 'TotalSize');
+			res([total, total / resourceCacheLimit]);
+		})
 	};
 
 	window.cacheStorage = storage;
