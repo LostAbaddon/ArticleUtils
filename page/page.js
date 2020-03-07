@@ -174,10 +174,16 @@ document.querySelectorAll('div.option-checkbox').forEach(ele => {
 document.querySelectorAll('div.option-inputer').forEach(ele => {
 	var inputter = ele.querySelector('input');
 	var itemName = inputter.name;
+	var isNum = inputter.type === 'number';
 	ExtInitActions[itemName] = value => inputter.value = value;
 
 	var change = () => {
-		ChangeConfig(itemName, inputter.value);
+		var value = inputter.value;
+		if (isNum) {
+			value = value * 1;
+			if (!isNumber(value)) value = inputter.value;
+		}
+		ChangeConfig(itemName, value);
 	};
 	ele.querySelectorAll('label').forEach(label => {
 		label.addEventListener('click', () => {
@@ -227,5 +233,14 @@ document.querySelectorAll('div.option-switcher').forEach(ele => {
 			prev.classList.add('hidden');
 		}
 		toggleSwitcher();
+	});
+});
+document.querySelectorAll('div.option-button').forEach(ele => {
+	var hooker = ele.getAttribute('hooker');
+	if (!hooker || hooker.length === 0) return;
+	ele.addEventListener('click', () => {
+		var cb = window.PageActions[hooker];
+		if (!cb) return;
+		cb();
 	});
 });

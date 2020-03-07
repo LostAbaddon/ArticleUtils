@@ -145,6 +145,10 @@ div.option-item div.option-switcher {
 	cursor: pointer;
 }
 
+div.option-item div.option-button {
+	cursor: pointer;
+}
+
 div.option-switch-container {
 	display: block;
 	position: relative;
@@ -221,7 +225,7 @@ div.option-switch-container div.option-title.nonclickable {
 textarea.option-full-textarea {
 	box-sizing: border-box;
 	width: 100%;
-	height: 476px;
+	height: 446px;
 	margin: 0px;
 	padding: 10px;
 	outline: none;
