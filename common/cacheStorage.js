@@ -182,7 +182,7 @@
 					let totalSize = 0;
 					let actions = list.map(item => new Promise(async res => {
 						var content = await store.get(item.name);
-						if (content.length === 0) {
+						if (!isNumber(content.length) || content.length === 0) {
 							res();
 							return;
 						}
@@ -204,7 +204,7 @@
 					}));
 					await Promise.all(actions);
 					await cacheDB.set('status', 'TotalSize', totalSize);
-					console.info("已将老版缓存数据迁移到IndexedDB");
+					console.info("已将老版缓存数据迁移到 IndexedDB");
 				}
 			}
 
@@ -263,21 +263,22 @@
 				await cacheDB.set('menu', url, usage);
 			}
 			else if (!usage && data !== undefined) {
-				let size = JSON.stringify(data).length;
-				usage = {
-					stamp: Date.now(),
-					usage: 1,
-					size
-				};
-				let total = await cacheDB.get('status', 'TotalSize');
-				total += size;
-				await Promise.all([
-					cacheDB.set('menu', url, usage),
-					cacheDB.set('status', 'TotalSize', total)
-				]);
+				data = undefined;
+				await cacheDB.del('cache', url);
 			}
 			else if (!!usage && data === undefined) {
+				usage = undefined;
 				await cache.del('menu', url);
+			}
+
+			if (!!usage) {
+				if (Date.now() - usage.stamp >= resourceExpire) {
+					await Promise.all([
+						cacheDB.del('menu', url),
+						cacheDB.del('cache', url)
+					]);
+					data = undefined;
+				}
 			}
 
 			if (!!callback) callback(data);

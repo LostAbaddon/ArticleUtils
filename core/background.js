@@ -159,7 +159,7 @@ const search = (target, engines, force, callback) => {
 			if (!list) list = await analyzePage(page, cfg);
 
 			await window.cacheStorage.set(saveTag, list);
-			var [totalSize, usage] = cacheStorage.getUsage();
+			var [totalSize, usage] = await cacheStorage.getUsage();
 			console.info('更新资源搜索记录缓存，缓存池已用 ' + totalSize + ' bytes (' + (Math.round(usage * 10000) / 100) + '%)');
 		}
 
