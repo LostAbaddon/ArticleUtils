@@ -100,7 +100,7 @@
 
 		console.info('当前缓存有 ' + Object.keys(allCache).length + ' 条记录');
 
-		autoGC = setTimeout(startGC, resourceGCInterval);
+		autoGC = setTimeout(startFullGC, resourceGCInterval);
 		res();
 	});
 	const startFullGC = () => new Promise(async res => {
