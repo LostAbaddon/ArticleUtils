@@ -1,9 +1,10 @@
 window.DefaultExtConfig = {
 	"AutoMath": true,
 	"AutoSearch": true,
-	"ShowSearchNotify": true,
-	"ResourceExpire": "24",
-	"CacheRateLimit": "80",
+	"ShowSearchNotify": false,
+	"ResourceExpire": 48,
+	"ResourceGCInterval": 6,
+	"ResourceCacheLimit": 500,
 	"IgnoreList": [
 		{
 			"url": "google.com",
@@ -46,7 +47,40 @@ window.DefaultExtConfig = {
 			"using": true
 		}
 	],
-	"SilenceRules": {},
+	"SilenceRules": {
+		"book.douban.com/subject": {
+			"article": true,
+			"book": true,
+			"common": true,
+			"news": false,
+			"pedia": false,
+			"video": false
+		},
+		"github.com/LostAbaddon": {
+			"article": true,
+			"book": true,
+			"common": true,
+			"news": false,
+			"pedia": false,
+			"video": false
+		},
+		"read.douban.com/": {
+			"article": true,
+			"book": true,
+			"common": true,
+			"news": false,
+			"pedia": false,
+			"video": false
+		},
+		"read.douban.com/reader": {
+			"article": true,
+			"book": true,
+			"common": true,
+			"news": false,
+			"pedia": false,
+			"video": false
+		}
+	},
 	"CommonSource": [
 		{
 			"connector": "+",

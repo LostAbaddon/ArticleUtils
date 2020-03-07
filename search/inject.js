@@ -163,7 +163,6 @@ window.SearchInjection.init = tabs => {
 		var frame = new SearchFrame(tab.id, tab.name, Object.keys(window.SearchInjection.tabs).length + 1);
 		window.SearchInjection.tabs[tab.id] = frame;
 		frame.onToggle((id, show) => {
-			console.log('>>>>', id, show);
 			if (show) window.SearchInjection._background.classList.add('show');
 			else window.SearchInjection._background.classList.remove('show');
 			Object.keys(window.SearchInjection.tabs).forEach(tab => {

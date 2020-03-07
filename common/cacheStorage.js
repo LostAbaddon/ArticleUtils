@@ -1,203 +1,334 @@
 (() => {
-	const TagMenu = 'ResourceCacheMenu';
-	const TagResource = 'Resource::';
+	const DBName = 'ResourceCache';
+	const DBVersion = 1;
 
 	var resourceExpire = Infinity;
-	var resourceRate = 1;
-	var cacheRecords = [];	//	name, stamp, usage
+	var resourceGCInterval = 1000 * 3600 * 6; // 小时 * 1000 * 3600
+	var resourceCacheLimit = 1024 * 1024 * 500; // 容量* 1024 * 1024 bytes
 
-	const removeExpired = () => new Promise(async res => {
-		if (!cacheRecords) return res();
+	var cacheDB;
+	var lastGC = 0;
+	var autoGC;
 
-		var task = cacheRecords.length;
-		if (task === 0) return res();
-
-		var now = Date.now(), removed = [];
-		cacheRecords.forEach(async (item, index) => {
-			if (now - item.stamp >= resourceExpire) {
-				await store.del(item.name);
-				removed.push(index);
-			}
-			task --;
-			if (task === 0) {
-				removed.sort((a, b) => b - a);
-				removed.forEach(i => cacheRecords.splice(i, 1));
-				await store.set(TagMenu, cacheRecords);
-				console.info('删除过期项 ' + removed.length + ' 条！');
-				res();
-			}
-		});
-	});
-	const removeUnderRated = () => new Promise(async res => {
-		var sorted = [];
-		var now = Date.now();
-		cacheRecords.forEach((item, index) => sorted.push([item, now - item.stamp, 0, 0, index]));
-		sorted.sort((a, b) => b[1] - a[1]);
-		sorted.forEach((line, i) => line[2] = i);
-		sorted.sort((a, b) => a[0].usage - b[0].usage);
-		sorted.forEach((line, i) => line[3] = i + line[2]);
-		sorted.sort((a, b) => {
-			var r = a[3] - b[3];
-			if (r === 0) r = a[2] - b[2];
-			return r;
-		});
-		var removeRate = await getRemoveRate();
-		now = Math.ceil(sorted.length * removeRate);
-		sorted = sorted.filter((_, i) => i <= now);
-		sorted.sort((a, b) => b[4] - a[4]);
-		now = sorted.length;
-		sorted.forEach(async item => {
-			cacheRecords.splice(item[4], 1);
-			await store.del(item[0].name);
-			now --;
-			if (now === 0) {
-				await store.set(TagMenu, cacheRecords);
-				console.info('强制回收缓存项 ' + sorted.length + ' 条！');
-				if (cacheRecords.length > 0) {
-					if (await didOverUsed()) {
-						await removeUnderRated();
-					}
-				}
-				res();
-			}
-		});
-	});
-	const didOverUsed = () => new Promise(res => {
-		chrome.storage.local.getBytesInUse(bytes => {
-			res(bytes >= chrome.storage.local.QUOTA_BYTES * resourceRate);
-		});
-	});
-	const getRemoveRate = () => new Promise(res => {
-		chrome.storage.local.getBytesInUse(bytes => {
-			res(chrome.storage.local.QUOTA_BYTES * resourceRate / bytes);
-		});
-	});
-	const updateExpire = (gc=true) => new Promise(async res => {
-		await removeExpired();
-		if (cacheRecords.length === 0) return res();
-
-		if (!gc) return res();
-
-		var overUsed = await didOverUsed();
-		if (overUsed) {
-			await removeUnderRated();
-			res();
-		} else {
-			res();
+	const startGC = () => new Promise(async res => {
+		if (!!autoGC) {
+			clearTimeout(autoGC);
+			autoGC = null;
 		}
+
+		lastGC = Date.now();
+
+		var allCache, allUsage, totalSize, actions = [];
+		actions.push(new Promise(async res => {
+			allCache = await cacheDB.all('cache');
+			res();
+		}));
+		actions.push(new Promise(async res => {
+			allUsage = await cacheDB.all('menu');
+			res();
+		}));
+		actions.push(new Promise(async res => {
+			totalSize = await cacheDB.get('status', 'TotalSize');
+			res();
+		}));
+		await Promise.all(actions);
+
+		actions = [];
+		var count = 0;
+		Object.keys(allUsage).forEach(url => {
+			var usage = allUsage[url];
+			if (lastGC - usage.stamp >= resourceExpire) {
+				console.log(lastGC, usage.stamp, lastGC - usage.stamp, resourceExpire);
+				totalSize -= usage.size;
+				count ++;
+				actions.push(cacheDB.del('menu', url));
+				actions.push(cacheDB.del('cache', url));
+				delete allCache[url];
+				delete allUsage[url];
+			}
+		});
+		if (count > 0) {
+			actions.push(cacheDB.set('status', 'TotalSize', totalSize));
+		}
+		await Promise.all(actions);
+		if (count > 0) {
+			console.info('本次 GC 共删除 ' + count + ' 条记录。目前缓存占用了 ' + totalSize + 'bytes。');
+		}
+
+		if (totalSize >= resourceCacheLimit) {
+			let list = Object.keys(allUsage);
+			list = list.map(url => {
+				var usage = allUsage[url];
+				return {
+					url,
+					stamp: lastGC - usage.stamp,
+					usage: usage.usage,
+					size: usage.size,
+					index1: 0,
+					index2: 0
+				}
+			});
+			list.sort((a, b) => a.stamp - b.stamp);
+			list.forEach((item, index) => item.index1 = index);
+			list.sort((a, b) => b.usage - a.usage);
+			list.forEach((item, index) => item.index2 = index + item.index1);
+			list.sort((a, b) => a.index2 - b.index2);
+			let total = 0, index = 0, last;
+			list.some((item, i) => {
+				last = item.size;
+				total += last;
+				index = i;
+				if (total >= resourceCacheLimit) return true;
+				return false;
+			});
+			if (index > 0) {
+				total -= last;
+				list.splice(0, index);
+				actions = [];
+				list.forEach(item => {
+					item = item.url;
+					actions.push(cacheDB.del('menu', item));
+					actions.push(cacheDB.del('cache', item));
+					delete allCache[item];
+					delete allUsage[item];
+				});
+				actions.push(cacheDB.set('status', 'TotalSize', total));
+				await Promise.all(actions);
+				console.info('删除 ' + list.length + ' 条低权重记录');
+			}
+		}
+
+		console.info('当前缓存有 ' + Object.keys(allCache).length + ' 条记录');
+
+		autoGC = setTimeout(startGC, resourceGCInterval);
+		res();
 	});
+	const startFullGC = () => new Promise(async res => {
+		if (!!autoGC) {
+			clearTimeout(autoGC);
+			autoGC = null;
+		}
+
+		var allCache, allUsage, actions = [];
+		actions.push(new Promise(async res => {
+			allCache = await cacheDB.all('cache');
+			res();
+		}));
+		actions.push(new Promise(async res => {
+			allUsage = await cacheDB.all('menu');
+			res();
+		}));
+		await Promise.all(actions);
+
+		var shouldRemoves = Object.keys(allUsage), actions = [], totalSize = 0, count = 0;
+		Object.keys(allCache).forEach(url => {
+			var data = allCache[url];
+			var index = shouldRemoves.indexOf(url);
+			if (index >= 0) shouldRemoves.splice(index, 1);
+			var size = JSON.stringify(data).length;
+			totalSize += size;
+			var usage = allUsage[url];
+			if (!usage) {
+				count ++;
+				actions.push(cacheDB.set('menu', url, {
+					stamp: Date.now(),
+					usage: 1,
+					size
+				}));
+			} else if (usage.size !== size) {
+				count ++;
+				usage.size = size;
+				actions.push(cacheDB.set('menu', url, usage));
+			}
+		});
+		shouldRemoves.forEach(url => actions.push(cacheDB.del('menu', url)));
+		actions.push(cacheDB.set('status', 'TotalSize', totalSize));
+		await Promise.all(actions);
+		if (shouldRemoves.length + count > 0) {
+			console.info("一级清理删除 " + shouldRemoves.length + ' 条记录，修正 ' + count + ' 条记录。');
+		}
+		console.info("当前缓存共用了 " + totalSize + ' bytes。');
+
+		await startGC();
+
+		res();
+	});
+
 	const storage = {
-		init: (expire, rate, callback) => new Promise(async res => {
+		init: (expire, interval, limit, callback) => new Promise(async res => {
 			if (isNumber(expire) && expire > 0) resourceExpire = expire * 1000 * 3600; // expire 单位是小时
-			if (isNumber(rate) && rate > 0 && rate <= 100) resourceRate = rate / 100;
-			var list = await store.get(TagMenu);
-			if (!list) list = [];
-			cacheRecords = list;
-			await updateExpire();
-			if (!!callback) callback(cacheRecords);
-			res(cacheRecords);
+			if (isNumber(interval) && interval > 0) resourceGCInterval = interval * 1000 * 3600; // GC 时间间隔，单位是小时
+			if (isNumber(limit) && limit > 0) resourceCacheLimit = limit * 1024 * 1024; // 缓存大小，单位是 MB
+
+			var needMigrate = false;
+			cacheDB = new CachedDB(DBName, DBVersion);
+			cacheDB.onUpdate(() => {
+				needMigrate = true;
+				cacheDB.open('menu', 'url');
+				cacheDB.open('cache', 'url');
+				cacheDB.open('status', 'name');
+			});
+			cacheDB.onConnect(() => {
+				cacheDB.cache('menu', 200);
+				cacheDB.cache('cache', 50);
+				cacheDB.cache('status', 10);
+			});
+			await cacheDB.connect();
+
+			if (needMigrate) {
+				let now = Date.now(), first = Infinity, last = 0;
+				let list = await store.get('ResourceCacheMenu');
+				if (!!list) {
+					let totalSize = 0;
+					let actions = list.map(item => new Promise(async res => {
+						var content = await store.get(item.name);
+						if (content.length === 0) {
+							res();
+							return;
+						}
+						var size = JSON.stringify(content).length;
+						totalSize += size;
+						var url = item.name.replace('Resource::', '');
+						var tasks = [];
+						tasks.push(cacheDB.set('menu', url, {
+							stamp: item.stamp,
+							usage: item.usage,
+							size: size
+						}));
+						time = now - item.stamp;
+						if (time > last) last = time;
+						if (time < first) first = time;
+						tasks.push(cacheDB.set('cache', url, content));
+						await Promise.all(tasks);
+						res();
+					}));
+					await Promise.all(actions);
+					await cacheDB.set('status', 'TotalSize', totalSize);
+					console.info("已将老版缓存数据迁移到IndexedDB");
+				}
+			}
+
+			var test = Date.now();
+			await startFullGC();
+			test = Date.now() - test;
+
+			if (!!callback) callback();
+			res();
 		}),
-		set: (url, content, callback) => new Promise(async res => {
-			var name = TagResource + url;
-			var cache = cacheRecords.filter(item => item.name === name);
-			if (cache.length === 0) {
-				cache = {
-					name,
+		set: (url, data, callback) => new Promise(async res => {
+			var usage, delta = 0, totalSize, actions;
+			actions = [
+				new Promise(async res => { usage = await cacheDB.get('menu', url); res(); }),
+				new Promise(async res => { totalSize = await cacheDB.get('status', 'TotalSize'); res(); })
+			];
+			await Promise.all(actions);
+
+			if (!usage) {
+				usage = {
 					stamp: Date.now(),
 					usage: 1
 				};
-				cacheRecords.push(cache);
 			} else {
-				cache = cache[0];
-				cache.stamp = Date.now();
-				cache.usage ++;
+				usage.usage ++;
+				delta = usage.size;
 			}
+			usage.size = JSON.stringify(data).length;
+			delta = usage.size - delta;
+			totalSize += delta;
 
-			await Promise.all([store.set(TagMenu, cacheRecords), store.set(name, content)]);
+			actions = [
+				cacheDB.set('menu', url, usage),
+				cacheDB.set('cache', url, data),
+				cacheDB.set('status', 'TotalSize', totalSize)
+			];
+			await Promise.all(actions);
 
-			if (await didOverUsed()) {
-				await updateExpire(false);
-			} else {
-				await updateExpire(true);
+			if (Date.now() - usage.stamp >= resourceExpire || totalSize >= resourceCacheLimit) {
+				await startGC();
 			}
 
 			if (!!callback) callback();
 			res();
 		}),
 		get: (url, callback) => new Promise(async res => {
-			var name = TagResource + url;
-			var content = await store.get(name);
+			var usage, data;
+			var actions = [
+				new Promise(async res => { usage = await cacheDB.get('menu', url); res(); }),
+				new Promise(async res => { data = await cacheDB.get('cache', url); res(); })
+			];
+			await Promise.all(actions);
 
-			var cache = cacheRecords.filter(item => item.name === name);
-			if (cache.length === 0) {
-				cache = null;
-			} else {
-				cache = cache[0];
+			if (!!usage && data !== undefined) {
+				usage.usage ++;
+				await cacheDB.set('menu', url, usage);
+			}
+			else if (!usage && data !== undefined) {
+				let size = JSON.stringify(data).length;
+				usage = {
+					stamp: Date.now(),
+					usage: 1,
+					size
+				};
+				let total = await cacheDB.get('status', 'TotalSize');
+				total += size;
+				await Promise.all([
+					cacheDB.set('menu', url, usage),
+					cacheDB.set('status', 'TotalSize', total)
+				]);
+			}
+			else if (!!usage && data === undefined) {
+				await cache.del('menu', url);
 			}
 
-			if (content === undefined) {
-				if (!!cache) {
-					let index = cacheRecords.indexOf(cache);
-					cacheRecords.splice(index, 1);
-					await store.set(TagMenu, cacheRecords);
-				}
-			} else {
-				if (!cache) {
-					cache = {
-						name,
-						stamp: Date.now(),
-						usage: 1
-					};
-					cacheRecords.push(cache);
-					await Promise.all([store.set(name, cache), store.set(TagMenu, cacheRecords)]);
-				} else {
-					if (Date.now() - cache.stamp >= resourceExpire) {
-						let index = cacheRecords.indexOf(cache);
-						if (cache >= 0) cacheRecords.splice(index, 1);
-						await Promise.all([store.set(TagMenu, cacheRecords), store.del(name)]);
-					} else {
-						cache.usage ++;
-						await store.set(TagMenu, cacheRecords);
-					}
-				}
-			}
-
-			if (!!callback) callback(content);
-			res(content);
+			if (!!callback) callback(data);
+			res(data);
 		}),
-		del: (key, callback) => new Promise(async res => {
-			var name = TagResource + url;
-			var list = [];
-			cacheRecords.forEach((item, i) => {
-				if (item.name === name) list.push(i);
-			});
-			list.reverse();
-			list.forEach(i => cacheRecords.splice(i, 1));
+		del: (url, callback) => new Promise(async res => {
+			var usage, totalSize, actions;
+			actions = [
+				new Promise(async res => { usage = await cacheDB.get('menu', url); res(); }),
+				new Promise(async res => { totalSize = await cacheDB.get('status', 'TotalSize'); res(); }),
+				cacheDB.del('cache', url)
+			];
+			await Promise.all(actions);
 
-			await Promise.all([store.del(name), store.set(TagMenu, cacheRecords)]);
+			if (!!usage) {
+				totalSize -= usage.size;
+				await cacheDB.set('status', 'TotalSize', totalSize);
+			}
 
 			if (!!callback) callback(content);
 			res(content);
 		}),
 		clear: callback => new Promise(async res => {
-			var list = cacheRecords.map(item => item.name);
-			list.push(TagMenu);
-			await Promise.all(list.map(name => store.del(name)));
+			var usage, totalSize, actions;
+			actions = [
+				cacheDB.clear('menu'),
+				cacheDB.clear('cache'),
+				cacheDB.clear('status', 'TotalSize', 0)
+			];
+			await Promise.all(actions);
+
 			if (!!callback) callback();
 			res();
 		}),
 		changeExpire: value => {
 			if (!isNumber(value)) return;
-			if (value < 0 || value > 1) return;
+			if (value < 0) return;
 			resourceExpire = value * 1000 * 3600;
-			removeExpired();
+			startGC();
 		},
-		changeRate: value => {
+		changeGCInterval: value => {
 			if (!isNumber(value)) return;
-			if (value < 0 || value >= 100) return;
-			resourceRate = value / 100;
-			updateExpire(true);
-		}
+			if (value < 0) return;
+			resourceGCInterval = value * 1000 * 3600;
+		},
+		changeCacheLimit: value => {
+			if (!isNumber(value)) return;
+			if (value < 0) return;
+			resourceCacheLimit = value * 1024 * 1024;
+			startGC();
+		},
 	};
 
 	window.cacheStorage = storage;

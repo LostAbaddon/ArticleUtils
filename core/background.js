@@ -52,11 +52,12 @@ const onInit = config => {
 			searchResources(msg.targets, msg.action, msg.engine, msg.force, engineList, sender.tab.id);
 		}
 	});
-	window.cacheStorage.init(config.ResourceExpire * 1, config.CacheRateLimit * 1);
+	window.cacheStorage.init(config.ResourceExpire * 1, config.ResourceGCInterval * 1, config.ResourceCacheLimit * 1);
 };
 const onUpdate = (key, value) => {
 	if (key === 'ResourceExpire') window.cacheStorage.changeExpire(value);
-	else if (key === 'CacheRateLimit') window.cacheStorage.changeRate(value);
+	else if (key === 'ResourceGCInterval') window.cacheStorage.changeGCInterval(value);
+	else if (key === 'ResourceCacheLimit') window.cacheStorage.changeCacheLimit(value);
 };
 
 const searchResources = (targets, type, engine, force, config, tabID) => {
