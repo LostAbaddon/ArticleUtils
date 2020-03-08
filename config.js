@@ -6,6 +6,14 @@ window.DefaultExtConfig = {
 	"ResourceExpire": 48,
 	"ResourceGCInterval": 6,
 	"ResourceCacheLimit": 500,
+	"DefaultSearchEngine": {
+		"article": true,
+		"book": true,
+		"pedia": true,
+		"video": true,
+		"news": true,
+		"common": true,
+	},
 	"IgnoreList": [
 		{
 			"url": "google.com",

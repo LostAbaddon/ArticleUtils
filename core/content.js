@@ -283,9 +283,7 @@ ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 			showSearchNotify = value;
 			if (showSearchNotify) TextNotifier.init();
 		} else if (key === 'HideWeakResults') {
-			console.log('HideWeakResults: ' + value);
-		} else {
-			console.log(key, value);
+			hideWeakResults = value;
 		}
 	}
 });

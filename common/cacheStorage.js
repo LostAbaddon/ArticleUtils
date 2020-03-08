@@ -38,7 +38,6 @@
 		Object.keys(allUsage).forEach(url => {
 			var usage = allUsage[url];
 			if (lastGC - usage.stamp >= resourceExpire) {
-				console.log(lastGC, usage.stamp, lastGC - usage.stamp, resourceExpire);
 				totalSize -= usage.size;
 				count ++;
 				actions.push(cacheDB.del('menu', url));

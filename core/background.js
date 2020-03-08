@@ -20,15 +20,8 @@ const onInit = config => {
 				let cfg = config.SilenceRules;
 				let rules = cfg[url];
 				if (!rules) {
-					rules = {
-						article: true,
-						book: true,
-						pedia: true,
-						video: true,
-						news: true,
-						common: true
-					};
-					cfg[url] = rules;
+					rules = {};
+					Object.keys(config.DefaultSearchEngine).forEach(key => rules[key] = config.DefaultSearchEngine[key]);
 				} else {
 					if (rules.article === undefined) rules.article = true;
 					if (rules.book === undefined) rules.book = true;

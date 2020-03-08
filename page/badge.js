@@ -21,14 +21,8 @@ window.PageActions.onLoad = config => {
 		var cfg = config.SilenceRules;
 		var rules = cfg[url];
 		if (!rules) {
-			rules = {
-				article: true,
-				book: true,
-				pedia: true,
-				video: true,
-				news: true,
-				common: true
-			};
+			rules = {};
+			Object.keys(config.DefaultSearchEngine).forEach(key => rules[key] = config.DefaultSearchEngine[key]);
 			cfg[url] = rules;
 		} else {
 			if (rules.article === undefined) rules.article = true;

@@ -2,7 +2,7 @@
 
 内容相关工具集，很实用的瑞士军刀~
 
-- **版本**： 1.1.2
+- **版本**： 1.1.3
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
@@ -87,7 +87,6 @@
 	+	划词翻译
 	+	Badge 颜色调盘
 -	搜索相关：
-	+	增加默认启用哪些搜索类别的设置
 	+	更好地识别页面中的资源
 -	文章相关：
 	+	自动识别页面中的正文
