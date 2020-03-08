@@ -23,7 +23,6 @@ window.PageActions.onLoad = config => {
 		if (!rules) {
 			rules = {};
 			Object.keys(config.DefaultSearchEngine).forEach(key => rules[key] = config.DefaultSearchEngine[key]);
-			cfg[url] = rules;
 		} else {
 			if (rules.article === undefined) rules.article = true;
 			if (rules.book === undefined) rules.book = true;

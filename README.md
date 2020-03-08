@@ -2,7 +2,7 @@
 
 内容相关工具集，很实用的瑞士军刀~
 
-- **版本**： 1.1.3
+- **版本**： 1.1.4
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
