@@ -39,6 +39,7 @@ window.PageActions.onLoad = config => {
 		window.PageActions.ChangeSearchRule = (key, value) => {
 			key = key.replace('search:', '');
 			rules[key] = value;
+			cfg[url] = rules;
 			ExtConfigManager.set('SilenceRules', cfg);
 		};
 	});
