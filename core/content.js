@@ -8,6 +8,7 @@ const ResourceTypes = {
 };
 
 var showSearchNotify = false;
+var hideWeakResults = false;
 
 const onInit = async config => {
 	if (config.AutoMath) {
@@ -15,10 +16,11 @@ const onInit = async config => {
 		await wait();
 	}
 
-	if (config.AutoSearch) {
-		showSearchNotify = config.ShowSearchNotify;
-		initSearch();
+	showSearchNotify = config.ShowSearchNotify;
+	hideWeakResults = config.HideWeakResults;
 
+	if (showSearchNotify) initSearch();
+	if (config.AutoSearch) {
 		var pagepath = location.protocol + '//' + location.host + location.pathname;
 		var ignoreList = config.IgnoreList || [];
 		var shouldIgnore = ignoreList.some(item => {
@@ -159,14 +161,16 @@ const searchItem = (type, id) => {
 		force = isNumber(id);
 	}
 
-	if (type === 'article') TextNotifier.notify('开始寻找文章资源');
-	else if (type === 'book') TextNotifier.notify('开始寻找书籍资源');
-	else if (type === 'pedia') TextNotifier.notify('开始寻找百科资源');
-	else if (type === 'video') TextNotifier.notify('开始寻找影视资源');
-	else if (type === 'news') TextNotifier.notify('开始寻找新闻资源');
-	else if (type === 'common') TextNotifier.notify('开始寻找综合资源');
-	else if (force) TextNotifier.notify('开始寻找指定资源');
-	else TextNotifier.notify('开始寻找页面资源');
+	if (showSearchNotify) {
+		if (type === 'article') TextNotifier.notify('开始寻找文章资源');
+		else if (type === 'book') TextNotifier.notify('开始寻找书籍资源');
+		else if (type === 'pedia') TextNotifier.notify('开始寻找百科资源');
+		else if (type === 'video') TextNotifier.notify('开始寻找影视资源');
+		else if (type === 'news') TextNotifier.notify('开始寻找新闻资源');
+		else if (type === 'common') TextNotifier.notify('开始寻找综合资源');
+		else if (force) TextNotifier.notify('开始寻找指定资源');
+		else TextNotifier.notify('开始寻找页面资源');
+	}
 
 	chrome.runtime.sendMessage({
 		event: 'FindResource',
@@ -204,7 +208,7 @@ const findResources = () => {
 	return content;
 };
 const onGetResource = (resource, name, type) => {
-	TextNotifier.notify('找到资源：' + name + '（'  + ResourceTypes[type] + '）');
+	if (showSearchNotify) TextNotifier.notify('找到资源：' + name + '（'  + (ResourceTypes[type] || '其它') + '）');
 	Object.keys(resource).forEach(type => {
 		var res = resource[type];
 		Object.keys(res).forEach(name => {
@@ -224,6 +228,10 @@ const onGetResource = (resource, name, type) => {
 				return kv;
 			});
 			item.sort((la, lb) => lb[2] - la[2]);
+			if (hideWeakResults) {
+				let limit = Math.ceil(name.length / 5);
+				item = item.filter(line => line[2] > limit);
+			}
 			res[name] = item.map(kv => [kv[0], kv[1]]);
 		});
 	});
@@ -270,6 +278,16 @@ const bonusAllNodes = (root, level=0, nodes) => {
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 	if (event === 'init') onInit(key);
+	else if (event === 'update') {
+		if (key === 'ShowSearchNotify') {
+			showSearchNotify = value;
+			if (showSearchNotify) TextNotifier.init();
+		} else if (key === 'HideWeakResults') {
+			console.log('HideWeakResults: ' + value);
+		} else {
+			console.log(key, value);
+		}
+	}
 });
 
 RegiestKeySeq('ctrl+ctrl+m', 'ConvertMath', async () => {

@@ -12,23 +12,10 @@
 			<div class="option-line option-checkbox">
 				<input type="checkbox" name="AutoMath"><label>自动转义数学公式</label>
 			</div>
-			<div class="option-line option-checkbox">
-				<input type="checkbox" name="AutoSearch"><label>自动搜索资源</label>
-			</div>
-			<div class="option-line option-checkbox">
-				<input type="checkbox" name="ShowSearchNotify"><label>显示搜索结果提醒</label>
-			</div>
-			<div class="option-line option-inputer number-inputer">
-				<label class="pre">缓存时长：</label><input type="number" name="ResourceExpire" class="short"><label class="post">小时</label>
-			</div>
-			<div class="option-line option-inputer number-inputer">
-				<label class="pre">GC 间隔：</label><input type="number" name="ResourceGCInterval" class="short"><label class="post">小时</label>
-			</div>
-			<div class="option-line option-inputer number-inputer">
-				<label class="pre">缓存大小：</label><input type="number" name="ResourceCacheLimit" class="short"><label class="post">MB</label>
+			<div class="option-item">
+				<div class="option-switcher" target="SearchConfig">搜索设置</div>
 			</div>
 		</div>
-		<div class="option-blankline"></div>
 		<div class="option-sepline"></div>
 		<div class="option-blankline"></div>
 		<div class="option-item">
@@ -57,6 +44,28 @@
 		</div>
 	</div>
 	<div class="container-column column-4">
+		<div class="option-switch-container hidden" name="SearchConfig">
+			<div class="option-item">
+				<div class="option-line option-checkbox">
+					<input type="checkbox" name="AutoSearch"><label>自动搜索资源</label>
+				</div>
+				<div class="option-line option-checkbox">
+					<input type="checkbox" name="ShowSearchNotify"><label>显示搜索结果提醒</label>
+				</div>
+				<div class="option-line option-checkbox">
+					<input type="checkbox" name="HideWeakResults"><label>隐藏极弱关联结果</label>
+				</div>
+				<div class="option-line option-inputer number-inputer">
+					<label class="pre">缓存时长：</label><input type="number" name="ResourceExpire" class="short"><label class="post">小时</label>
+				</div>
+				<div class="option-line option-inputer number-inputer">
+					<label class="pre">GC 间隔：</label><input type="number" name="ResourceGCInterval" class="short"><label class="post">小时</label>
+				</div>
+				<div class="option-line option-inputer number-inputer">
+					<label class="pre">缓存大小：</label><input type="number" name="ResourceCacheLimit" class="short"><label class="post">MB</label>
+				</div>
+			</div>
+		</div>
 		<div class="option-switch-container hidden" name="ArticleSearchEngine">
 			<div class="option-list-container" name="ArticleSource" title="增加文章引擎" clickable>
 				<div class="option-list-line"><span class="hint">名称：</span><input type="text" name="name"></div>

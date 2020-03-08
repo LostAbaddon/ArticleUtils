@@ -2,6 +2,7 @@ window.DefaultExtConfig = {
 	"AutoMath": true,
 	"AutoSearch": true,
 	"ShowSearchNotify": false,
+	"HideWeakResults": false,
 	"ResourceExpire": 48,
 	"ResourceGCInterval": 6,
 	"ResourceCacheLimit": 500,
