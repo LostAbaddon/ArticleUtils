@@ -2,7 +2,7 @@
 
 内容相关工具集，很实用的瑞士军刀~
 
-- **版本**： 1.1.5
+- **版本**： 1.2.0
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
@@ -75,14 +75,20 @@
 -	键列开关（ctrl+ctrl+s），支持划词
 -	右键菜单，支持划词、选择分类、选择引擎
 
-## 功能三：划词翻译（开发中）
+## 功能三：划词翻译
 
-使用[谷歌翻译](https://translate.google.com/)、[金山词霸](http://www.iciba.com/)等在线平台进行翻译，并将翻译结果汇整到当前页面。
+使用[金山词霸](http://www.iciba.com/)等在线平台进行翻译，并将翻译结果汇整到当前页面。
+
+未来会考虑接入[彩云小译](https://fanyi.caiyunapp.com/)、[谷歌翻译](https://translate.google.com/)等服务。
 
 ### 功能
 
 -	划词后提取划中词句进行翻译
 -	使用 IndexedDB 对翻译内容进行保存并在过期后自动回收空间，以降低网络请求
+
+### 特别说明
+
+**由于没找到金山词霸的公开 WebAPI，所以这里采用的可能是非正常 AJAX 方式来获取翻译结果，若有问题请告知我，我会将此功能删除。**
 
 ## 其它说明
 
@@ -93,7 +99,6 @@
 ## TODO
 
 -	小工具：
-	+	划词翻译
 	+	Badge 颜色调盘
 -	搜索相关：
 	+	更好地识别页面中的资源

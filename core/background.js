@@ -2,6 +2,8 @@ const UnavailableChars = /\\\//gi;
 const ForbiddenNames = [ 'cache', '快照', '广告', 'here', 'next', 'prev', 'see all', 'see more' ];
 const ForbiddenPaths = [ 'cache', 'translate', 'translator', 'ad.', 'javascript:' ];
 const SearchItem = ['common', 'book', 'video', 'article', 'pedia', 'news'];
+const ChineseChars = /[\u4e00-\u9fa5]/gi;
+const DualChars = /[^\x00-\xff]/gi;
 const ExtHost = chrome.extension.getURL('');
 
 const onInit = config => {
@@ -40,6 +42,8 @@ const onInit = config => {
 			}
 
 			searchResources(msg.targets, msg.action, msg.engine, msg.force, engineList, sender.tab.id);
+		} else if (msg.event === 'ToggleTranslation') {
+			launchTranslation(msg.target, sender.tab.id);
 		}
 	});
 	window.cacheStorage.init(config.ResourceExpire * 1, config.ResourceGCInterval * 1, config.ResourceCacheLimit * 1);
@@ -48,6 +52,26 @@ const onUpdate = (key, value) => {
 	if (key === 'ResourceExpire') window.cacheStorage.changeExpire(value);
 	else if (key === 'ResourceGCInterval') window.cacheStorage.changeGCInterval(value);
 	else if (key === 'ResourceCacheLimit') window.cacheStorage.changeCacheLimit(value);
+};
+const analyzePage = page => {
+	var low = page.toLowerCase();
+	var pos = low.indexOf('<body');
+	if (pos < 0) return '';
+	page = page.substring(pos, page.length);
+	low = low.substring(pos, low.length);
+	pos = low.indexOf('>');
+	if (pos < 0) return '';
+	page = page.substring(pos + 1, page.length);
+	low = low.substring(pos + 1, low.length);
+	pos = low.indexOf('</body>');
+	if (pos < 0) return '';
+	page = page.substring(0, pos);
+	page = page.replace(/<img.*?\/?>/gi, '');
+	page = page.replace(/<script.*?>[\w\W]*?<\/script>/gi, '');
+	page = page.replace(/<style.*?>[\w\W]*?<\/style>/gi, '');
+	page = page.replace(/^[ \n\t\r]+|[ \n\t\r]+$/g, '');
+	if (page.length === 0) return '';
+	return page;
 };
 
 const searchResources = (targets, type, engine, force, config, tabID) => {
@@ -146,7 +170,7 @@ const search = (target, engines, force, callback) => {
 				let reg = new RegExp(cfg.redirect);
 				if (resp.match(reg)) list = [[target, resp]];
 			}
-			if (!list) list = await analyzePage(page, cfg);
+			if (!list) list = await analyzeSearch(page, cfg);
 
 			await window.cacheStorage.set(saveTag, list);
 			var [totalSize, usage] = await cacheStorage.getUsage();
@@ -156,24 +180,9 @@ const search = (target, engines, force, callback) => {
 		done(list);
 	});
 };
-const analyzePage = (page, cfg) => new Promise(async res => {
-	var low = page.toLowerCase();
-	var pos = low.indexOf('<body');
-	if (pos < 0) return res([]);
-	page = page.substring(pos, page.length);
-	low = low.substring(pos, low.length);
-	pos = low.indexOf('>');
-	if (pos < 0) return res([]);
-	page = page.substring(pos + 1, page.length);
-	low = low.substring(pos + 1, low.length);
-	pos = low.indexOf('</body>');
-	if (pos < 0) return res([]);
-	page = page.substring(0, pos);
-	page = page.replace(/<img.*?\/?>/gi, '');
-	page = page.replace(/<script.*?>[\w\W]*?<\/script>/gi, '');
-	page = page.replace(/<style.*?>[\w\W]*?<\/style>/gi, '');
-	page = page.replace(/^[ \n\t\r]+|[ \n\t\r]+$/g, '');
-	if (page.length === 0) return res([]);
+const analyzeSearch = (page, cfg) => new Promise(async res => {
+	page = analyzePage(page);
+	if (!page || page.length === 0) return res([]);
 
 	var container = newEle('div', null, 'MainContainer');
 	container.innerHTML = page;
@@ -305,6 +314,99 @@ const sendBackResource = (tabID, resource, targetName, targetType) => {
 	});
 };
 
+const launchTranslation = async (word, tabID) => {
+	if (!word) return;
+
+	// var ens = (word.match(/[a-z]+/gi) || []).length;
+	var zhs = (word.match(ChineseChars) || []).length;
+	var left = word.replace(/[,\.\+\-\(\)\[\]\{\}。，\?\!？！（）【】#]/gi, '').replace(/[a-z0-9]+ */gi, 'X');
+	var toCh = left.length >= zhs * 1.5;
+	var results = {}, actions = [];
+
+	word = word.replace(/[ ]+/gi, ' ');
+	// word = encodeURI(word);
+
+	// actions.push(googleTranslation(word, toCh, results));
+	// actions.push(caiyunTranslation(word, toCh, results));
+
+	actions.push(icibaTranslation(word, toCh, results));
+	await Promise.all(actions);
+
+	results = Object.keys(results).map(key => [key, results[key]]);
+	// results = [['iciba', 'The impact of crude oil on the whole market is so great that I can see it. # Russia and opec after the collapse of the entire market collapse! #']];
+	sendMenuAction('GotTranslation', results);
+};
+const googleTranslation = (word, toCh, results) => new Promise(async res => {
+	var url = "https://translate.google.com/translate_a/single?client=webapp&sl=auto&tl=" + (toCh ? "zh-CN" : "en") + "&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&dt=gt&otf=2&ssel=3&tsel=5&kc=1&tk=84787.523604&q="
+	url = url + word;
+	console.info('开始谷歌翻译……');
+	var page = await xhr(url);
+	if (!page) return res();
+	page = page[0];
+	if (!page) return res();
+
+	res('done');
+});
+const icibaTranslation = (word, toCh, results) => new Promise(async res => {
+	console.info('开始词霸翻译……');
+	var url = "http://fy.iciba.com/ajax.php?a=fy";
+	var page = await xhr(url, 'post', {
+		// f: 'auto',
+		// t: 'auto',
+		f: toCh ? 'en' : 'zh',
+		t: toCh ? 'zh' : 'en',
+		w: word
+	});
+	if (!page) return res();
+	page = page[0];
+	if (!page) return res();
+
+	try {
+		page = JSON.parse(page);
+	} catch (err) {
+		console.error(err);
+		return res();
+	}
+
+	if (page.status !== 1) return res();
+	page = page.content;
+	if (!page) return res();
+	page = page.out;
+	if (!page) return res();
+	results.iciba = page;
+	res();
+});
+const caiyunTranslation = (word, toCh, results) => new Promise(async res => {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://api.interpreter.caiyunai.com/v1/translator', true);
+	xhr.setRequestHeader('content-type', 'application/json');
+	xhr.setRequestHeader('x-authorization', 'token:3975l6lr5pcbvidl6jl2');
+	xhr.onreadystatechange = () => {
+		if (xhr.readyState == 4) {
+			if (xhr.status === 0 || xhr.response === '') return rej(new Error('Connection Failed'));
+			var json;
+			try {
+				json = JSON.parse(xhr.responseText);
+			} catch {
+				return res();
+			}
+			results.caiyun = json.target;
+			res();
+		}
+	};
+	xhr.send(JSON.stringify({
+		'source': [word],
+		'trans_type': 'auto2' + (toCh ? 'zh' : 'en'),
+		'request_id': 'demo',
+		"media": "text"
+	}));
+	// var formData = new FormData();
+	// formData.append('source', [word]);
+	// formData.append('trans_type', 'auto2' + (toCh ? 'zh' : 'en'));
+	// formData.append('request_id', 'demo');
+	// xhr.send(formData);
+});
+
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 	if (event === 'init') onInit(key);
 	else if (event === 'update') onUpdate(key, value);
@@ -394,11 +496,10 @@ const UpdateContentMenu = async () => {
 	await Promise.all(actions);
 };
 
-const sendMenuAction = (action, id) => new Promise(res => {
+const sendMenuAction = (event, action, id) => new Promise(res => {
 	chrome.tabs.getSelected(tab => {
 		chrome.tabs.sendMessage(tab.id, {
-			event: "ToggleSearch",
-			action, id
+			event, action, id
 		});
 	});
 });
@@ -407,30 +508,42 @@ chrome.contextMenus.onClicked.addListener(evt => {
 	var id = target[1] * 1;
 	target = target[0];
 
-	if (target === 'search_resource') {
-		sendMenuAction('All', null);
+	if (target === 'toggle_translation') {
+		sendMenuAction('ToggleTranslation', null, null);
+	} else if (target === 'search_resource') {
+		sendMenuAction('ToggleSearch', 'All', null);
 	} else if (target === 'search_article') {
-		if (isNumber(id)) sendMenuAction('Article', id);
-		else sendMenuAction('Article', null);
+		if (isNumber(id)) sendMenuAction('ToggleSearch', 'Article', id);
+		else sendMenuAction('ToggleSearch', 'Article', null);
 	} else if (target === 'search_book') {
-		if (isNumber(id)) sendMenuAction('Book', id);
-		else sendMenuAction('Book', null);
+		if (isNumber(id)) sendMenuAction('ToggleSearch', 'Book', id);
+		else sendMenuAction('ToggleSearch', 'Book', null);
 	} else if (target === 'search_pedia') {
-		if (isNumber(id)) sendMenuAction('Pedia', id);
-		else sendMenuAction('Pedia', null);
+		if (isNumber(id)) sendMenuAction('ToggleSearch', 'Pedia', id);
+		else sendMenuAction('ToggleSearch', 'Pedia', null);
 	} else if (target === 'search_video') {
-		if (isNumber(id)) sendMenuAction('Video', id);
-		else sendMenuAction('Video', null);
+		if (isNumber(id)) sendMenuAction('ToggleSearch', 'Video', id);
+		else sendMenuAction('ToggleSearch', 'Video', null);
 	} else if (target === 'search_news') {
-		if (isNumber(id)) sendMenuAction('News', id);
-		else sendMenuAction('News', null);
+		if (isNumber(id)) sendMenuAction('ToggleSearch', 'News', id);
+		else sendMenuAction('ToggleSearch', 'News', null);
 	} else if (target === 'search_common') {
-		if (isNumber(id)) sendMenuAction('Common', id);
-		else sendMenuAction('Common', null);
+		if (isNumber(id)) sendMenuAction('ToggleSearch', 'Common', id);
+		else sendMenuAction('ToggleSearch', 'Common', null);
 	}
 });
 chrome.tabs.onActivated.addListener(evt => {
 	chrome.tabs.get(evt.tabId, tab => {
 		UpdateContentMenu(tab.url);
 	});
+});
+chrome.commands.onCommand.addListener(cmd => {
+	if (cmd === 'toggle-translation') {
+		sendMenuAction('ToggleTranslation', null, null);
+	}
+});
+chrome.contextMenus.create({
+	id: 'toggle_translation',
+	title: '翻译本段',
+	contexts: [ 'selection' ]
 });

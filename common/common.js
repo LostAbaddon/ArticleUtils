@@ -57,7 +57,14 @@
 				res([xhr.responseText, xhr.responseURL]);
 			}
 		};
-		if (!!data) xhr.send(data);
+		if (!!data) {
+			if (isString(data)) xhr.send(data);
+			else {
+				let formData = new FormData();
+				Object.keys(data).forEach(key => formData.append(key, data[key]));
+				xhr.send(formData);
+			}
+		}
 		else xhr.send();
 	});
 

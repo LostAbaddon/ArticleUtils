@@ -6,6 +6,11 @@ const ResourceTypes = {
 	'news': '新闻',
 	'common': '其它'
 };
+const Translators = {
+	iciba: "金山词霸",
+	google: '谷歌翻译',
+	caiyun: '彩云小译'
+};
 
 var showSearchNotify = false;
 var hideWeakResults = false;
@@ -238,6 +243,89 @@ const onGetResource = (resource, name, type) => {
 	window.SearchInjection.show(resource);
 };
 
+var translationPad = null;
+const toggleTranslation = () => {
+	var text = getSelectedText();
+	if (!text) return;
+	text = text.replace(/^[ \t\r\n]+|[ \t\r\n]+$/gi, '');
+	if (!text) return;
+
+	if (showSearchNotify) {
+		TextNotifier.notify('开始翻译：' + text);
+	}
+	chrome.runtime.sendMessage({
+		event: 'ToggleTranslation',
+		target: text
+	});
+};
+const gotTranslation = async list => {
+	var rect = document.getSelection();
+	if (!rect) return;
+	rect = rect.getRangeAt(0);
+	if (!rect) return;
+	rect = rect.getBoundingClientRect();
+	if (!rect) return;
+
+	if (!translationPad) {
+		translationPad = newEle('div', 'extension_translation_pad');
+		translationPad.style.position = 'fixed';
+		translationPad.style.display = 'block';
+		translationPad.style.boxSizing = 'border-box';
+		translationPad.style.padding = '20px';
+		translationPad.style.margin = '0px';
+		translationPad.style.borderRadius = '15px';
+		translationPad.style.boxShadow = '2px 2px 5px black';
+		translationPad.style.backgroundColor = 'white';
+		translationPad.style.width = '300px';
+		translationPad.style.opacity = '0';
+		translationPad.style.transition = 'opacity 300ms ease-in-out';
+		translationPad.style.zIndex = '9100';
+
+		translationPad.BG = newEle('div', 'extension_translation_background');
+		translationPad.BG.style.position = 'fixed';
+		translationPad.BG.style.display = 'block';
+		translationPad.BG.style.padding = '0px';
+		translationPad.BG.style.margin = '0px';
+		translationPad.BG.style.top = '0px';
+		translationPad.BG.style.bottom = '0px';
+		translationPad.BG.style.left = '0px';
+		translationPad.BG.style.right = '0px';
+		translationPad.BG.style.zIndex = '9000';
+
+		translationPad.BG.addEventListener('click', async () => {
+			translationPad.style.opacity = '0';
+			await wait(300);
+			document.body.removeChild(translationPad);
+			document.body.removeChild(translationPad.BG);
+		});
+	}
+	var content = '';
+	list.forEach(item => {
+		content = content + '<div style="font-weight:bolder;font-size:17px;">' + (Translators[item[0]] || '其它译者') + '</div>';
+		content = content + '<div style="font-size:14px;">' + item[1] + '</div>';
+	});
+	translationPad.innerHTML = content;
+	var isTop = true;
+	var top = rect.top + rect.height + 5;
+	var height = window.innerHeight / 3 * 2;
+	if (top > height) {
+		top = window.innerHeight - rect.top + 5;
+		isTop = false;
+	}
+	if (isTop) {
+		translationPad.style.top = top + 'px';
+		translationPad.style.bottom = '';
+	} else {
+		translationPad.style.top = '';
+		translationPad.style.bottom = top + 'px';
+	}
+	translationPad.style.left = (rect.left) + 'px';
+	document.body.appendChild(translationPad.BG);
+	document.body.appendChild(translationPad);
+	await wait(100);
+	translationPad.style.opacity = '1';
+};
+
 const launchGreatBonus = () => {
 	var [list, depth] = bonusAllNodes(document.body);
 	list.splice(0, 1);
@@ -300,10 +388,15 @@ RegiestKeySeq('ctrl+ctrl+m', 'ConvertMath', async () => {
 RegiestKeySeq('ctrl+ctrl+s', 'SearchResource', () => {
 	searchItem('all', null);
 });
+RegiestKeySeq('ctrl+ctrl+t', 'ToggleTranslation', () => {
+	toggleTranslation();
+});
 RegiestKeySeq('up+up+down+down+left+left+right+right+b+a+b+a', 'GreatBonus', launchGreatBonus);
 
 chrome.runtime.onMessage.addListener(msg => {
 	if (msg.event === 'GotResource') onGetResource(msg.resource, msg.targetName, msg.targetType);
+	else if (msg.event === 'ToggleTranslation') toggleTranslation();
+	else if (msg.event === 'GotTranslation') gotTranslation(msg.action);
 	else if (msg.event === 'ToggleSearch') {
 		let action = msg.action || 'All';
 		let id = msg.id;

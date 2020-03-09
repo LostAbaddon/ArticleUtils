@@ -1,6 +1,6 @@
 {
 	"name": "内容辅助工具集",
-	"version": "1.1.5",
+	"version": "1.2.0",
 	"author": "LostAbaddon",
 	"homepage_url": "https://github.com/LostAbaddon/ArticleUtils",
 	"manifest_version": 2,
@@ -43,5 +43,13 @@
 				"core/content.js"
 			]
 		}
-	]
+	],
+	"commands": {
+		"toggle-translation": {
+			"suggested_key": {
+				"default": "Alt+T"
+			},
+			"description": "翻译本段"
+		}
+	}
 }
