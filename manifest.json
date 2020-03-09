@@ -1,6 +1,6 @@
 {
 	"name": "内容辅助工具集",
-	"version": "1.2.4",
+	"version": "1.3.0",
 	"author": "LostAbaddon",
 	"homepage_url": "https://github.com/LostAbaddon/ArticleUtils",
 	"manifest_version": 2,
@@ -36,6 +36,7 @@
 			"js": [
 				"common/common.js",
 				"common/param.js",
+				"common/sha256.js",
 				"keyseq/keyseq_content.js",
 				"config.js",
 				"search/inject.js",
