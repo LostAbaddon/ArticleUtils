@@ -2,7 +2,7 @@
 
 内容相关工具集，很实用的瑞士军刀~
 
-- **版本**： 1.2.0
+- **版本**： 1.2.1
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
@@ -77,9 +77,9 @@
 
 ## 功能三：划词翻译
 
-使用[金山词霸](http://www.iciba.com/)等在线平台进行翻译，并将翻译结果汇整到当前页面。
+使用[金山词霸](http://www.iciba.com/)与[彩云小译](https://fanyi.caiyunapp.com/)这两个在线平台进行翻译，并将翻译结果汇整到当前页面。
 
-未来会考虑接入[彩云小译](https://fanyi.caiyunapp.com/)、[谷歌翻译](https://translate.google.com/)等服务。
+未来会考虑接入[谷歌翻译](https://translate.google.com/)等更多翻译服务平台。
 
 ### 功能
 

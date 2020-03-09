@@ -274,7 +274,7 @@ const gotTranslation = async list => {
 		translationPad.style.padding = '20px';
 		translationPad.style.margin = '0px';
 		translationPad.style.borderRadius = '15px';
-		translationPad.style.boxShadow = '2px 2px 5px black';
+		translationPad.style.boxShadow = '2px 2px 5px rgba(53, 53, 53, 0.6)';
 		translationPad.style.backgroundColor = 'white';
 		translationPad.style.width = '300px';
 		translationPad.style.opacity = '0';
@@ -300,9 +300,10 @@ const gotTranslation = async list => {
 		});
 	}
 	var content = '';
-	list.forEach(item => {
-		content = content + '<div style="font-weight:bolder;font-size:17px;">' + (Translators[item[0]] || '其它译者') + '</div>';
-		content = content + '<div style="font-size:14px;">' + item[1] + '</div>';
+	list.forEach((item, index) => {
+		if (item.length < 2) item.push('Unknown', 'Unknown');
+		content = content + '<div style="font-weight:bolder;font-size:17px;' + (index > 0 ? 'margin-top:10px;' : '') + '">' + (Translators[item[0]] || '其它译者') + '</div>';
+		content = content + '<div style="font-size:14px;">' + item[1].replace(/\n/gi, '<br>') + '</div>';
 	});
 	translationPad.innerHTML = content;
 	var isTop = true;

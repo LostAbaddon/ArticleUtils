@@ -327,8 +327,7 @@ const launchTranslation = async (word, tabID) => {
 	// word = encodeURI(word);
 
 	// actions.push(googleTranslation(word, toCh, results));
-	// actions.push(caiyunTranslation(word, toCh, results));
-
+	actions.push(caiyunTranslation(word, toCh, results));
 	actions.push(icibaTranslation(word, toCh, results));
 	await Promise.all(actions);
 
@@ -380,24 +379,29 @@ const caiyunTranslation = (word, toCh, results) => new Promise(async res => {
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', 'https://api.interpreter.caiyunai.com/v1/translator', true);
 	xhr.setRequestHeader('content-type', 'application/json');
-	xhr.setRequestHeader('x-authorization', 'token:3975l6lr5pcbvidl6jl2');
+	xhr.setRequestHeader('x-authorization', 'token:j3iz6kyni1zu86crbsp7');
 	xhr.onreadystatechange = () => {
 		if (xhr.readyState == 4) {
 			if (xhr.status === 0 || xhr.response === '') return rej(new Error('Connection Failed'));
+			console.log(xhr.responseText);
 			var json;
 			try {
 				json = JSON.parse(xhr.responseText);
 			} catch {
 				return res();
 			}
-			results.caiyun = json.target;
+			json = json.target || 'Unknown';
+			if (Array.isArray(json)) json = json.join('\n');
+			results.caiyun = json;
 			res();
 		}
 	};
 	xhr.send(JSON.stringify({
 		'source': [word],
-		'trans_type': 'auto2' + (toCh ? 'zh' : 'en'),
+		// 'trans_type': 'auto2' + (toCh ? 'zh' : 'en'),
+		'trans_type': (toCh ? 'en2zh' : 'zh2en'),
 		'request_id': 'demo',
+		"detect": true,
 		"media": "text"
 	}));
 	// var formData = new FormData();
