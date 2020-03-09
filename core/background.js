@@ -315,6 +315,7 @@ const sendBackResource = (tabID, resource, targetName, targetType) => {
 };
 
 const launchTranslation = async (word, tabID) => {
+	word = word.replace(/[ ]+/gi, ' ');
 	if (!word) return;
 
 	var zhs = (word.match(ChineseChars) || []).length;
@@ -322,7 +323,10 @@ const launchTranslation = async (word, tabID) => {
 	var toCh = left.length >= zhs * 1.5;
 	var results = {}, actions = [];
 
-	word = word.replace(/[ ]+/gi, ' ');
+	var isSentence = !!word.match(/[,\.\+\-\(\)\[\]\{\}。，\?\!？！（）【】#~'"‘’“”、]/gi);
+	var items = word.replace(/[a-z0-9]+ */gi, '哈喽').match(ChineseChars);
+	items = !!items ? items.length : 0;
+	isSentence = isSentence || items > 20;
 
 	actions.push(bingTranslation(word, toCh, results));
 	actions.push(caiyunTranslation(word, toCh, results));

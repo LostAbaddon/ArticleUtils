@@ -307,8 +307,8 @@ const gotTranslation = async list => {
 		if (!trans) return;
 		used ++;
 		length += trans.replace(/[a-z]+ */gi, 'XXXXX').length;
-		content = content + '<div style="font-weight:bolder;font-size:17px;' + (index > 0 ? 'margin-top:10px;' : '') + '">' + Translators[vendor] + '</div>';
-		content = content + '<div style="font-size:14px;">' + trans.replace(/\n/gi, '<br>') + '</div>';
+		content = content + '<div style="font-weight:bolder;font-size:17px;color:black;' + (index > 0 ? 'margin-top:10px;' : '') + '">' + Translators[vendor] + '</div>';
+		content = content + '<div style="font-size:14px;color:black;">' + trans.replace(/\n/gi, '<br>') + '</div>';
 	});
 	if (used === 0) {
 		if (showSearchNotify) {
