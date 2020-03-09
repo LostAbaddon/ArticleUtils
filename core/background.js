@@ -553,6 +553,6 @@ chrome.commands.onCommand.addListener(cmd => {
 });
 chrome.contextMenus.create({
 	id: 'toggle_translation',
-	title: '翻译本段',
+	title: '翻译本段(Alt+T / ctrl+ctrl+T)',
 	contexts: [ 'selection' ]
 });

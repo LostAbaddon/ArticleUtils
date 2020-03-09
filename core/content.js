@@ -269,7 +269,7 @@ const gotTranslation = async list => {
 
 	if (!translationPad) {
 		translationPad = newEle('div', 'extension_translation_pad');
-		translationPad.style.position = 'fixed';
+		translationPad.style.position = 'absolute';
 		translationPad.style.display = 'block';
 		translationPad.style.boxSizing = 'border-box';
 		translationPad.style.padding = '20px';
@@ -301,28 +301,35 @@ const gotTranslation = async list => {
 		});
 	}
 	var content = '';
+	var length = 0, used = 0;
 	Object.keys(Translators).forEach((vendor, index) => {
 		var trans = list[vendor];
 		if (!trans) return;
+		used ++;
+		length += trans.replace(/[a-z]+ */gi, 'XXXXX').length;
 		content = content + '<div style="font-weight:bolder;font-size:17px;' + (index > 0 ? 'margin-top:10px;' : '') + '">' + Translators[vendor] + '</div>';
 		content = content + '<div style="font-size:14px;">' + trans.replace(/\n/gi, '<br>') + '</div>';
 	});
-	translationPad.innerHTML = content;
-	var isTop = true;
-	var top = rect.top + rect.height + 5;
-	var height = window.innerHeight / 3 * 2;
-	if (top > height) {
-		top = window.innerHeight - rect.top + 5;
-		isTop = false;
+	if (used === 0) {
+		if (showSearchNotify) {
+			TextNotifier.notify('没找到合适的翻译……');
+		}
+		return;
 	}
-	if (isTop) {
-		translationPad.style.top = top + 'px';
-		translationPad.style.bottom = '';
+	length /= used;
+	var width = 0;
+	if (length > 60) {
+		width = 500;
 	} else {
-		translationPad.style.top = '';
-		translationPad.style.bottom = top + 'px';
+		width = 300;
 	}
-	translationPad.style.left = (rect.left) + 'px';
+	translationPad.style.width = width + 'px';
+	translationPad.innerHTML = content;
+	var top = window.scrollY + rect.top + rect.height + 5;
+	translationPad.style.top = top + 'px';
+	var left = rect.left;
+	if (left >= window.innerWidth / 3 * 2) left -= width;
+	translationPad.style.left = left + 'px';
 	document.body.appendChild(translationPad.BG);
 	document.body.appendChild(translationPad);
 	await wait(100);
