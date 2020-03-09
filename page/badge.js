@@ -24,12 +24,9 @@ window.PageActions.onLoad = config => {
 			rules = {};
 			Object.keys(config.DefaultSearchEngine).forEach(key => rules[key] = config.DefaultSearchEngine[key]);
 		} else {
-			if (rules.article === undefined) rules.article = true;
-			if (rules.book === undefined) rules.book = true;
-			if (rules.pedia === undefined) rules.pedia = true;
-			if (rules.video === undefined) rules.video = true;
-			if (rules.news === undefined) rules.news = true;
-			if (rules.common === undefined) rules.common = true;
+			Object.keys(config.DefaultSearchEngine).forEach(key => {
+				if (rules[key] === undefined) rules[key] = config.DefaultSearchEngine[key]
+			});
 		}
 
 		Object.keys(rules).forEach(name => {
