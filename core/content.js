@@ -7,9 +7,10 @@ const ResourceTypes = {
 	'common': '其它'
 };
 const Translators = {
+	caiyun: '彩云小译',
 	iciba: "金山词霸",
-	google: '谷歌翻译',
-	caiyun: '彩云小译'
+	bing: 'Bing 翻译',
+	google: '谷歌翻译'
 };
 
 var showSearchNotify = false;
@@ -300,10 +301,11 @@ const gotTranslation = async list => {
 		});
 	}
 	var content = '';
-	list.forEach((item, index) => {
-		if (item.length < 2) item.push('Unknown', 'Unknown');
-		content = content + '<div style="font-weight:bolder;font-size:17px;' + (index > 0 ? 'margin-top:10px;' : '') + '">' + (Translators[item[0]] || '其它译者') + '</div>';
-		content = content + '<div style="font-size:14px;">' + item[1].replace(/\n/gi, '<br>') + '</div>';
+	Object.keys(Translators).forEach((vendor, index) => {
+		var trans = list[vendor];
+		if (!trans) return;
+		content = content + '<div style="font-weight:bolder;font-size:17px;' + (index > 0 ? 'margin-top:10px;' : '') + '">' + Translators[vendor] + '</div>';
+		content = content + '<div style="font-size:14px;">' + trans.replace(/\n/gi, '<br>') + '</div>';
 	});
 	translationPad.innerHTML = content;
 	var isTop = true;

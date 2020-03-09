@@ -317,34 +317,46 @@ const sendBackResource = (tabID, resource, targetName, targetType) => {
 const launchTranslation = async (word, tabID) => {
 	if (!word) return;
 
-	// var ens = (word.match(/[a-z]+/gi) || []).length;
 	var zhs = (word.match(ChineseChars) || []).length;
 	var left = word.replace(/[,\.\+\-\(\)\[\]\{\}。，\?\!？！（）【】#]/gi, '').replace(/[a-z0-9]+ */gi, 'X');
 	var toCh = left.length >= zhs * 1.5;
 	var results = {}, actions = [];
 
 	word = word.replace(/[ ]+/gi, ' ');
-	// word = encodeURI(word);
 
-	// actions.push(googleTranslation(word, toCh, results));
+	actions.push(bingTranslation(word, toCh, results));
 	actions.push(caiyunTranslation(word, toCh, results));
 	actions.push(icibaTranslation(word, toCh, results));
 	await Promise.all(actions);
 
-	results = Object.keys(results).map(key => [key, results[key]]);
-	// results = [['iciba', 'The impact of crude oil on the whole market is so great that I can see it. # Russia and opec after the collapse of the entire market collapse! #']];
 	sendMenuAction('GotTranslation', results);
 };
-const googleTranslation = (word, toCh, results) => new Promise(async res => {
-	var url = "https://translate.google.com/translate_a/single?client=webapp&sl=auto&tl=" + (toCh ? "zh-CN" : "en") + "&hl=zh-CN&dt=at&dt=bd&dt=ex&dt=ld&dt=md&dt=qca&dt=rw&dt=rm&dt=ss&dt=t&dt=gt&otf=2&ssel=3&tsel=5&kc=1&tk=84787.523604&q="
-	url = url + word;
-	console.info('开始谷歌翻译……');
-	var page = await xhr(url);
-	if (!page) return res();
-	page = page[0];
-	if (!page) return res();
-
-	res('done');
+const bingTranslation = (word, toCh, results) => new Promise(async res => {
+	var xhr = new XMLHttpRequest();
+	xhr.open('POST', 'https://www.bing.com/ttranslatev3?isVertical=1&&IG=ADB683081E9A478ABE32091C15345F9A&IID=translator.5028.1', true);
+	xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
+	xhr.onreadystatechange = () => {
+		if (xhr.readyState == 4) {
+			if (xhr.status === 0 || xhr.response === '') return rej(new Error('Connection Failed'));
+			var json;
+			try {
+				json = JSON.parse(xhr.responseText);
+			} catch {
+				return res();
+			}
+			json = json[0];
+			if (!json) return res();
+			json = json.translations;
+			if (!json) return res();
+			json = json[0];
+			if (!json) return res();
+			json = json.text;
+			if (!json) return res();
+			results.bing = json;
+			res();
+		}
+	};
+	xhr.send('&text=' + encodeURI(word) + '&fromLang=auto-detect&to=' + (toCh ? 'zh-Hans' : 'en'));
 });
 const icibaTranslation = (word, toCh, results) => new Promise(async res => {
 	console.info('开始词霸翻译……');
@@ -383,7 +395,6 @@ const caiyunTranslation = (word, toCh, results) => new Promise(async res => {
 	xhr.onreadystatechange = () => {
 		if (xhr.readyState == 4) {
 			if (xhr.status === 0 || xhr.response === '') return rej(new Error('Connection Failed'));
-			console.log(xhr.responseText);
 			var json;
 			try {
 				json = JSON.parse(xhr.responseText);
@@ -398,17 +409,11 @@ const caiyunTranslation = (word, toCh, results) => new Promise(async res => {
 	};
 	xhr.send(JSON.stringify({
 		'source': [word],
-		// 'trans_type': 'auto2' + (toCh ? 'zh' : 'en'),
 		'trans_type': (toCh ? 'en2zh' : 'zh2en'),
 		'request_id': 'demo',
 		"detect": true,
 		"media": "text"
 	}));
-	// var formData = new FormData();
-	// formData.append('source', [word]);
-	// formData.append('trans_type', 'auto2' + (toCh ? 'zh' : 'en'));
-	// formData.append('request_id', 'demo');
-	// xhr.send(formData);
 });
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {
