@@ -3,6 +3,7 @@ const ForbiddenNames = [ 'cache', '快照', '广告', 'here', 'next', 'prev', 's
 const ForbiddenPaths = [ 'cache', 'translate', 'translator', 'ad.', 'javascript:' ];
 const SearchItem = ['common', 'book', 'video', 'article', 'pedia', 'news'];
 const ChineseChars = /[\u4e00-\u9fa5]/gi;
+const JapaneseChars = /[\u0800-\u4e00]/gi;
 const DualChars = /[^\x00-\xff]/gi;
 const ExtHost = chrome.extension.getURL('');
 
@@ -362,8 +363,8 @@ const launchTranslation = async (word, tabID) => {
 	var results = {}, actions = [];
 
 	var isSentence = !!word.match(/[,\.\+\-\(\)\[\]\{\}。，\?\!？！（）【】#~'"‘’“”、]/gi);
-	var items = word.replace(/[a-z0-9]+ */gi, '哈喽').match(ChineseChars);
-	items = !!items ? items.length : 0;
+	var items = word.replace(/[a-z0-9]+ */gi, '哈喽');
+	items = (items.match(ChineseChars) || []).length + (items.match(JapaneseChars) || []).length;
 	isSentence = isSentence || items > 20;
 
 	actions.push(bingTranslation(word, toCh, !isSentence, results));
@@ -483,9 +484,20 @@ const caiyunTranslation = (word, toCh, isWord, results) => new Promise(async res
 			res();
 		}
 	};
+	var dir = '';
+	var jps = (word.match(JapaneseChars) || []).length;
+	var zhs = (word.match(ChineseChars) || []).length;
+	var ens = (word.match(/[a-z]+/gi) || []).length;
+	if (toCh) {
+		if (jps >= ens) dir = 'ja2zh';
+		else dir = 'en2zh';
+	} else {
+		if (jps >= zhs) dir = 'ja2en';
+		else dir = 'zh2en'
+	}
 	xhr.send(JSON.stringify({
 		'source': [word],
-		'trans_type': (toCh ? 'en2zh' : 'zh2en'),
+		'trans_type': dir,
 		'request_id': 'demo',
 		"detect": true,
 		"media": "text"
