@@ -328,7 +328,7 @@ const gotTranslation = async list => {
 	var top = window.scrollY + rect.top + rect.height + 5;
 	translationPad.style.top = top + 'px';
 	var left = rect.left;
-	if (left >= window.innerWidth / 3 * 2) left -= width;
+	if (left >= window.innerWidth / 3 * 2) left = rect.right - width;
 	translationPad.style.left = left + 'px';
 	document.body.appendChild(translationPad.BG);
 	document.body.appendChild(translationPad);

@@ -14,7 +14,7 @@ class CacheStorage {
 		this.#DBName = dbName;
 		this.#DBVersion = dbVersion;
 	}
-	init (expire, interval, limit, callback) {
+	init (expire, interval, limit, onMigrate, callback) {
 		return new Promise(async res => {
 			if (isNumber(expire) && expire > 0) this.#resourceExpire = expire * 1000 * 3600; // expire 单位是小时
 			if (isNumber(interval) && interval > 0) this.#resourceGCInterval = interval * 1000 * 3600; // GC 时间间隔，单位是小时
@@ -35,38 +35,7 @@ class CacheStorage {
 			});
 			await this.#cacheDB.connect();
 
-			if (needMigrate) {
-				let now = Date.now(), first = Infinity, last = 0;
-				let list = await store.get('ResourceCacheMenu');
-				if (!!list) {
-					let totalSize = 0;
-					let actions = list.map(item => new Promise(async res => {
-						var content = await store.get(item.name);
-						if (!isNumber(content.length) || content.length === 0) {
-							res();
-							return;
-						}
-						var size = JSON.stringify(content).length;
-						totalSize += size;
-						var url = item.name.replace('Resource::', '');
-						var tasks = [];
-						tasks.push(this.#cacheDB.set('menu', url, {
-							stamp: item.stamp,
-							usage: item.usage,
-							size: size
-						}));
-						time = now - item.stamp;
-						if (time > last) last = time;
-						if (time < first) first = time;
-						tasks.push(this.#cacheDB.set('cache', url, content));
-						await Promise.all(tasks);
-						res();
-					}));
-					await Promise.all(actions);
-					await this.#cacheDB.set('status', 'TotalSize', totalSize);
-					console.info("已将老版缓存数据迁移到 IndexedDB");
-				}
-			}
+			if (needMigrate && !!onMigrate) onMigrate(this.#cacheDB);
 
 			var test = Date.now();
 			await this.startFullGC();
@@ -355,5 +324,3 @@ class CacheStorage {
 		});
 	}
 }
-
-window.cacheStorage = new CacheStorage('ResourceCache', 1);

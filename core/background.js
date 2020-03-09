@@ -46,7 +46,45 @@ const onInit = config => {
 			launchTranslation(msg.target, sender.tab.id);
 		}
 	});
-	window.cacheStorage.init(config.ResourceExpire * 1, config.ResourceGCInterval * 1, config.ResourceCacheLimit * 1);
+
+	window.cacheStorage = new CacheStorage('ResourceCache', 1);
+	window.cacheStorage.init(config.ResourceExpire * 1, config.ResourceGCInterval * 1, config.ResourceCacheLimit * 1,
+		db => new Promise(async res => {
+			var now = Date.now(), first = Infinity, last = 0;
+			var list = await store.get('ResourceCacheMenu');
+			if (!!list) {
+				let totalSize = 0;
+				let actions = list.map(item => new Promise(async res => {
+					var content = await store.get(item.name);
+					if (!isNumber(content.length) || content.length === 0) {
+						res();
+						return;
+					}
+					var size = JSON.stringify(content).length;
+					totalSize += size;
+					var url = item.name.replace('Resource::', '');
+					var tasks = [];
+					tasks.push(db.set('menu', url, {
+						stamp: item.stamp,
+						usage: item.usage,
+						size: size
+					}));
+					time = now - item.stamp;
+					if (time > last) last = time;
+					if (time < first) first = time;
+					tasks.push(db.set('cache', url, content));
+					await Promise.all(tasks);
+					res();
+				}));
+				await Promise.all(actions);
+				await db.set('status', 'TotalSize', totalSize);
+				console.info("已将老版缓存数据迁移到 IndexedDB");
+			}
+		})
+	);
+
+	window.transCache = new CacheStorage('TranslationCache', 1);
+	window.transCache.init(24 * 30, 24, 300); // 30 天过期，24 小时清理一次，总容量 300 MB
 };
 const onUpdate = (key, value) => {
 	if (key === 'ResourceExpire') window.cacheStorage.changeExpire(value);
@@ -328,20 +366,30 @@ const launchTranslation = async (word, tabID) => {
 	items = !!items ? items.length : 0;
 	isSentence = isSentence || items > 20;
 
-	actions.push(bingTranslation(word, toCh, results));
-	actions.push(caiyunTranslation(word, toCh, results));
-	actions.push(icibaTranslation(word, toCh, results));
+	actions.push(bingTranslation(word, toCh, !isSentence, results));
+	actions.push(caiyunTranslation(word, toCh, !isSentence, results));
+	actions.push(icibaTranslation(word, toCh, !isSentence, results));
 	await Promise.all(actions);
 
 	sendMenuAction('GotTranslation', results);
 };
-const bingTranslation = (word, toCh, results) => new Promise(async res => {
+const bingTranslation = (word, toCh, isWord, results) => new Promise(async res => {
+	var tag = 'BING::' + word;
+	if (isWord) {
+		let cache = await window.transCache.get(tag);
+		if (!!cache) {
+			results.bing = cache;
+			return res();
+		}
+	}
+
+	console.info('开始 BING 翻译……');
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', 'https://www.bing.com/ttranslatev3?isVertical=1&&IG=ADB683081E9A478ABE32091C15345F9A&IID=translator.5028.1', true);
 	xhr.setRequestHeader('content-type', 'application/x-www-form-urlencoded');
-	xhr.onreadystatechange = () => {
+	xhr.onreadystatechange = async () => {
 		if (xhr.readyState == 4) {
-			if (xhr.status === 0 || xhr.response === '') return rej(new Error('Connection Failed'));
+			if (xhr.status === 0 || xhr.response === '') return res();
 			var json;
 			try {
 				json = JSON.parse(xhr.responseText);
@@ -356,13 +404,24 @@ const bingTranslation = (word, toCh, results) => new Promise(async res => {
 			if (!json) return res();
 			json = json.text;
 			if (!json) return res();
+			if (isWord) await window.transCache.set(tag, json);
 			results.bing = json;
+			console.info('BING 成功翻译结束');
 			res();
 		}
 	};
 	xhr.send('&text=' + encodeURI(word) + '&fromLang=auto-detect&to=' + (toCh ? 'zh-Hans' : 'en'));
 });
-const icibaTranslation = (word, toCh, results) => new Promise(async res => {
+const icibaTranslation = (word, toCh, isWord, results) => new Promise(async res => {
+	var tag = 'ICIBA::' + word;
+	if (isWord) {
+		let cache = await window.transCache.get(tag);
+		if (!!cache) {
+			results.iciba = cache;
+			return res();
+		}
+	}
+
 	console.info('开始词霸翻译……');
 	var url = "http://fy.iciba.com/ajax.php?a=fy";
 	var page = await xhr(url, 'post', {
@@ -379,8 +438,7 @@ const icibaTranslation = (word, toCh, results) => new Promise(async res => {
 	try {
 		page = JSON.parse(page);
 	} catch (err) {
-		console.error(err);
-		return res();
+		return rej(err);
 	}
 
 	if (page.status !== 1) return res();
@@ -389,16 +447,28 @@ const icibaTranslation = (word, toCh, results) => new Promise(async res => {
 	page = page.out;
 	if (!page) return res();
 	results.iciba = page;
+	if (isWord) await window.transCache.set(tag, page);
+	console.info('词霸成功翻译结束');
 	res();
 });
-const caiyunTranslation = (word, toCh, results) => new Promise(async res => {
+const caiyunTranslation = (word, toCh, isWord, results) => new Promise(async res => {
+	var tag = 'CAIYUN::' + word;
+	if (isWord) {
+		let cache = await window.transCache.get(tag);
+		if (!!cache) {
+			results.caiyun = cache;
+			return res();
+		}
+	}
+
+	console.info('开始彩云翻译……');
 	var xhr = new XMLHttpRequest();
 	xhr.open('POST', 'https://api.interpreter.caiyunai.com/v1/translator', true);
 	xhr.setRequestHeader('content-type', 'application/json');
 	xhr.setRequestHeader('x-authorization', 'token:j3iz6kyni1zu86crbsp7');
-	xhr.onreadystatechange = () => {
+	xhr.onreadystatechange = async () => {
 		if (xhr.readyState == 4) {
-			if (xhr.status === 0 || xhr.response === '') return rej(new Error('Connection Failed'));
+			if (xhr.status === 0 || xhr.response === '') return res();
 			var json;
 			try {
 				json = JSON.parse(xhr.responseText);
@@ -408,6 +478,8 @@ const caiyunTranslation = (word, toCh, results) => new Promise(async res => {
 			json = json.target || 'Unknown';
 			if (Array.isArray(json)) json = json.join('\n');
 			results.caiyun = json;
+			if (isWord) await window.transCache.set(tag, json);
+			console.info('彩云成功翻译结束');
 			res();
 		}
 	};
