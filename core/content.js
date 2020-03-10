@@ -337,7 +337,7 @@ const gotTranslation = async list => {
 };
 
 const UpRate = 0.9;
-const DownRate = 0.75;
+const DownRate = 0.95;
 const ChildRate = 0.1;
 const ArticleComponents = ['span', 'p', 'font', 'b', 'strong', 'i', 'u', 'del', 'p', 'blockquote', 'code', 'pre', '#text'];
 const IgnoreComponents = ['script', 'style', 'link', 'ref', 'rel', 'img', 'video', 'audio', 'iframe', 'br', 'hr', '#comment'];

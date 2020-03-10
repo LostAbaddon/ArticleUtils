@@ -155,7 +155,7 @@
 		article = article.map(param => {
 			var result = [];
 			param = param.replace(/[a-z0-9]+/gi, word => {
-				result.push(SHA256.toHexArray(word));
+				result.push([word.length, SHA256.toHexArray(word)]);
 				return '';
 			});
 			param = param.replace(/ +/g, '\n');
@@ -164,20 +164,20 @@
 				return c < 128 || c > 255;
 			}).join('');
 			param = param.split('\n').map(l => l.match(/.+/gi) || []).flat();
+			if (param.length > 0) {
+				param = param.map(line => [line.length, SHA256.toHexArray(line)]);
+			}
+			param = [...param, ...result];
 			if (param.length === 0) return null;
-			param = param.map(line => [line.length, SHA256.toHexArray(line)]);
 			result = combineList(param);
 			return [param.length, result];
 		}).filter(param => !!param);
-		var a1 = article.length
 		article = combineList(article);
-		var a2 = article.length
 		article = article.map(c => {
 			c = c.toString(16);
 			if (c.length < 2) c = '0' + c;
 			return c;
 		}).join('');
-		var a3 = article.length
 		return article;
 	};
 }) ();
