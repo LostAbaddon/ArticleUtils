@@ -336,6 +336,43 @@ const gotTranslation = async list => {
 	translationPad.style.opacity = '1';
 };
 
+const UpRate = 0.9;
+const DownRate = 0.75;
+const ChildRate = 0.1;
+const ArticleComponents = ['span', 'p', 'font', 'b', 'strong', 'i', 'u', 'del', 'p', 'blockquote', 'code', 'pre', '#text'];
+const IgnoreComponents = ['script', 'style', 'link', 'ref', 'rel', 'img', 'video', 'audio', 'iframe', 'br', 'hr', '#comment'];
+const findArticleContainer = () => {
+	var result = [];
+	rateNode(document.body, result);
+	result.sort((a, b) => b[1] - a[1]);
+	return result[0][0];
+};
+const rateNode = (node, result) => {
+	var current = [], children = [];
+	if (!node.childNodes) return 0;
+	node.childNodes.forEach(node => {
+		var tag = node.nodeName;
+		if (!tag) return;
+		tag = tag.toLowerCase();
+		if (IgnoreComponents.includes(tag)) return;
+		if (ArticleComponents.includes(tag)) {
+			let text = node.textContent || node.innerText || '';
+			text = text.replace(/[　\t\r\n]+/g, '').trim();
+			current.push(text.length);
+		} else {
+			children.push(rateNode(node, result) * UpRate);
+		}
+	});
+	var score = 0;
+	if (children.length > 0) {
+		children.sort((a, b) => a - b);
+		score = children.reduce((last, current) => last * DownRate + current, 0) / (children.length * ChildRate + 1);
+	}
+	score = current.reduce((a, b) => a + b, score);
+	result.push([node, score]);
+	return score;
+};
+
 const launchGreatBonus = () => {
 	var [list, depth] = bonusAllNodes(document.body);
 	list.splice(0, 1);
@@ -420,3 +457,12 @@ chrome.runtime.onMessage.addListener(msg => {
 		else if (action === 'Common') searchItem('common', id);
 	}
 });
+
+(() => {
+	var article = findArticleContainer();
+	console.log(article);
+	article = article.innerText;
+	console.log(article);
+	var fingerprint = SHA256.FingerPrint(article);
+	console.log(fingerprint);
+}) ();

@@ -251,6 +251,7 @@ const analyzeSearch = (page, cfg) => new Promise(async res => {
 		forbid = ForbiddenPaths.some(f => test.indexOf(f) >= 0);
 		if (forbid) return;
 		url = url.replace(ExtHost, cfg.host);
+		url = url.replace('chrome-extension://', 'https://')
 
 		list.push([name, url]);
 	});
