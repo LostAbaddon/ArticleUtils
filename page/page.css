@@ -85,6 +85,9 @@ div.option-item .content {
 div.option-item .small {
 	font-size: 14px;
 }
+div.option-item .center {
+	text-align: center;
+}
 div.option-line input {
 	font-size: 1rem;
 }

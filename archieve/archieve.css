@@ -1,0 +1,109 @@
+.extension_archieve_selected {
+	border-radius: 0px !important;
+	border: 0px solid rgba(127, 127, 127, 0) !important;
+	box-shadow: inset 0px 0px 0px rgba(225, 225, 225, 0), 0px 0px 0px rgba(53, 53, 53, 0) !important;
+	transition: all 200ms ease-in-out !important;
+}
+.extension_archieve_selected.extension_archieve_focused {
+	border-radius: 10px !important;
+	border: 1px solid rgb(127, 127, 127) !important;
+	box-shadow: inset 0px 0px 2px rgba(225, 225, 225, 0.3), 2px 2px 5px rgba(53, 53, 53, 0.6) !important;
+}
+
+.extension_archieve_controller {
+	position: fixed;
+	display: block;
+	box-sizing: border-box;
+	top: 10px;
+	right: -610px;
+	z-index: 10000;
+	width: 600px;
+	height: 65px;
+	padding: 10px;
+	border-radius: 10px;
+	color: black !important;
+	font-size: 13px !important;
+	background-color: white;
+	box-shadow: 2px 2px 3px rgba(175, 175, 175, 0.4), inset 0px 0px 2px rgba(0, 0, 0, 0.5);
+	transition: all 300ms ease-in-out;
+}
+.extension_archieve_controller.show {
+	right: 50px;
+}
+
+.extension_archieve_controller .button {
+	cursor: pointer;
+}
+
+.extension_archieve_confirm {
+	margin-top: 5px;
+	text-align: center;
+	font-weight: bolder;
+}
+.extension_archieve_confirm .title_hint {
+	color: rgb(75, 75, 75);
+	font-size: 12px;
+	font-weight: normal;
+}
+
+.extension_archieve_controller .extension_archieve_levelup,
+.extension_archieve_controller .extension_archieve_leveldown {
+	position: absolute;
+	display: block;
+	box-sizing: border-box;
+	right: 5px;
+	width: 24px;
+	height: 24px;
+	border-radius: 12px;
+	background-color: white;
+	box-shadow: 1px 1px 3px 1px rgba(53, 53, 53, 0.6);
+}
+.extension_archieve_controller .extension_archieve_levelup:before,
+.extension_archieve_controller .extension_archieve_leveldown:before {
+	content: ' ';
+	overflow: hidden;
+	position: absolute;
+	display: block;
+	left: 4px;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+}
+.extension_archieve_controller .extension_archieve_levelup {
+	top: 5px;
+}
+.extension_archieve_controller .extension_archieve_levelup:before {
+	top: 6px;
+	border-top: 0px solid transparent;
+	border-bottom: 10px solid rgb(127, 127, 127);
+}
+.extension_archieve_controller .extension_archieve_leveldown {
+	bottom: 5px;
+}
+.extension_archieve_controller .extension_archieve_leveldown:before {
+	bottom: 6px;
+	border-top: 10px solid rgb(127, 127, 127);
+	border-bottom: 0px solid transparent;
+}
+
+.extension_archieve_controller .extension_archieve_close {
+	position: absolute;
+	display: block;
+	box-sizing: border-box;
+	top: -10px;
+	left: -10px;
+	width: 24px;
+	height: 24px;
+	border-radius: 12px;
+	background-color: white;
+	box-shadow: 1px 1px 3px 1px rgba(53, 53, 53, 0.6);
+}
+.extension_archieve_controller .extension_archieve_close:before {
+	content: 'X';
+	overflow: hidden;
+	position: absolute;
+	display: block;
+	top: 2px;
+	left: 0px;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+}

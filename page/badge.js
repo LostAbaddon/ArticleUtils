@@ -41,3 +41,10 @@ window.PageActions.onLoad = config => {
 		};
 	});
 };
+window.PageActions.ToggleArchieve = () => {
+	chrome.tabs.getSelected(tab => {
+		chrome.tabs.sendMessage(tab.id, {
+			event: 'ToggleArchieve'
+		});
+	});
+};

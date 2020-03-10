@@ -16,6 +16,32 @@ const Translators = {
 var showSearchNotify = false;
 var hideWeakResults = false;
 
+window.getLongestCommonPart = (stra, strb) => {
+	var lena = stra.length, lenb = strb.length, target = '';
+
+	if (lena < lenb) {
+		for (let i = 0; i < lena; i ++) {
+			for (let j = 1; j <= lena - i; j ++) {
+				let str = stra.substr(i, j);
+				if (strb.indexOf(str) < 0) break;
+				if (target.length < j) target = str;
+			}
+			if (i + target.length > lena) break;
+		}
+	} else {
+		for (let i = 0; i < lenb; i ++) {
+			for (let j = 1; j <= lenb - i; j ++) {
+				let str = strb.substr(i, j);
+				if (stra.indexOf(str) < 0) break;
+				if (target.length < j) target = str;
+			}
+			if (i + target.length > lenb) break;
+		}
+	}
+
+	return target;
+};
+
 const onInit = async config => {
 	if (config.AutoMath) {
 		await autoMath();
@@ -24,6 +50,8 @@ const onInit = async config => {
 
 	showSearchNotify = config.ShowSearchNotify;
 	hideWeakResults = config.HideWeakResults;
+
+	window.Archieve.init();
 
 	if (showSearchNotify) initSearch();
 	if (config.AutoSearch) {
@@ -99,32 +127,6 @@ const initSearch = () => {
 		name: '其它'
 	}]);
 	if (showSearchNotify) TextNotifier.init();
-};
-
-const getLongestCommonPart = (stra, strb) => {
-	var lena = stra.length, lenb = strb.length, target = '';
-
-	if (lena < lenb) {
-		for (let i = 0; i < lena; i ++) {
-			for (let j = 1; j <= lena - i; j ++) {
-				let str = stra.substr(i, j);
-				if (strb.indexOf(str) < 0) break;
-				if (target.length < j) target = str;
-			}
-			if (i + target.length > lena) break;
-		}
-	} else {
-		for (let i = 0; i < lenb; i ++) {
-			for (let j = 1; j <= lenb - i; j ++) {
-				let str = strb.substr(i, j);
-				if (stra.indexOf(str) < 0) break;
-				if (target.length < j) target = str;
-			}
-			if (i + target.length > lenb) break;
-		}
-	}
-
-	return target;
 };
 
 const getSelectedText = () => {
@@ -336,41 +338,8 @@ const gotTranslation = async list => {
 	translationPad.style.opacity = '1';
 };
 
-const UpRate = 0.9;
-const DownRate = 0.95;
-const ChildRate = 0.1;
-const ArticleComponents = ['span', 'p', 'font', 'b', 'strong', 'i', 'u', 'del', 'p', 'blockquote', 'code', 'pre', '#text'];
-const IgnoreComponents = ['script', 'style', 'link', 'ref', 'rel', 'img', 'video', 'audio', 'iframe', 'br', 'hr', '#comment'];
-const findArticleContainer = () => {
-	var result = [];
-	rateNode(document.body, result);
-	result.sort((a, b) => b[1] - a[1]);
-	return result[0][0];
-};
-const rateNode = (node, result) => {
-	var current = [], children = [];
-	if (!node.childNodes) return 0;
-	node.childNodes.forEach(node => {
-		var tag = node.nodeName;
-		if (!tag) return;
-		tag = tag.toLowerCase();
-		if (IgnoreComponents.includes(tag)) return;
-		if (ArticleComponents.includes(tag)) {
-			let text = node.textContent || node.innerText || '';
-			text = text.replace(/[　\t\r\n]+/g, '').trim();
-			current.push(text.length);
-		} else {
-			children.push(rateNode(node, result) * UpRate);
-		}
-	});
-	var score = 0;
-	if (children.length > 0) {
-		children.sort((a, b) => a - b);
-		score = children.reduce((last, current) => last * DownRate + current, 0) / (children.length * ChildRate + 1);
-	}
-	score = current.reduce((a, b) => a + b, score);
-	result.push([node, score]);
-	return score;
+const toggleArchieve = () => {
+	Archieve.launch();
 };
 
 const launchGreatBonus = () => {
@@ -444,6 +413,16 @@ chrome.runtime.onMessage.addListener(msg => {
 	if (msg.event === 'GotResource') onGetResource(msg.resource, msg.targetName, msg.targetType);
 	else if (msg.event === 'ToggleTranslation') toggleTranslation();
 	else if (msg.event === 'GotTranslation') gotTranslation(msg.action);
+	else if (msg.event === 'ArticleArchieved') {
+		TextNotifier.init();
+		if (msg.status === 1) {
+			TextNotifier.notify('<span style="color:blue;">内容（' + msg.fingerprint + '）已存档</span>');
+		} else if (msg.status === 2) {
+			TextNotifier.notify('<span style="color:green;">内容（' + msg.fingerprint + '）已更新</span>');
+		} else {
+			TextNotifier.notify('<span style="color:red;">内容（' + msg.fingerprint + '）已存在</span>');
+		}
+	}
 	else if (msg.event === 'ToggleSearch') {
 		let action = msg.action || 'All';
 		let id = msg.id;
@@ -456,13 +435,5 @@ chrome.runtime.onMessage.addListener(msg => {
 		else if (action === 'News') searchItem('news', id);
 		else if (action === 'Common') searchItem('common', id);
 	}
+	else if (msg.event === 'ToggleArchieve') toggleArchieve();
 });
-
-(() => {
-	var article = findArticleContainer();
-	console.log(article);
-	article = article.innerText;
-	console.log(article);
-	var fingerprint = SHA256.FingerPrint(article);
-	console.log(fingerprint);
-}) ();

@@ -45,6 +45,8 @@ const onInit = config => {
 			searchResources(msg.targets, msg.action, msg.engine, msg.force, engineList, sender.tab.id);
 		} else if (msg.event === 'ToggleTranslation') {
 			launchTranslation(msg.target, sender.tab.id);
+		} else if (msg.event === 'ArchieveArticle') {
+			ArchieveArticle(msg.fingerprint, msg.title, msg.content, msg.url, sender.tab.id);
 		}
 	});
 
@@ -86,6 +88,9 @@ const onInit = config => {
 
 	window.transCache = new CacheStorage('TranslationCache', 1);
 	window.transCache.init(24 * 30, 24, 300); // 30 天过期，24 小时清理一次，总容量 300 MB
+
+	window.archieveCache = new CacheStorage('ArchieveCache', 1);
+	window.archieveCache.init(24 * 365, 24, 500); // 1 年过期，24 小时清理一次，总容量 500 MB
 };
 const onUpdate = (key, value) => {
 	if (key === 'ResourceExpire') window.cacheStorage.changeExpire(value);
@@ -505,6 +510,36 @@ const caiyunTranslation = (word, toCh, isWord, results) => new Promise(async res
 	}));
 });
 
+const ArchieveArticle = async (fingerprint, title, content, url, tabID) => {
+	var cache = await archieveCache.get(fingerprint);
+	var changed = false, status = 0;
+	if (!cache) {
+		changed = true;
+		status = 1;
+		cache = { title, content, usage: [url], update: Date.now() };
+	} else {
+		status = 2;
+		if (title.length > cache.title.length) {
+			changed = true;
+			cache.title = title;
+			cache.update = Date.now();
+		}
+		if (content.length > cache.content.length) {
+			changed = true;
+			cache.content = content;
+			cache.update = Date.now();
+		}
+		if (!cache.usage.includes(url)) {
+			changed = true;
+			cache.usage.push(url);
+			cache.update = Date.now();
+		}
+	}
+	if (changed) await archieveCache.set(fingerprint, cache);
+	else status = 0;
+	chrome.tabs.sendMessage(tabID, { event: 'ArticleArchieved', fingerprint, status });
+};
+
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {
 	if (event === 'init') onInit(key);
 	else if (event === 'update') onUpdate(key, value);
@@ -542,7 +577,7 @@ const UpdateContentMenu = async () => {
 	await createMenu('search_resource_entry', '搜索资源');
 
 	var actions = [];
-	actions.push(createMenu('search_resource', '搜索所有资源(ctrl+ctrl+s)', 'search_resource_entry'));
+	actions.push(createMenu('search_resource', '搜索所有资源(ctrl+ctrl+S)', 'search_resource_entry'));
 	actions.push(createMenu('search_article_entry', '搜索文章', 'search_resource_entry'));
 	actions.push(createMenu('search_book_entry', '搜索书籍', 'search_resource_entry'));
 	actions.push(createMenu('search_pedia_entry', '搜索百科', 'search_resource_entry'));
@@ -601,6 +636,11 @@ const sendMenuAction = (event, action, id) => new Promise(res => {
 		});
 	});
 });
+chrome.tabs.onActivated.addListener(evt => {
+	chrome.tabs.get(evt.tabId, tab => {
+		UpdateContentMenu(tab.url);
+	});
+});
 chrome.contextMenus.onClicked.addListener(evt => {
 	var target = evt.menuItemId.split('::');
 	var id = target[1] * 1;
@@ -610,6 +650,8 @@ chrome.contextMenus.onClicked.addListener(evt => {
 		sendMenuAction('ToggleTranslation', null, null);
 	} else if (target === 'search_resource') {
 		sendMenuAction('ToggleSearch', 'All', null);
+	} else if (target === 'toggle_archieve') {
+		sendMenuAction('ToggleArchieve', null, null);
 	} else if (target === 'search_article') {
 		if (isNumber(id)) sendMenuAction('ToggleSearch', 'Article', id);
 		else sendMenuAction('ToggleSearch', 'Article', null);
@@ -630,18 +672,20 @@ chrome.contextMenus.onClicked.addListener(evt => {
 		else sendMenuAction('ToggleSearch', 'Common', null);
 	}
 });
-chrome.tabs.onActivated.addListener(evt => {
-	chrome.tabs.get(evt.tabId, tab => {
-		UpdateContentMenu(tab.url);
-	});
-});
 chrome.commands.onCommand.addListener(cmd => {
 	if (cmd === 'toggle-translation') {
 		sendMenuAction('ToggleTranslation', null, null);
+	} else if (cmd === 'toggle-archieve') {
+		sendMenuAction('ToggleArchieve', null, null);
 	}
 });
 chrome.contextMenus.create({
 	id: 'toggle_translation',
 	title: '翻译本段(Alt+T / ctrl+ctrl+T)',
 	contexts: [ 'selection' ]
+});
+chrome.contextMenus.create({
+	id: 'toggle_archieve',
+	title: '内容存档(Alt+A / ctrl+ctrl+A)',
+	contexts: [ 'page', 'selection' ]
 });

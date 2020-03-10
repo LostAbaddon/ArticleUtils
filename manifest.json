@@ -6,7 +6,7 @@
 	"manifest_version": 2,
 	"description": "内容辅助实用工具集：显示 LaTeX；搜索当前页种的所有可下载资源；划词翻译",
 	"permissions": [ "storage", "contextMenus", "tabs" ],
-	"web_accessible_resources": [ "keyseq/*", "search/*", "notifier/*", "MathJax2.5/*" ],
+	"web_accessible_resources": [ "keyseq/*", "search/*", "notifier/*", "archieve/*", "MathJax2.5/*" ],
 	"icons": {
 		"128": "utils.png"
 	},
@@ -40,6 +40,7 @@
 				"keyseq/keyseq_content.js",
 				"config.js",
 				"search/inject.js",
+				"archieve/archieve.js",
 				"notifier/notify.js",
 				"core/content.js"
 			]
@@ -51,6 +52,12 @@
 				"default": "Alt+T"
 			},
 			"description": "翻译本段"
+		},
+		"toggle-archieve": {
+			"suggested_key": {
+				"default": "Alt+A"
+			},
+			"description": "内容存档"
 		}
 	}
 }
