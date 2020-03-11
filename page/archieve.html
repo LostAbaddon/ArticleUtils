@@ -4,26 +4,37 @@
 <meta charset="UTF-8">
 <title>存档查阅</title>
 <link type="text/css" rel="stylesheet" href="./archieve.css">
+<link type="text/css" rel="stylesheet" href="./alert.css">
 </head>
 <body>
 <div id="container">
 	<nav id="articleList"></nav>
 	<article id="articleContainer">
-		<header id="articleTitle"><span></span></header>
+		<header id="articleTitle">
+			<div class="title_modifier">点击修改标题</div>
+			<span></span>
+		</header>
 		<section class="mainContainer">
 			<aside><span>存档时间：</span><time></time></aside>
 			<main></main>
 			<footer>
+				<div class="title">本文指纹：<span name="fingerprint" class="text"></span></div>
 				<div class="title">归档源：</div>
 				<ul></ul>
-				<div class="title">操作：<span name="deleteArchieve" class="button">删除本存档</span></div>
+				<div class="title">操作：<span name="deleteArchieve" class="text button">删除本存档</span></div>
 			</footer>
 		</section>
 	</article>
 </div>
+<div id="maskCover"></div>
+<div id="alertFrame">
+	<div class="title"></div>
+	<div class="content"></div>
+</div>
 <script type="text/javascript" src="../common/common.js"></script>
 <script type="text/javascript" src="../common/param.js"></script>
 <script type="text/javascript" src="../common/cacheDB.js"></script>
+<script type="text/javascript" src="./alert.js"></script>
 <script type="text/javascript" src="./archieve.js"></script>
 </body>
 </html>

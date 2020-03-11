@@ -56,6 +56,7 @@ div#container article {
 	bottom: 10px;
 	left: 320px;
 	right: 10px;
+	cursor: default;
 }
 
 div#container article a,
@@ -66,6 +67,9 @@ div#container article a:visited {
 div#container article a:hover {
 	color: white;
 	text-decoration: underline;
+}
+div#container article .button {
+	cursor: pointer;
 }
 
 div#container article header {
@@ -91,7 +95,35 @@ div#container article header span {
 	max-height: 100px;
 	overflow: hidden;
 	margin-top: -5px;
+	padding: 5px;
 	transform: translateY(-50%);
+	box-shadow: inset 0px 0px 0px rgba(0, 0, 0, 0);
+	transition: box-shadow 300ms ease-in-out;
+	outline: none;
+}
+div#container article header span[contenteditable="true"] {
+	box-shadow: inset 2px 2px 5px 2px rgba(26, 26, 26, 0.8);
+}
+
+div#container article header .title_modifier {
+	position: absolute;
+	display: block;
+	box-sizing: border-box;
+	top: -50px;
+	z-index: 2;
+	padding: 5px 10px;
+	opacity: 0;
+	border-radius: 10px;
+	background-color: rgb(0, 0, 0);
+	color: rgb(127, 127, 127);
+	font-size: 14px;
+	font-weight: normal;
+	pointer-events: none;
+	transition: all 250ms ease-in-out;
+}
+div#container article header:hover .title_modifier {
+	top: 0px;
+	opacity: 1;
 }
 
 div#container article section.mainContainer {
@@ -177,6 +209,7 @@ div#container article section.mainContainer footer {
 	box-shadow: 0px -2px 2px -1px rgba(127, 127, 127, 0.3);
 }
 div#container article section.mainContainer footer .title {
+	margin-bottom: 10px;
 	font-size: 18px;
 	font-weight: bolder;
 }
@@ -185,9 +218,9 @@ div#container article section.mainContainer footer ul {
 	margin-bottom: 20px;
 	font-size: 15px;
 }
-div#container article section.mainContainer footer .title .button {
+div#container article section.mainContainer footer .title .text {
 	margin-left: 20px;
 	margin-right: 20px;
+	font-size: 14px;
 	font-weight: normal;
-	cursor: pointer;
 }

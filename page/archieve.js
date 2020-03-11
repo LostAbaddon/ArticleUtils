@@ -1,4 +1,4 @@
-var articles, menu;
+var archieveDB, menu, editing = false;
 
 const num2time = num => {
 	var time = new Date(num);
@@ -22,10 +22,10 @@ const num2time = num => {
 
 const generateMenu = () => {
 	var articleMenu = document.querySelector('#articleList');
-	menu.forEach(fingerprint => {
+	menu.forEach(item => {
 		var ele = newEle('menuitem');
-		ele.setAttribute('fingerprint', fingerprint);
-		ele.innerHTML = articles[fingerprint].title;
+		ele.setAttribute('fingerprint', item[0]);
+		ele.innerHTML = item[1];
 		articleMenu.appendChild(ele);
 	});
 	articleMenu.addEventListener('click', evt => {
@@ -34,8 +34,8 @@ const generateMenu = () => {
 		showArticle(fingerprint);
 	});
 };
-const showArticle = fingerprint => {
-	var article = articles[fingerprint];
+const showArticle = async fingerprint => {
+	var article = await archieveDB.get('cache', fingerprint);
 	if (!article) {
 		article = {
 			fingerprint: '',
@@ -48,6 +48,8 @@ const showArticle = fingerprint => {
 
 	var ele = document.querySelector('#articleContainer');
 	ele.setAttribute('fingerprint', fingerprint);
+	ele = document.querySelector('#articleContainer section.mainContainer footer [name="fingerprint"]');
+	ele.innerText = fingerprint;
 
 	ele = document.querySelector('#articleContainer header span');
 	ele.innerText = article.title;
@@ -73,8 +75,8 @@ const showArticle = fingerprint => {
 
 const unarchieve = fingerprint => {
 	var removes = [];
-	menu.forEach((fp, index) => {
-		if (fp === fingerprint) removes.unshift(index);
+	menu.forEach((item, index) => {
+		if (item[0] === fingerprint) removes.unshift(index);
 	});
 	removes.forEach(i => menu.splice(i, 1));
 	document.querySelectorAll('#articleList menuitem[fingerprint="' + fingerprint + '"]').forEach(item => {
@@ -82,10 +84,22 @@ const unarchieve = fingerprint => {
 	});
 	showArticle(menu[0]);
 };
+const titleModified = (fingerprint, title, ok, err) => {
+	if (!ok) {
+		Alert.show('<div style="text-align:center;">' + err + '</div>', '<span style="color:red;">出错啦！</span>');
+		return;
+	}
+	menu.some(item => {
+		if (item[0] !== fingerprint) return false;
+		item[1] = title;
+	});
+	document.querySelector('menuitem[fingerprint="' + fingerprint + '"]').innerText = title;
+};
 
 (async () => {
 	chrome.runtime.onMessage.addListener(msg => {
 		if (msg.event === "ArchieveDeleted") unarchieve(msg.fingerprint);
+		else if (msg.event === 'ArchieveTitleModified') titleModified(msg.fingerprint, msg.title, msg.ok, msg.err);
 	});
 
 	document.querySelector('#articleContainer section footer .title .button[name=deleteArchieve]').addEventListener('click', () => {
@@ -95,14 +109,38 @@ const unarchieve = fingerprint => {
 			fingerprint: container.getAttribute('fingerprint')
 		});
 	});
+	document.querySelector('#articleContainer header').addEventListener('click', async () => {
+		if (editing) return;
+		editing = true;
+		var ele = document.querySelector('#articleContainer header span');
+		ele.setAttribute('contentEditable', true);
+		await wait(50);
+		ele.focus();
+	});
+	document.querySelector('#articleContainer header span').addEventListener('blur', () => {
+		if (!editing) return;
+		editing = false;
+		var newTitle = document.querySelector('#articleContainer header span').innerText;
+		newTitle = newTitle.replace(/^[ 　\n\t\r]+|[ 　\n\t\r]+$/gi, '');
+		var fingerprint = document.querySelector('#articleContainer').getAttribute('fingerprint');
+		chrome.runtime.sendMessage({
+			event: 'ModifyArchieveTitle',
+			fingerprint,
+			title: newTitle
+		});
+		document.querySelector('#articleContainer header span').setAttribute('contenteditable', false);
+	});
 
-	var db = new CachedDB('ArchieveCache', 1);
-	await db.connect();
+	archieveDB = new CachedDB('ArchieveCache', 1);
+	await archieveDB.connect();
 
-	articles = await db.all('cache');
-	menu = Object.keys(articles).map(fingerprint => [fingerprint, articles[fingerprint].update]);
+	var articles = await archieveDB.all('cache');
+	menu = Object.keys(articles).map(fingerprint => {
+		var item = articles[fingerprint];
+		return [fingerprint, item.update, item.title];
+	});
 	menu.sort((arc1, arc2) => arc2[1] - arc1[1]);
-	menu = menu.map(item => item[0]);
+	menu = menu.map(item => [item[0], item[2]]);
 	generateMenu();
-	showArticle(menu[0]);
+	showArticle(menu[0][0]);
 }) ();

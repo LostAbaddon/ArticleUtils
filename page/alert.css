@@ -1,0 +1,51 @@
+div#maskCover {
+	position: fixed;
+	display: none;
+	box-sizing: border-box;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	z-index: 1000;
+	background-color: transparent;
+}
+div#maskCover.show {
+	display: block;
+}
+
+div#alertFrame {
+	position: fixed;
+	display: none;
+	box-sizing: border-box;
+	top: 50%;
+	left: 50%;
+	z-index: 1001;
+	width: 450px;
+	max-height: 600px;
+	margin-left: -225px;
+	padding: 0px;
+	border-radius: 20px 0px 20px 0px;
+	background-color: rgb(75, 75, 75);
+	box-shadow: inset 2px 2px 3px rgb(127, 127, 127), inset -2px -2px 3px rgb(53, 53, 53), 2px 2px 10px rgb(0, 0, 0, 0.3);
+	opacity: 0;
+	transform: translateY(-50%);
+	transition: all 300ms ease-in-out;
+	cursor: default;
+	user-select: none;
+}
+div#alertFrame .title {
+	box-sizing: border-box;
+	padding: 5px;
+	border-bottom: 1px solid rgb(53, 53, 53);
+	font-size: 18px;
+	font-weight: bolder;
+	color: white;
+	text-align: center;
+}
+div#alertFrame .content {
+	box-sizing: border-box;
+	padding: 10px;
+	padding-bottom: 15px;
+	font-size: 16px;
+	color: rgb(225, 225, 225);
+}
