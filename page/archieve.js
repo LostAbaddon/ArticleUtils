@@ -161,13 +161,27 @@ const gotTranslation = async list => {
 	range = range.getRangeAt(0);
 	range = range.getBoundingClientRect();
 
+	var width = range.width;
+	if (width < 400) width = 400;
 	var top = range.top + range.height;
+	var isUp = true;
+	if (top + 600 > window.innerHeight) {
+		isUp = false;
+		top = window.innerHeight - range.top;
+	}
 	var left = range.left;
-	if (left + 600 > window.innerWidth) left = range.right - 500;
+	if (left + width + 100 > window.innerWidth) left = range.right - width;
 
 	transUI.style.display = 'block';
-	transUI.style.top = top + 'px';
+	if (isUp) {
+		transUI.style.top = top + 'px';
+		transUI.style.bottom = '';
+	} else {
+		transUI.style.top = ''
+		transUI.style.bottom = top + 'px';
+	}
 	transUI.style.left = left + 'px';
+	transUI.style.width = width + 'px';
 	await wait(50);
 	transUI.style.opacity = '1';
 };
