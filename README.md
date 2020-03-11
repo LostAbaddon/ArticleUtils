@@ -2,7 +2,7 @@
 
 内容相关工具集，很实用的瑞士军刀~
 
-- **版本**： 1.3.0
+- **版本**： 1.3.1
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
@@ -123,6 +123,8 @@
 	+	Markdown2RichText 搬家工具
 	+	归档功能更新
 		*	更好的内容选取工具
+		*	支持修改存档文件标题
+		*	能保存图片
 		*	增加标签功能
 		*	标签树
 -	内容地图相关：
