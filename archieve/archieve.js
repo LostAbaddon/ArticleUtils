@@ -1,8 +1,9 @@
 const UpRate = 0.9;
 const DownRate = 0.95;
 const ChildRate = 0.1;
-const ArticleComponents = ['span', 'p', 'font', 'b', 'strong', 'i', 'u', 'del', 'p', 'blockquote', 'code', 'pre', '#text'];
+const ArticleComponents = ['span', 'p', 'font', 'b', 'strong', 'i', 'u', 'del', 'h1', 'h2', 'h3', 'h4', 'h5', 'blockquote', 'code', 'pre', '#text'];
 const IgnoreComponents = ['script', 'style', 'link', 'ref', 'rel', 'img', 'video', 'audio', 'iframe', 'br', 'hr', '#comment'];
+
 const findArticleContainer = () => {
 	var result = [];
 	rateNode(document.body, result);
@@ -89,7 +90,6 @@ const findArticleTitle = () => {
 	var temp_title = titles[0][0];
 
 	while (titles.length > 1) {
-		console.log('========================');
 		result = {};
 		total = titles.length;
 		for (let i = 0; i < total; i ++) {
@@ -143,7 +143,8 @@ window.Archieve = {
 	_pad: null,
 	_target: null,
 	_scoreMap: new Map(),
-	_title: ''
+	_title: '',
+	_active: false
 };
 window.Archieve.init = () => {
 	if (Archieve._initialed) return;
@@ -153,6 +154,35 @@ window.Archieve.init = () => {
 	style.rel = 'stylesheet';
 	style.href = chrome.extension.getURL('/archieve/archieve.css');
 	document.body.appendChild(style);
+
+	var lastClick = 0;
+	document.body.addEventListener('click', async evt => {
+		if (!Archieve._active) return;
+
+		var now = Date.now();
+		if (now - lastClick > 300) {
+			lastClick = now;
+			return;
+		}
+		lastClick = now;
+
+		var ele = evt.target;
+		while (!Archieve._scoreMap.has(ele) && ele !== document.body) {
+			ele = ele.parentElement;
+		}
+		if (ele === document.body) return;
+
+		document.querySelectorAll('.extension_archieve_selected').forEach(async e => {
+			e.classList.remove('extension_archieve_focused');
+			await wait(200);
+			e.classList.remove('extension_archieve_selected');
+		});
+		Archieve._target = ele;
+		Archieve.select();
+		ele.classList.add('extension_archieve_selected');
+		await wait(50);
+		ele.classList.add('extension_archieve_focused');
+	});
 
 	Archieve._pad = newEle('div', 'extension_archieve_controller');
 	Archieve._pad.innerHTML = `<div class="extension_archieve_hash">当前内容指纹：<span></span></div>
@@ -198,6 +228,7 @@ window.Archieve.init = () => {
 		ele.classList.add('extension_archieve_focused');
 	});
 	Archieve._pad.querySelector('div.extension_archieve_close').addEventListener('click', async () => {
+		Archieve._active = false;
 		document.querySelectorAll('.extension_archieve_selected').forEach(async e => {
 			e.classList.remove('extension_archieve_focused');
 			await wait(200);
@@ -206,6 +237,7 @@ window.Archieve.init = () => {
 		Archieve._pad.classList.remove('show');
 	});
 	Archieve._pad.querySelector('div.extension_archieve_confirm').addEventListener('mousedown', async () => {
+		Archieve._active = false;
 		var text = document.getSelection().toString();
 		text = text.replace(/^[ 　\t\r\n]+|[ 　\t\r\n]+$/gi, '');
 		if (text.length === 0) text = Archieve._target.innerText || Archieve._target.textContent || '';
@@ -228,6 +260,7 @@ window.Archieve.init = () => {
 	document.body.appendChild(Archieve._pad);
 };
 window.Archieve.launch = async () => {
+	Archieve._active = true;
 	Archieve._title = findArticleTitle();
 	Archieve._pad.classList.add('show');
 	Archieve._pad.querySelector('div.extension_archieve_confirm span.title_hint').innerText = ' (' + Archieve._title + ')';
