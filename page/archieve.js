@@ -178,9 +178,9 @@ const hideTranslation = async evt => {
 	if (!translating) return;
 	translating = false;
 
-	trans.style.opacity = '0';
+	transUI.style.opacity = '0';
 	await wait(300);
-	trans.style.display = 'none';
+	transUI.style.display = 'none';
 };
 
 (async () => {
