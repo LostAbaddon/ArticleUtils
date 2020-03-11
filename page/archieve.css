@@ -213,6 +213,9 @@ div#container article section.mainContainer footer .title {
 	font-size: 18px;
 	font-weight: bolder;
 }
+div#container article section.mainContainer footer .title:last-child {
+	margin-bottom: 0px;
+}
 div#container article section.mainContainer footer ul {
 	margin-top: 10px;
 	margin-bottom: 20px;
@@ -223,4 +226,32 @@ div#container article section.mainContainer footer .title .text {
 	margin-right: 20px;
 	font-size: 14px;
 	font-weight: normal;
+}
+
+div#translationFrame {
+	position: absolute;
+	display: none;
+	box-sizing: border-box;
+	width: 500px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+	border-radius: 10px;
+	background-color: rgb(50, 50, 50);
+	box-shadow: 0px 0px 1px rgba(227, 227, 227, 0.5), 2px 2px 5px rgb(26, 26, 26, 0.6);
+	opacity: 0;
+	overflow: hidden;
+	transition: opacity 300ms ease-in-out;
+}
+div#translationFrame .translation_source {
+	padding: 5px 10px;
+	box-shadow: 0px 1px 3px black, 0px 2px 4px rgb(26, 26, 26);
+	font-size: 16px;
+	font-weight: bolder;
+	color: rgb(235, 235, 235);
+}
+div#translationFrame .translation_result {
+	padding: 10px 20px;
+	border-bottom: 1px solid black;
+	font-size: 14px;
+	color: rgb(227, 227, 227);
 }
