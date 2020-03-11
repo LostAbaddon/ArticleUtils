@@ -30,6 +30,6 @@
 		notify.closer = setTimeout(() => {
 			notify.classList.remove('show');
 			notify.classList = null;
-		}, 1000);
+		}, 3000);
 	};
 }) ();

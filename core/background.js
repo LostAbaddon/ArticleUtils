@@ -718,6 +718,7 @@ chrome.commands.onCommand.addListener(cmd => {
 	if (cmd === 'toggle-translation') sendMenuAction('ToggleTranslation', null, null);
 	else if (cmd === 'toggle-archieve') sendMenuAction('ToggleArchieve', null, null);
 	else if (cmd === 'view-archieve') viewArchieve();
+	else if (cmd === 'toggle-search') sendMenuAction('ToggleSearch', 'All', null);
 });
 chrome.contextMenus.create({
 	id: 'toggle_translation',

@@ -228,6 +228,17 @@ div#container article section.mainContainer footer .title .text {
 	font-weight: normal;
 }
 
+div#container article section.mainContainer section#searchResultList {
+	display: none;
+	padding: 10px;
+	border-top: 1px solid rgb(0, 0, 0);
+	box-shadow: 0px -2px 2px -1px rgba(127, 127, 127, 0.3);
+}
+div#container article section.mainContainer section#searchResultList div.search_list_typename {
+	font-size: 16px;
+	font-weight: bolder;
+}
+
 div#translationFrame {
 	position: absolute;
 	display: none;

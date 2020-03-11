@@ -4,6 +4,14 @@ const Translators = {
 	bing: 'Bing 翻译',
 	google: '谷歌翻译'
 };
+const ResourceTypes = {
+	article: '相关文章',
+	book: "相关书籍",
+	pedia: '相关百科',
+	video: '相关视频',
+	news: '相关新闻',
+	common: '其它结果'
+};
 
 var archieveDB, menu, editing = false, translating = false;
 
@@ -197,12 +205,69 @@ const hideTranslation = async evt => {
 	transUI.style.display = 'none';
 };
 
+const toggleSearch = (type, id) => {
+	var text = getSelectedText(), force;
+	if (text.length === 0) return;
+	force = isNumber(id);
+	text = [text];
+
+	if (type === 'article') Alert.notify('开始寻找文章资源');
+	else if (type === 'book') Alert.notify('开始寻找书籍资源');
+	else if (type === 'pedia') Alert.notify('开始寻找百科资源');
+	else if (type === 'video') Alert.notify('开始寻找影视资源');
+	else if (type === 'news') Alert.notify('开始寻找新闻资源');
+	else if (type === 'common') Alert.notify('开始寻找综合资源');
+	else if (force) Alert.notify('开始寻找指定资源');
+	else Alert.notify('开始寻找页面资源');
+
+	chrome.runtime.sendMessage({
+		event: 'FindResource',
+		action: type,
+		engine: id,
+		force,
+		auto: false,
+		targets: text
+	});
+};
+const gotSearchResult = (name, type, results) => {
+	Alert.notify("找到“" + name + '”的资源，将显示在底部');
+
+	var area = document.querySelector('section#searchResultList');
+	area.innerHTML = '';
+	area.style.display = 'block';
+	Object.keys(ResourceTypes).forEach(type => {
+		var list = results[type];
+		if (!list) return;
+		list = list[name];
+		if (!list || list.length === 0) return;
+		type = ResourceTypes[type];
+
+		var ele = newEle('div', 'search_list_typename');
+		ele.innerText = type + '：';
+		area.appendChild(ele);
+		ele = newEle('ul', 'search_list_area');
+		area.appendChild(ele);
+		list.forEach(item => {
+			var line = newEle('li', 'search_list_line');
+			var link = newEle('a');
+			link.target = '_blank';
+			link.href = item[1];
+			link.innerText = item[0];
+			line.appendChild(link);
+			ele.appendChild(line);
+		});
+	});
+};
+
 (async () => {
 	chrome.runtime.onMessage.addListener(msg => {
 		if (msg.event === "ArchieveDeleted") unarchieve(msg.fingerprint);
 		else if (msg.event === 'ArchieveTitleModified') titleModified(msg.fingerprint, msg.title, msg.ok, msg.err);
 		else if (msg.event === 'ToggleTranslation') toggleTranslation();
 		else if (msg.event === 'GotTranslation') gotTranslation(msg.action);
+		else if (msg.event === "ToggleSearch") toggleSearch((msg.action || 'all').toLowerCase(), msg.id);
+		else if (msg.event === "GotResource") gotSearchResult(msg.targetName, msg.targetType, msg.resource);
+		else console.log(msg);
 	});
 
 	document.querySelector('#articleContainer section footer .title .button[name=deleteArchieve]').addEventListener('click', () => {

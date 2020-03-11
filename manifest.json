@@ -47,6 +47,12 @@
 		}
 	],
 	"commands": {
+		"toggle-search": {
+			"suggested_key": {
+				"default": "Alt+S"
+			},
+			"description": "搜索资源"
+		},
 		"toggle-translation": {
 			"suggested_key": {
 				"default": "Alt+T"
