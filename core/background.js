@@ -374,19 +374,21 @@ const launchTranslation = async (word, tabID) => {
 	items = (items.match(ChineseChars) || []).length + (items.match(JapaneseChars) || []).length;
 	isSentence = isSentence || items > 20;
 
-	actions.push(bingTranslation(word, toCh, !isSentence, results));
-	actions.push(caiyunTranslation(word, toCh, !isSentence, results));
-	actions.push(icibaTranslation(word, toCh, !isSentence, results));
+	actions.push(bingTranslation(word, toCh, !isSentence, results, tabID));
+	actions.push(caiyunTranslation(word, toCh, !isSentence, results, tabID));
+	actions.push(icibaTranslation(word, toCh, !isSentence, results, tabID));
 	await Promise.all(actions);
 
-	sendMenuAction('GotTranslation', results);
+	Object.keys(results).forEach(name => delete results[name]);
+	results = null;
 };
-const bingTranslation = (word, toCh, isWord, results) => new Promise(async res => {
+const bingTranslation = (word, toCh, isWord, results, tabID) => new Promise(async res => {
 	var tag = 'BING::' + word;
 	if (isWord) {
 		let cache = await window.transCache.get(tag);
 		if (!!cache) {
 			results.bing = cache;
+			chrome.tabs.sendMessage(tabID, { event: 'GotTranslation', action: results });
 			return res();
 		}
 	}
@@ -415,17 +417,19 @@ const bingTranslation = (word, toCh, isWord, results) => new Promise(async res =
 			if (isWord) await window.transCache.set(tag, json);
 			results.bing = json;
 			console.info('BING 成功翻译结束');
+			chrome.tabs.sendMessage(tabID, { event: 'GotTranslation', action: results });
 			res();
 		}
 	};
 	xhr.send('&text=' + encodeURI(word) + '&fromLang=auto-detect&to=' + (toCh ? 'zh-Hans' : 'en'));
 });
-const icibaTranslation = (word, toCh, isWord, results) => new Promise(async res => {
+const icibaTranslation = (word, toCh, isWord, results, tabID) => new Promise(async res => {
 	var tag = 'ICIBA::' + word;
 	if (isWord) {
 		let cache = await window.transCache.get(tag);
 		if (!!cache) {
 			results.iciba = cache;
+			chrome.tabs.sendMessage(tabID, { event: 'GotTranslation', action: results });
 			return res();
 		}
 	}
@@ -457,14 +461,16 @@ const icibaTranslation = (word, toCh, isWord, results) => new Promise(async res 
 	results.iciba = page;
 	if (isWord) await window.transCache.set(tag, page);
 	console.info('词霸成功翻译结束');
+	chrome.tabs.sendMessage(tabID, { event: 'GotTranslation', action: results });
 	res();
 });
-const caiyunTranslation = (word, toCh, isWord, results) => new Promise(async res => {
+const caiyunTranslation = (word, toCh, isWord, results, tabID) => new Promise(async res => {
 	var tag = 'CAIYUN::' + word;
 	if (isWord) {
 		let cache = await window.transCache.get(tag);
 		if (!!cache) {
 			results.caiyun = cache;
+			chrome.tabs.sendMessage(tabID, { event: 'GotTranslation', action: results });
 			return res();
 		}
 	}
@@ -488,6 +494,7 @@ const caiyunTranslation = (word, toCh, isWord, results) => new Promise(async res
 			results.caiyun = json;
 			if (isWord) await window.transCache.set(tag, json);
 			console.info('彩云成功翻译结束');
+			chrome.tabs.sendMessage(tabID, { event: 'GotTranslation', action: results });
 			res();
 		}
 	};
