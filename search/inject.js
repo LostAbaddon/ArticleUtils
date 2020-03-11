@@ -26,7 +26,7 @@ class SearchItem {
 			var ui = newEle('div', 'search_item_pad_line');
 			var link = newEle('a');
 			link.innerText = item[0];
-			link.href = item[1];
+			link.href = item[1].replace('chrome-extension://', 'https://');
 			link.target = '_blank';
 			ui.appendChild(link);
 			this.pad.appendChild(ui);

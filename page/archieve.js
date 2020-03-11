@@ -58,7 +58,7 @@ const showArticle = async fingerprint => {
 	ele.innerText = num2time(article.update);
 
 	ele = document.querySelector('#articleContainer section.mainContainer main');
-	ele.innerText = article.content;
+	ele.innerText = article.content.replace(/^[ 　\n\t\r]+|[ 　\n\t\r]+$/gi, '').replace(/[\r\n]{2,}/gi, '\n\n');
 
 	ele = document.querySelector('#articleContainer section.mainContainer footer ul');
 	ele.innerHTML = '';
