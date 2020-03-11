@@ -48,3 +48,6 @@ window.PageActions.ToggleArchieve = () => {
 		});
 	});
 };
+window.PageActions.ViewArchieve = () => {
+	chrome.tabs.create({ url: chrome.runtime.getURL('/page/archieve.html'), active: true });
+};

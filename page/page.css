@@ -4,6 +4,8 @@ body {
 	margin: 0px;
 	padding: 10px;
 	font-size: 12px;
+	color: white;
+	background-color: rgb(53, 53, 53);
 }
 div.container {
 	box-sizing: border-box;

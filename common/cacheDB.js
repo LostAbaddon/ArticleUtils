@@ -44,7 +44,7 @@
 		}
 		cache (name, size) {
 			if (!this.#caches[name]) {
-				this.#caches[name] = new UFCache(50, 0.9, size);
+				this.#caches[name] = new LRUCache(size);
 			}
 		}
 		set (store, key, value) {
@@ -150,6 +150,11 @@
 					rej(err);
 				};
 			});
+		}
+		clearCache (store) {
+			var ufc = this.#caches[store];
+			if (!ufc) return;
+			ufc.clear();
 		}
 
 		get name () {

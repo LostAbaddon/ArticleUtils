@@ -20,13 +20,12 @@ class CacheStorage {
 			if (isNumber(interval) && interval > 0) this.#resourceGCInterval = interval * 1000 * 3600; // GC 时间间隔，单位是小时
 			if (isNumber(limit) && limit > 0) this.#resourceCacheLimit = limit * 1024 * 1024; // 缓存大小，单位是 MB
 
-			var needMigrate = false;
 			this.#cacheDB = new CachedDB(this.#DBName, this.#DBVersion);
 			this.#cacheDB.onUpdate(() => {
-				needMigrate = true;
 				this.#cacheDB.open('menu', 'url');
 				this.#cacheDB.open('cache', 'url');
 				this.#cacheDB.open('status', 'name');
+				if (!!onMigrate) onMigrate(this.#cacheDB);
 			});
 			this.#cacheDB.onConnect(() => {
 				this.#cacheDB.cache('menu', 200);
@@ -35,11 +34,7 @@ class CacheStorage {
 			});
 			await this.#cacheDB.connect();
 
-			if (needMigrate && !!onMigrate) onMigrate(this.#cacheDB);
-
-			var test = Date.now();
 			await this.startFullGC();
-			test = Date.now() - test;
 
 			if (!!callback) callback();
 			res();
@@ -133,8 +128,8 @@ class CacheStorage {
 				await this.#cacheDB.set('status', 'TotalSize', totalSize);
 			}
 
-			if (!!callback) callback(content);
-			res(content);
+			if (!!callback) callback();
+			res();
 		});
 	}
 	clear (callback) {

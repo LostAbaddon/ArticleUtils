@@ -407,22 +407,16 @@ RegiestKeySeq('ctrl+ctrl+s', 'SearchResource', () => {
 RegiestKeySeq('ctrl+ctrl+t', 'ToggleTranslation', () => {
 	toggleTranslation();
 });
+RegiestKeySeq('ctrl+ctrl+a', 'ToggleArchieve', () => {
+	toggleArchieve();
+});
+RegiestKeySeq('ctrl+ctrl+a+a', 'ViewArchieve', () => {
+	chrome.runtime.sendMessage({ event: 'ViewArchieve' });
+});
 RegiestKeySeq('up+up+down+down+left+left+right+right+b+a+b+a', 'GreatBonus', launchGreatBonus);
 
 chrome.runtime.onMessage.addListener(msg => {
 	if (msg.event === 'GotResource') onGetResource(msg.resource, msg.targetName, msg.targetType);
-	else if (msg.event === 'ToggleTranslation') toggleTranslation();
-	else if (msg.event === 'GotTranslation') gotTranslation(msg.action);
-	else if (msg.event === 'ArticleArchieved') {
-		TextNotifier.init();
-		if (msg.status === 1) {
-			TextNotifier.notify('<span style="color:blue;">内容（' + msg.fingerprint + '）已存档</span>');
-		} else if (msg.status === 2) {
-			TextNotifier.notify('<span style="color:green;">内容（' + msg.fingerprint + '）已更新</span>');
-		} else {
-			TextNotifier.notify('<span style="color:red;">内容（' + msg.fingerprint + '）已存在</span>');
-		}
-	}
 	else if (msg.event === 'ToggleSearch') {
 		let action = msg.action || 'All';
 		let id = msg.id;
@@ -435,5 +429,17 @@ chrome.runtime.onMessage.addListener(msg => {
 		else if (action === 'News') searchItem('news', id);
 		else if (action === 'Common') searchItem('common', id);
 	}
+	else if (msg.event === 'ToggleTranslation') toggleTranslation();
+	else if (msg.event === 'GotTranslation') gotTranslation(msg.action);
 	else if (msg.event === 'ToggleArchieve') toggleArchieve();
+	else if (msg.event === 'ArticleArchieved') {
+		TextNotifier.init();
+		if (msg.status === 1) {
+			TextNotifier.notify('<span style="color:blue;">内容（' + msg.fingerprint + '）已存档</span>');
+		} else if (msg.status === 2) {
+			TextNotifier.notify('<span style="color:green;">内容（' + msg.fingerprint + '）已更新</span>');
+		} else {
+			TextNotifier.notify('<span style="color:red;">内容（' + msg.fingerprint + '）已存在</span>');
+		}
+	}
 });

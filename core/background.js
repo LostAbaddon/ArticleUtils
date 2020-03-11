@@ -43,11 +43,11 @@ const onInit = config => {
 			}
 
 			searchResources(msg.targets, msg.action, msg.engine, msg.force, engineList, sender.tab.id);
-		} else if (msg.event === 'ToggleTranslation') {
-			launchTranslation(msg.target, sender.tab.id);
-		} else if (msg.event === 'ArchieveArticle') {
-			ArchieveArticle(msg.fingerprint, msg.title, msg.content, msg.url, sender.tab.id);
 		}
+		else if (msg.event === 'ToggleTranslation') launchTranslation(msg.target, sender.tab.id);
+		else if (msg.event === 'ArchieveArticle') archieveArticle(msg.fingerprint, msg.title, msg.content, msg.url, sender.tab.id);
+		else if (msg.event === 'ViewArchieve') viewArchieve();
+		else if (msg.event === 'DeleteArchieve') unarchieveArticle(msg.fingerprint, sender.tab.id);
 	});
 
 	window.cacheStorage = new CacheStorage('ResourceCache', 1);
@@ -510,7 +510,7 @@ const caiyunTranslation = (word, toCh, isWord, results) => new Promise(async res
 	}));
 });
 
-const ArchieveArticle = async (fingerprint, title, content, url, tabID) => {
+const archieveArticle = async (fingerprint, title, content, url, tabID) => {
 	var cache = await archieveCache.get(fingerprint);
 	var changed = false, status = 0;
 	if (!cache) {
@@ -535,9 +535,21 @@ const ArchieveArticle = async (fingerprint, title, content, url, tabID) => {
 			cache.update = Date.now();
 		}
 	}
-	if (changed) await archieveCache.set(fingerprint, cache);
+	if (changed) {
+		await archieveCache.set(fingerprint, cache);
+		if (status === 1) console.info('新增存档：' + fingerprint + ' (' + JSON.stringify(cache).length + ' bytes)');
+		else if (status === 2) console.info('更新存档：' + fingerprint + ' (' + JSON.stringify(cache).length + ' bytes)');
+	}
 	else status = 0;
 	chrome.tabs.sendMessage(tabID, { event: 'ArticleArchieved', fingerprint, status });
+};
+const viewArchieve = () => chrome.tabs.create({ url: chrome.runtime.getURL('/page/archieve.html'), active: true });
+const unarchieveArticle = async (fingerprint, tabID) => {
+	await archieveCache.del(fingerprint);
+	chrome.tabs.sendMessage(tabID, {
+		event: 'ArchieveDeleted',
+		fingerprint: fingerprint
+	});
 };
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {
@@ -673,11 +685,9 @@ chrome.contextMenus.onClicked.addListener(evt => {
 	}
 });
 chrome.commands.onCommand.addListener(cmd => {
-	if (cmd === 'toggle-translation') {
-		sendMenuAction('ToggleTranslation', null, null);
-	} else if (cmd === 'toggle-archieve') {
-		sendMenuAction('ToggleArchieve', null, null);
-	}
+	if (cmd === 'toggle-translation') sendMenuAction('ToggleTranslation', null, null);
+	else if (cmd === 'toggle-archieve') sendMenuAction('ToggleArchieve', null, null);
+	else if (cmd === 'view-archieve') viewArchieve();
 });
 chrome.contextMenus.create({
 	id: 'toggle_translation',

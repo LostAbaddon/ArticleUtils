@@ -14,7 +14,7 @@
 		"scripts": [
 			"common/common.js",
 			"common/param.js",
-			"common/UFcache.js",
+			"common/LRUcache.js",
 			"common/cacheDB.js",
 			"common/cacheStorage.js",
 			"config.js",
@@ -58,6 +58,12 @@
 				"default": "Alt+A"
 			},
 			"description": "内容存档"
+		},
+		"view-archieve": {
+			"suggested_key": {
+				"default": "Ctrl+Shift+A"
+			},
+			"description": "查看存档"
 		}
 	}
 }
