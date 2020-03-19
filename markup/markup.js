@@ -1,3 +1,11 @@
+/**
+ *	Title: MarkUp Parser
+ *	Author: LostAbaddon
+ *	Email: LostAbaddon@gmail.com
+ *	Version: 1.0.0
+ *	Date: 2020.03.18
+ */
+
 (() => {
 	const SymHidden = Symbol('HIDDEN');
 	const MetaWords = ['GOD', 'THEONE', 'TITLE', 'AUTHOR', 'EMAIL', 'DESCRIPTION', 'STYLE', 'SCRIPT', 'DATE', 'KEYWORD', 'GLOSSARY', 'TOC', 'REF', 'LINK', 'IMAGES', 'VIDEOS', 'AUDIOS', 'ARCHOR', 'SHOWTITLE', 'SHOWAUTHOR', 'RESOURCES'];

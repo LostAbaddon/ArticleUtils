@@ -1,3 +1,11 @@
+/**
+ *	Title: MarkUp Parser Extensions
+ *	Author: LostAbaddon
+ *	Email: LostAbaddon@gmail.com
+ *	Version: 1.0.0
+ *	Date: 2020.03.18
+ */
+
 const generateRandomKey = MarkUp.generateRandomKey;
 
 // LaTeX
