@@ -1,0 +1,228 @@
+html, body {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+body {
+	background-color: rgb(22, 24, 35);
+	font-size: 0px;
+}
+
+.controller {
+	position: absolute;
+	display: block;
+	box-sizing: border-box;
+}
+
+.scroller::-webkit-scrollbar {
+	width: 12px;
+	background-color: transparent;
+	cursor: default;
+}
+.scroller::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+	background-color: rgb(75, 75, 75);
+	box-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.5);
+	cursor: default;
+}
+.scroller::-webkit-scrollbar-track {
+	border-radius: 6px;
+	background-color: rgba(225, 225, 225, 0.1);
+	box-shadow: inset 2px 2px 3px rgba(53, 53, 53, 0.2);
+	cursor: default;
+}
+
+div.toolbar {
+	top: 0px;
+	left: 0px;
+	z-index: 1000;
+	width: 100%;
+	height: 50px;
+	background-color: rgb(4, 0, 14);
+	box-shadow: 0px -2px 10px rgba(225, 227, 227, 0.6);
+}
+
+div.toolbar div.wordcount-hint {
+	float: right;
+	height: 50px;
+	margin-right: 20px;
+	font-size: 12px;
+	line-height: 50px;
+	color: rgb(117, 138, 153);
+	cursor: default;
+}
+
+div.container {
+	top: 60px;
+	bottom: 10px;
+	left: 10px;
+	right: 10px;
+}
+
+div.container div.editorContainer,
+div.container div.previewContainer {
+	top: 0px;
+	width: 50%;
+	height: 100%;
+	padding-top: 5px;
+}
+div.container div.editorContainer {
+	left: 0px;
+	padding-right: 15px;
+	padding-bottom: 10px;
+}
+div.container div.previewContainer {
+	right: 0px;
+	padding-left: 10px;
+	padding-bottom: 5px;
+}
+div.container div.sepBar {
+	top: 0px;
+	left: 50%;
+	z-index: 1;
+	width: 10px;
+	height: 100%;
+	margin-left: -5px;
+	border-left: 1px dashed black;
+	border-right: 1px dashed black;
+}
+
+#MUEditor,
+#MUPreview {
+	width: 100%;
+	height: 100%;
+	background-color: transparent;
+	line-height: 24px;
+	font-size: 16px;
+	font-family: Georgia,Times New Roman,Times,Songti SC,serif;
+	color: rgb(225, 225, 225);
+}
+
+#MUEditor {
+	border: none;
+	outline: none;
+	resize: none;
+}
+
+#MUPreview {
+	overflow: auto;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+
+div.table-generator {
+	width: 180px;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	margin-left: auto;
+	margin-right: auto;
+}
+div.table-generator div.table-line {
+	margin: 10px 15px;
+	box-sizing: border-box;
+}
+div.table-generator div.table-line.button-line {
+	text-align: center;
+}
+div.table-generator div.table-line input {
+	width: 80px;
+	padding: 2px 5px;
+	border: none;
+	border-bottom: 1px solid rgb(225, 225, 227);
+	outline: none;
+	resize: none;
+	background-color: transparent;
+	color: rgb(225, 225, 227);
+}
+div.table-generator div.table-line button {
+	margin: 20px 10px 0px 10px;
+	padding: 5px 10px;
+	border: 1px solid rgb(225, 225, 227);
+	outline: none;
+	resize: none;
+	background-color: transparent;
+	color: rgb(225, 225, 227);
+	cursor: pointer;
+}
+
+div.link-generator {
+	width: 280px;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	margin-left: auto;
+	margin-right: auto;
+}
+div.link-generator div.link-line {
+	margin: 10px 15px;
+	box-sizing: border-box;
+}
+div.link-generator div.link-line.button-line {
+	text-align: center;
+}
+div.link-generator div.link-line input {
+	width: 180px;
+	padding: 2px 5px;
+	border: none;
+	border-bottom: 1px solid rgb(225, 225, 227);
+	outline: none;
+	resize: none;
+	background-color: transparent;
+	color: rgb(225, 225, 227);
+}
+div.link-generator div.link-line input[type="radio"] {
+	position: relative;
+	top: 2px;
+	width: 20px;
+}
+div.link-generator div.link-line button {
+	margin: 20px 10px 0px 10px;
+	padding: 5px 10px;
+	border: 1px solid rgb(225, 225, 227);
+	outline: none;
+	resize: none;
+	background-color: transparent;
+	color: rgb(225, 225, 227);
+	cursor: pointer;
+}
+
+div.icon-generator {
+	width: 280px;
+	margin-top: 30px;
+	margin-bottom: 30px;
+	margin-left: auto;
+	margin-right: auto;
+}
+div.icon-generator div.icon-line {
+	margin: 10px 15px;
+	box-sizing: border-box;
+}
+div.icon-generator div.icon-line.button-line {
+	text-align: center;
+}
+div.icon-generator div.icon-line input {
+	width: 150px;
+	padding: 2px 5px;
+	border: none;
+	border-bottom: 1px solid rgb(225, 225, 227);
+	outline: none;
+	resize: none;
+	background-color: transparent;
+	color: rgb(225, 225, 227);
+}
+div.icon-generator div.icon-line input[type="radio"] {
+	position: relative;
+	top: 2px;
+	width: 20px;
+}
+div.icon-generator div.icon-line button {
+	margin: 20px 10px 0px 10px;
+	padding: 5px 10px;
+	border: 1px solid rgb(225, 225, 227);
+	outline: none;
+	resize: none;
+	background-color: transparent;
+	color: rgb(225, 225, 227);
+	cursor: pointer;
+}

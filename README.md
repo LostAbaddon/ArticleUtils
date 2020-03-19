@@ -1,13 +1,23 @@
 # ArticleUtils
 
-内容相关工具集，很实用的瑞士军刀~
+内容相关工具集（自带 MarkUp 解释器与编辑器哦~），很实用的瑞士军刀~
 
-- **版本**： 1.3.1
+- **版本**： 2.0.0
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
 - **Chrome Web Store发行版本**：暂未发布
 - **Chrome Web Store发行地址**：暂未发布
+
+## 主要功能：
+
+1.	LaTeX 公式转换
+2.	资源自动搜索
+3.	划词翻译
+4.	文章存档
+5.	MarkUp 解释器与编辑器
+
+详细介绍见后文。
 
 ## 使用方法
 
@@ -108,6 +118,14 @@
 -	可通过 Badge、右键菜单、快捷键（`alt+A`）和键列（`ctrl+ctrl+A`）来触发存档
 -	可通过 Badge、快捷键（`ctrl+shift+A`）和键列(`ctrl+ctrl+A+A`) 来查看既有存档
 
+## 功能五：MarkUp 编辑器
+
+MarkUp 是在 MarkDown 基础上的增强型语言，支持 MarkDown 的所有语法，但有所增强。
+
+本插件自带本作者自制的最新 MarkUp 语法解释器，并用在存档内容编辑上。
+
+可打开本地 MarkDown / MarkUp 文档进行编辑。
+
 ## 其它说明
 
 -	所有配置都可在选项页导出，未来会增加配置导入功能。
@@ -122,6 +140,7 @@
 	+	更好地识别页面中的资源
 	+	自动完成翻译后中英文搜索新闻
 -	文章相关：
+	+	MarkUp 逆向
 	+	Markdown2RichText 搬家工具
 -	归档功能：
 	+	能保存图片

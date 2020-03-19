@@ -413,6 +413,9 @@ RegiestKeySeq('ctrl+ctrl+a', 'ToggleArchieve', () => {
 RegiestKeySeq('ctrl+ctrl+a+a', 'ViewArchieve', () => {
 	chrome.runtime.sendMessage({ event: 'ViewArchieve' });
 });
+RegiestKeySeq('ctrl+ctrl+e', 'ToggleArchieve', () => {
+	chrome.tabs.create({ url: chrome.runtime.getURL('/markup/editor.html'), active: true });
+});
 RegiestKeySeq('up+up+down+down+left+left+right+right+b+a+b+a', 'GreatBonus', launchGreatBonus);
 
 chrome.runtime.onMessage.addListener(msg => {

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>MarkUp 编辑器</title>
+<link type="text/css" rel="stylesheet" href="../page/alert.css">
+<link type="text/css" rel="stylesheet" href="./editor.css">
+<link type="text/css" rel="stylesheet" href="../fontawesome/css/all.min.css">
+<link type="text/css" rel="stylesheet" href="./style/menu.css">
+<link type="text/css" rel="stylesheet" href="./style/footnote.css">
+<link type="text/css" rel="stylesheet" href="./style/default.css">
+</head>
+<body>
+<div class="controller toolbar">
+	<div class="wordcount-hint"><span>字数：</span><span class="count"></span></div>
+</div>
+<div class="controller container">
+	<div class="controller editorContainer">
+		<textarea id="MUEditor" class="scroller"></textarea>
+	</div>
+	<div class="controller sepBar"></div>
+	<div class="controller previewContainer">
+		<div id="MUPreview" class="scroller"></div>
+	</div>
+</div>
+<div id="maskCover"></div>
+<div id="alertFrame">
+	<div class="title"></div>
+	<div class="content"></div>
+</div>
+<div id="notifyFrame"></div>
+<div id="footnoteFrame"></div>
+<script type="text/javascript" src="../MathJax2.5/MathJax.js?config=TeX-AMS_HTML"></script>
+<script type="text/javascript" src="../common/common.js"></script>
+<script type="text/javascript" src="../page/alert.js"></script>
+<script type="text/javascript" src="./markup.js"></script>
+<script type="text/javascript" src="./extensions.js"></script>
+<script type="text/javascript" src="./editor.js"></script>
+<script type="text/javascript" src="./script/footnote.js"></script>
+</body>
+</html>

@@ -64,6 +64,12 @@ const getSelectedText = () => {
 
 const generateMenu = () => {
 	var articleMenu = document.querySelector('#articleList');
+	articleMenu.innerHTML = '';
+	var ele = newEle('menuitem');
+	ele.setAttribute('fingerprint', 'JumpToEditor');
+	ele.innerHTML = '<a href="../markup/editor.html">跳转到编辑器</a>';
+	articleMenu.appendChild(ele);
+
 	menu.forEach(item => {
 		var ele = newEle('menuitem');
 		ele.setAttribute('fingerprint', item[0]);
@@ -73,7 +79,8 @@ const generateMenu = () => {
 	articleMenu.addEventListener('click', evt => {
 		var fingerprint = evt.target.getAttribute('fingerprint');
 		if (!fingerprint) return;
-		showArticle(fingerprint);
+		if (fingerprint === 'JumpToEditor') return;
+		else showArticle(fingerprint);
 	});
 };
 const showArticle = async fingerprint => {

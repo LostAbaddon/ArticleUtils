@@ -719,6 +719,7 @@ chrome.commands.onCommand.addListener(cmd => {
 	else if (cmd === 'toggle-archieve') sendMenuAction('ToggleArchieve', null, null);
 	else if (cmd === 'view-archieve') viewArchieve();
 	else if (cmd === 'toggle-search') sendMenuAction('ToggleSearch', 'All', null);
+	else if (cmd === 'view-editor') chrome.tabs.create({ url: chrome.runtime.getURL('/markup/editor.html'), active: true });
 });
 chrome.contextMenus.create({
 	id: 'toggle_translation',
