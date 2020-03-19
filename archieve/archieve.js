@@ -240,7 +240,9 @@ window.Archieve.init = () => {
 		Archieve._active = false;
 		var text = document.getSelection().toString();
 		text = text.replace(/^[ 　\t\r\n]+|[ 　\t\r\n]+$/gi, '');
-		if (text.length === 0) text = Archieve._target.innerText || Archieve._target.textContent || '';
+		if (text.length === 0) {
+			text = MarkUp.reverse(Archieve._target);
+		}
 		fingerprint = SHA256.FingerPrint(text);
 		document.querySelectorAll('.extension_archieve_selected').forEach(async e => {
 			e.classList.remove('extension_archieve_focused');

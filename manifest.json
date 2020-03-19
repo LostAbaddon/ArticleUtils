@@ -43,6 +43,8 @@
 				"search/inject.js",
 				"archieve/archieve.js",
 				"notifier/notify.js",
+				"markup/markup.js",
+				"markup/extensions.js",
 				"core/content.js"
 			]
 		}

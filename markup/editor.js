@@ -257,6 +257,9 @@ const onEdited = async (saveHistory=true) => {
 	text = text.replace(/[a-z0-9]+/gi, 'X').replace(/ +/g, '');
 	var wordCount = text.length;
 	document.querySelector('div.controller.toolbar div.wordcount-hint span.count').innerText = wordCount;
+
+	var text = MarkUp.reverse(MUPreview);
+	console.log(text);
 };
 const onChange = () => {
 	if (!!changer) {

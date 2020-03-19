@@ -10,6 +10,7 @@
 	const SymHidden = Symbol('HIDDEN');
 	const MetaWords = ['GOD', 'THEONE', 'TITLE', 'AUTHOR', 'EMAIL', 'DESCRIPTION', 'STYLE', 'SCRIPT', 'DATE', 'KEYWORD', 'GLOSSARY', 'TOC', 'REF', 'LINK', 'IMAGES', 'VIDEOS', 'AUDIOS', 'ARCHOR', 'SHOWTITLE', 'SHOWAUTHOR', 'RESOURCES'];
 	const PreservedKeywords = ['toc', 'glossary', 'resources', 'images', 'videos', 'audios'];
+	const ParagraphTags = ['article', 'section', 'div', 'p', 'header', 'footer', 'aside', 'ul', 'ol', 'li', 'blockquote', 'pre', 'figure', 'figcaption'];
 
 	const PreserveWords = {
 		'\\': 'slash',
@@ -179,6 +180,8 @@
 	};
 	// 解析段级样式
 	const parseSection = (content, doc, currLevel=-Infinity, caches) => {
+		doc.parseLevel ++;
+
 		var sections = [];
 
 		var outmost = false;
@@ -357,7 +360,8 @@
 			}
 			return context;
 		});
-		if (!outmost) sections = sections.join('');
+		doc.parseLevel --;
+		if (doc.parseLevel > 0) sections = sections.join('');
 		return sections;
 	};
 
@@ -1577,6 +1581,7 @@
 		}
 		else doc.metas.style = [];
 		doc.termList = doc.termList || [];
+		doc.mainParser = false;
 
 		// 解析引用文本
 		doc.refs = {};
@@ -1662,6 +1667,8 @@
 			let value = config[key];
 			if (value !== undefined) docTree.metas[key] = value;
 		});
+		docTree.parseLevel = 0;
+		docTree.mainParser = true;
 
 		// 主体解析
 		text = parseSection(text, docTree);
@@ -1706,6 +1713,228 @@
 		});
 
 		return text;
+	};
+
+	const reverseSection = (section, config) => {
+		config.__level ++;
+		var contents = [], line = '', singleLine = true;
+		section.childNodes.forEach(n => {
+			var tag = n.tagName;
+			if (!tag) {
+				let inner = n.textContent || '';
+				inner = inner.trim();
+				if (inner.length > 0) line += inner;
+				return;
+			}
+
+			tag = tag.trim().toLowerCase();
+			var inner;
+			if (ParagraphTags.includes(tag)) {
+				singleLine = false;
+				if (line.length > 0) {
+					contents.push(config.__prefix + line);
+					line = '';
+				}
+
+				if (tag === 'blockquote') {
+					let lastPrefix = config.__prefix;
+					config.__prefix = config.__prefix + '>\t';
+					inner = reverseSection(n, config);
+					inner = inner.flat(Infinity);
+					inner.push('\n');
+					config.__prefix = lastPrefix;
+				}
+				else if (tag === 'ol') {
+					let lastPrefix = config.__prefix;
+					if (config.__prefix.indexOf('-\t') >= 0 || config.__prefix.indexOf('1.\t') >= 0) config.__prefix = '\t' + config.__prefix;
+					else config.__prefix = config.__prefix + '1.\t';
+					inner = reverseSection(n, config);
+					inner = inner.flat(Infinity);
+					inner.push('');
+					config.__prefix = lastPrefix;
+				}
+				else if (tag === 'ul') {
+					let lastPrefix = config.__prefix;
+					if (config.__prefix.indexOf('-\t') >= 0 || config.__prefix.indexOf('1.\t') >= 0) config.__prefix = '\t' + config.__prefix;
+					else config.__prefix = config.__prefix + '-\t';
+					inner = reverseSection(n, config);
+					inner = inner.flat(Infinity);
+					inner.push('');
+					config.__prefix = lastPrefix;
+				}
+				else {
+					inner = reverseSection(n, config);
+					inner = inner.flat(Infinity);
+					inner.push('');
+				}
+				if (!!inner && inner.length > 0) contents.push(...inner);
+			}
+			else {
+				let [inner, isInline] = reverseMix(n, tag, config);
+				if (isInline) {
+					if (inner.length > 0) {
+						line += inner.join('');
+					}
+				}
+				else {
+					if (line.length > 0) {
+						contents.push(config.__prefix + line);
+						line = '';
+					}
+					inner.forEach(l => {
+						contents.push(config.__prefix + l);
+					});
+				}
+			}
+		});
+		if (line.length > 0) contents.push(config.__prefix + line);
+		config.__level --;
+		return contents;
+	};
+	const reverseLine = (node, config) => {
+		var line = '';
+		node.childNodes.forEach(n => {
+			var tag = n.tagName;
+			if (!tag) {
+				let inner = n.textContent || '';
+				inner = inner.trim();
+				if (inner.length > 0) line += inner;
+				return;
+			}
+
+			tag = tag.trim().toLowerCase();
+			if (tag === 'a') {
+				let url = n.href;
+				if (url.indexOf('javascript:') === 0) url = '';
+				console.log('::::', url);
+				let inner = reverseLine(n, config);
+				if (!url || url.substr(0, 1) === '#') {
+					line += inner;
+				}
+				else {
+					if (!url.match(/^(ftp|https?):\/\//i)) url = config.host + url;
+					inner = '[' + inner + '](' + url + ')';
+					line += inner;
+				}
+				return;
+			}
+			if (tag === 'span' || tag === 'font') {
+				let inner = reverseLine(n, config);
+				line += inner;
+				return;
+			}
+			if (tag === 'strong' || tag === 'b') {
+				let inner = reverseLine(n, config);
+				line += inner;
+				return;
+			}
+			if (tag === 'em' || tag === 'i') {
+				let inner = reverseLine(n, config);
+				line += inner;
+				return;
+			}
+			if (tag === 'sup') {
+				let inner = reverseLine(n, config);
+				line += inner;
+				return;
+			}
+			if (tag === 'sub') {
+				let inner = reverseLine(n, config);
+				line += inner;
+				return;
+			}
+			if (tag === 'del') {
+				let inner = reverseLine(n, config);
+				line += inner;
+				return;
+			}
+			line += n.innerText;
+		});
+		return line;
+	};
+	const reverseMix = (node, tag, config) => {
+		if (tag === 'script') return [[''], true];
+		if (tag === 'style') return [[''], true];
+		if (tag === 'link') return [[''], true];
+		if (tag === 'hr') return [['\n---\n'], false];
+		if (tag === 'br') return [['\n'], true];
+		if (tag.match(/^h\d+$/)) {
+			let lev = tag.substring(1, tag.length);
+			lev *= 1;
+			let prefix = '\n';
+			for (let i = 0; i < lev; i ++) prefix += '#';
+			let line = reverseLine(node, config);
+			line = prefix + line + '\n';
+			return [[line], false];
+		}
+		if (tag === 'a') {
+			let url = node.href;
+			if (url.indexOf('javascript:') === 0) url = '';
+			console.log('>>>>', url);
+			let inner = reverseLine(node, config);
+			if (!url || url.substr(0, 1) === '#') return [[inner], true];
+			if (!url.match(/^(ftp|https?):\/\//i)) url = config.host + url;
+			inner = '[' + inner + '](' + url + ')';
+			return [[inner], true];
+		}
+		if (tag === 'img') {
+			if (node.src.length === 0) return [[''], true];
+			let inner = '\n![](' + node.src + ')\n';
+			return [[inner], false];
+		}
+		if (tag === 'video') {
+			if (node.src.length === 0) return [[''], true];
+			let inner = '\n@[](' + node.src + ')\n';
+			return [[inner], true];
+		}
+		if (tag === 'audio') {
+			if (node.src.length === 0) return [[''], true];
+			let inner = '\n#[](' + node.src + ')\n';
+			return [[inner], true];
+		}
+		if (tag === 'span' || tag === 'font') {
+			let inner = reverseLine(node, config);
+			return [[inner], true];
+		}
+		if (tag === 'strong' || tag === 'b') {
+			let inner = reverseLine(node, config);
+			return [['**' + inner + '**'], true];
+		}
+		if (tag === 'em' || tag === 'i') {
+			let inner = reverseLine(node, config);
+			return [['*' + inner + '*'], true];
+		}
+		if (tag === 'u') {
+			let inner = reverseLine(node, config);
+			return [['__' + inner + '__'], true];
+		}
+		if (tag === 'sup') {
+			let inner = reverseLine(node, config);
+			return [['^' + inner + '^'], true];
+		}
+		if (tag === 'sub') {
+			let inner = reverseLine(node, config);
+			return [['_' + inner + '_'], true];
+		}
+		if (tag === 'del') {
+			let inner = reverseLine(node, config);
+			return [['~~' + inner + '~~'], true];
+		}
+		var content = reverseLine(node, config);
+		return [[content], false];
+	};
+
+	MarkUp.reverse = (ele, config, outmost=true) => {
+		if (!ele) return '';
+		config = config || {};
+		config.__level = 0;
+		config.__prefix = '';
+		config.host = config.host || '';
+		var content = reverseSection(ele, config);
+		content = content.flat(Infinity);
+		content = content.join('\n');
+		content = content.replace(/\n{2,}/g, '\n\n');
+		return content;
 	};
 
 	MarkUp.parseLine = parseLine;

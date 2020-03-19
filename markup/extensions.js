@@ -566,6 +566,7 @@ MarkUp.addExtension({
 	name: 'InlineLinks',
 	parse: (line, doc, caches) => {
 		var changed = false;
+		if (!doc.mainParser) return [line, changed];
 
 		line = line.replace(/https?:\/\/[\w\-\+=\.;\?\\\/%]+/gi, (match, pos) => {
 			doc.links.push([match, match]);
