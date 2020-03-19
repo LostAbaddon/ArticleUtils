@@ -140,7 +140,6 @@ MarkUp 是在 MarkDown 基础上的增强型语言，支持 MarkDown 的所有�
 	+	更好地识别页面中的资源
 	+	自动完成翻译后中英文搜索新闻
 -	文章相关：
-	+	MarkUp 逆向
 	+	Markdown2RichText 搬家工具
 -	归档功能：
 	+	能保存图片
