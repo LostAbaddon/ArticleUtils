@@ -49,6 +49,7 @@ const onInit = config => {
 		else if (msg.event === 'ViewArchieve') viewArchieve();
 		else if (msg.event === 'DeleteArchieve') unarchieveArticle(msg.fingerprint, sender.tab.id);
 		else if (msg.event === 'ModifyArchieveTitle') modifyArchieveTitle(msg.fingerprint, msg.title, sender.tab.id);
+		else if (msg.event === 'ModifyArchieve') modifyArchieve(msg.fingerprint, msg.content, sender.tab.id);
 	});
 
 	window.cacheStorage = new CacheStorage('ResourceCache', 1);
@@ -579,6 +580,32 @@ const modifyArchieveTitle = async (fingerprint, title, tabID) => {
 		fingerprint: fingerprint,
 		ok: true,
 		title
+	});
+};
+const modifyArchieve = async (fingerprint, content, tabID) => {
+	var article = await archieveCache.get(fingerprint);
+	if (!article) return;
+	if (article.content === content) return;
+	article.content = content;
+	article.update = Date.now();
+	var fp = SHA256.FingerPrint(content);
+	if (fp === fingerprint) {
+		await archieveCache.set(fingerprint, article);
+		console.info('文档更新：' + fingerprint);
+	}
+	else {
+		await Promise.all([
+			archieveCache.del(fingerprint),
+			archieveCache.set(fp, article)
+		]);
+		console.info('文档（' + fingerprint + '）更新新指纹：' + fp);
+		fingerprint = fp;
+	}
+
+	chrome.tabs.sendMessage(tabID, {
+		event: 'ArchieveModified',
+		fingerprint: fingerprint,
+		ok: true
 	});
 };
 

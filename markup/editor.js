@@ -200,25 +200,26 @@ const HistoryManager = {
 		HistoryManager.index ++;
 		HistoryManager.history.splice(HistoryManager.index, HistoryManager.history.length);
 		HistoryManager.history[HistoryManager.index] = item;
-		console.log(HistoryManager.history);
 	},
 	restore: () => {
 		if (HistoryManager.index < 0) return null;
 		HistoryManager.index --;
-		console.log(HistoryManager.history);
 		return HistoryManager.history[HistoryManager.index];
 	},
 	redo: () => {
 		if (HistoryManager.index === HistoryManager.history.length) return null;
 		HistoryManager.index ++;
-		console.log(HistoryManager.history);
 		return HistoryManager.history[HistoryManager.index];
+	},
+	clear: () => {
+		HistoryManager.index = -1;
+		HistoryManager.history = [];
 	},
 };
 
 const ScrollSpeed = 50, ScrollRate = 0.15;
 
-var changer, lastContent = '';
+var changer, lastContent = '', articleConfig = {}, helpContent = '', isHelping = false;
 const onEdited = async (saveHistory=true) => {
 	if (!!changer) {
 		clearTimeout(changer);
@@ -230,7 +231,8 @@ const onEdited = async (saveHistory=true) => {
 	var last = MUPreview.innerHTML;
 	var html;
 	try {
-		html = MarkUp.parse(text);
+		if (isHelping) html = MarkUp.parse(text);
+		else html = MarkUp.parse(text, articleConfig);
 	} catch (err) {
 		html = last;
 		console.error(err);
@@ -1219,7 +1221,24 @@ const insertLine = (tag) => {
 	return true;
 };
 const showHelp = () => {
-	console.log('显示帮助文档！');
+	if (isHelping) return;
+	isHelping = true;
+
+	HistoryManager._index = HistoryManager.index;
+	HistoryManager._history = HistoryManager.history;
+	sessionStorage.content = MUEditor.value;
+	HistoryManager.clear();
+	MUEditor.value = helpContent;
+	onEdited();
+};
+const saveDoc = () => {
+	var content = MUEditor.value;
+	var fingerprint = SHA256.FingerPrint(content);
+	chrome.runtime.sendMessage({
+		event: 'ModifyArchieve',
+		fingerprint: articleConfig.fingerprint,
+		content,
+	});
 };
 
 const controlHandler = (key, fromKB=false) => {
@@ -1493,9 +1512,32 @@ const controlHandler = (key, fromKB=false) => {
 		generateRefBlock();
 		result = false;
 	}
+
 	else if (key === 'help') {
 		showHelp();
-		result = true;
+		return true;
+	}
+	else if (key === 'close') {
+		if (isHelping) {
+			isHelping = false;
+			HistoryManager.clear();
+			HistoryManager.index = HistoryManager._index;
+			HistoryManager.history = HistoryManager._history;
+			delete HistoryManager._index;
+			delete HistoryManager._history;
+			MUEditor.value = sessionStorage.content;
+			onEdited();
+			return true;
+		}
+		else {
+			let addr = location.origin + '/page/archieve.html?fingerprint=' + articleConfig.fingerprint;
+			location.href = addr;
+			return true;
+		}
+	}
+	else if (key === 'save-article') {
+		saveDoc();
+		return true;
 	}
 
 	else if (key === 'deleteLine') {
@@ -1542,6 +1584,10 @@ const menuBar = new MenuBar(controlHandler);
 (() => {
 	var group, subgroup;
 
+	menuBar.add('保存', 'save', 'save-article', 'ctrl+S');
+
+	menuBar.add(new MenuLine());
+
 	group = new MenuGroup();
 	group.add('加粗', 'bold', 'bold', 'ctrl+B');
 	group.add('斜体', 'italic', 'italic', 'ctrl+I');
@@ -1549,24 +1595,24 @@ const menuBar = new MenuBar(controlHandler);
 	group.add('波浪线', 'water', 'wavy', 'alt+W');
 	group.add('删除线', 'strikethrough', 'delete', 'alt+D');
 	group.add(new MenuLine());
+	subgroup = new MenuGroup();
+	subgroup.add('红色', 'color red', 'red');
+	subgroup.add('绿色', 'color green', 'green');
+	subgroup.add('蓝色', 'color blue', 'blue');
+	subgroup.add('黄色', 'color yellow', 'yellow');
+	subgroup.add('金色', 'color gold', 'gold');
+	subgroup.add('白色', 'color white', 'white');
+	subgroup.add('银色', 'color silver', 'silver');
+	subgroup.add('灰色', 'color gray', 'gray');
+	subgroup.add('深色', 'color dark', 'dark');
+	subgroup.add('黑色', 'color black', 'black');
+	group.add(subgroup);
+	group.add(new MenuLine());
 	group.add('上标', 'superscript', 'sup', 'alt+P');
 	group.add('下标', 'subscript', 'sub', 'alt+B');
 	group.add(new MenuLine());
 	group.add('大一号', 'sort-amount-up', 'sizeUp', 'ctrl+Up');
 	group.add('小一号', 'sort-amount-down', 'sizeDown', 'ctrl+Down');
-	menuBar.add(group);
-
-	group = new MenuGroup();
-	group.add('红色', 'color red', 'red');
-	group.add('绿色', 'color green', 'green');
-	group.add('蓝色', 'color blue', 'blue');
-	group.add('黄色', 'color yellow', 'yellow');
-	group.add('金色', 'color gold', 'gold');
-	group.add('白色', 'color white', 'white');
-	group.add('银色', 'color silver', 'silver');
-	group.add('灰色', 'color gray', 'gray');
-	group.add('深色', 'color dark', 'dark');
-	group.add('黑色', 'color black', 'black');
 	menuBar.add(group);
 
 	group = new MenuGroup();
@@ -1577,9 +1623,9 @@ const menuBar = new MenuBar(controlHandler);
 	group.add(new MenuLine());
 	group.add('代码', 'code', 'convert-code', 'alt+C');
 	group.add('公式', 'square-root-alt', 'convert-latex', 'alt+L');
+	group.add(new MenuLine());
+	group.add('插入图标', 'flag', 'insert-icon');
 	menuBar.add(group);
-
-	menuBar.add('插入图标', 'flag', 'insert-icon');
 
 	menuBar.add(new MenuLine());
 
@@ -1647,30 +1693,101 @@ const menuBar = new MenuBar(controlHandler);
 
 	menuBar.add(new MenuLine());
 
-	menuBar.add('帮助文档', 'info-circle', 'help');
+	menuBar.add('帮助文档', 'info-circle', 'help', 'ctrl+H');
+
+	menuBar.add(new MenuLine());
+
+	menuBar.add('关闭本文档', 'times-circle', 'close');
 
 	var sc = menuBar.getShortcuts();
 	Object.keys(sc).forEach(key => ShortcutsMap[key] = sc[key]);
 
 	document.querySelector('div.controller.toolbar').appendChild(menuBar.ui);
+}) ();
 
+var archieveDB;
+const loadArticle = fingerprint => new Promise(async res => {
+	archieveDB = new CachedDB('ArchieveCache', 1);
+	await archieveDB.connect();
+
+	var article = await archieveDB.get('cache', fingerprint);
+	if (!article) {
+		article = {
+			fingerprint: '',
+			title: '无存档',
+			update: Date.now(),
+			content: '',
+			usage: []
+		};
+	}
+	else {
+		article.fingerprint = fingerprint;
+	}
+
+	res(article);
+});
+const loadHelp = () => new Promise(res => {
 	var xhr = new XMLHttpRequest();
 	xhr.open('get', './demo.mu', true);
 	xhr.onreadystatechange = () => {
 		if (xhr.readyState == 4) {
-			if (xhr.status === 0 || xhr.response === '') throw new Error('Connection Failed');
+			if (xhr.status === 0 || xhr.response === '') return res(null);
 			var text = xhr.responseText;
-			if (!text) text = 'No Content...';
-			MUEditor.value = text;
-
-			onEdited(false);
-			var history = new HistoryItem();
-			history.content = text;
-			history.start = 0;
-			history.end = 0;
-			history.scroll = 0;
-			HistoryManager.append(history);
+			if (!text) text = '本文档无内容';
+			res(text);
 		}
 	};
 	xhr.send();
+});
+
+(async () => {
+	var query = {};
+	var search = location.search;
+	search = search.substring(1, search.length);
+	search = search.split('&').map(k => k.trim()).filter(k => k.length > 0);
+	search.forEach(item => {
+		item = item.split('=');
+		var key = item.splice(0, 1)[0];
+		var value = item.join('=');
+		query[key] = value;
+	});
+
+	var article, help;
+
+	await Promise.all([
+		new Promise(async res => {article = await loadArticle(query.article); res();}),
+		new Promise(async res => {help = await loadHelp(); res();})
+	]);
+
+	if (!article.content) {
+		article.content = help;
+		article.title = 'MarkUp 帮助文档';
+	}
+	Object.keys(article).forEach(key => {
+		var value = article[key];
+		if (!key) return;
+		articleConfig[key] = value;
+	});
+	articleConfig.showtitle = true;
+
+	helpContent = help;
+	MUEditor.value = article.content;
+	onEdited(false);
+	var history = new HistoryItem();
+	history.content = article.content;
+	history.start = 0;
+	history.end = 0;
+	history.scroll = 0;
+	HistoryManager.clear();
+	HistoryManager.append(history);
 }) ();
+
+chrome.runtime.onMessage.addListener(msg => {
+	if (msg.event === 'ArchieveModified') {
+		if (msg.ok) {
+			articleConfig.fingerprint = msg.fingerprint
+		}
+	}
+});
+
+InitNotes(MUPreview);

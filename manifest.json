@@ -14,6 +14,7 @@
 		"scripts": [
 			"common/common.js",
 			"common/param.js",
+			"common/sha256.js",
 			"common/LRUcache.js",
 			"common/cacheDB.js",
 			"common/cacheStorage.js",

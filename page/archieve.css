@@ -47,7 +47,7 @@ div#container nav::-webkit-scrollbar-track {
 	box-shadow: inset 2px 2px 3px rgba(53, 53, 53, 0.2);
 }
 
-div#container article {
+div#container > article {
 	position: absolute;
 	display: block;
 	box-sizing: border-box;
@@ -60,20 +60,11 @@ div#container article {
 	cursor: default;
 }
 
-div#container article a,
-div#container article a:visited {
-	color: white;
-	text-decoration: none;
-}
-div#container article a:hover {
-	color: white;
-	text-decoration: underline;
-}
-div#container article .button {
+div#container > article .button {
 	cursor: pointer;
 }
 
-div#container article header {
+div#container > article header {
 	position: absolute;
 	display: block;
 	box-sizing: border-box;
@@ -87,7 +78,7 @@ div#container article header {
 	font-weight: bolder;
 	text-align: center;
 }
-div#container article header span {
+div#container > article header span {
 	position: absolute;
 	display: block;
 	box-sizing: border-box;
@@ -102,11 +93,11 @@ div#container article header span {
 	transition: box-shadow 300ms ease-in-out;
 	outline: none;
 }
-div#container article header span[contenteditable="true"] {
+div#container > article header span[contenteditable="true"] {
 	box-shadow: inset 2px 2px 5px 2px rgba(26, 26, 26, 0.8);
 }
 
-div#container article header .title_modifier {
+div#container > article header .title_modifier {
 	position: absolute;
 	display: block;
 	box-sizing: border-box;
@@ -122,12 +113,12 @@ div#container article header .title_modifier {
 	pointer-events: none;
 	transition: all 250ms ease-in-out;
 }
-div#container article header:hover .title_modifier {
+div#container > article header:hover .title_modifier {
 	top: 0px;
 	opacity: 1;
 }
 
-div#container article section.mainContainer {
+div#container > article section.mainContainer {
 	position: absolute;
 	display: block;
 	box-sizing: border-box;
@@ -138,16 +129,16 @@ div#container article section.mainContainer {
 	overflow-x: hidden;
 	overflow-y: auto;
 }
-div#container article section.mainContainer::-webkit-scrollbar {
+div#container > article section.mainContainer::-webkit-scrollbar {
 	width: 12px;
 	background-color: transparent;
 }
-div#container article section.mainContainer::-webkit-scrollbar-thumb {
+div#container > article section.mainContainer::-webkit-scrollbar-thumb {
 	border-radius: 5px;
 	background-color: rgb(75, 75, 75);
 	box-shadow: inset 2px 2px 3px rgba(255, 255, 255, 0.5);
 }
-div#container article section.mainContainer::-webkit-scrollbar-track {
+div#container > article section.mainContainer::-webkit-scrollbar-track {
 	border-radius: 6px;
 	background-color: rgba(225, 225, 225, 0.1);
 	box-shadow: inset 2px 2px 3px rgba(53, 53, 53, 0.2);
@@ -157,7 +148,7 @@ div#container article section.mainContainer::-webkit-scrollbar-track {
 	div#container nav {
 		width: 25%;
 	}
-	div#container article {
+	div#container > article {
 		left: 25%;
 		margin-left: 20px;
 	}
@@ -197,7 +188,7 @@ div#container nav menuitem[fingerprint="JumpToEditor"] a:visited {
 	text-decoration: none;
 }
 
-div#container article section.mainContainer aside {
+div#container > article section.mainContainer aside {
 	margin-bottom: 10px;
 	padding-top: 5px;
 	padding-bottom: 5px;
@@ -207,7 +198,7 @@ div#container article section.mainContainer aside {
 	text-align: right;
 	color: rgb(127, 127, 127);
 }
-div#container article section.mainContainer main {
+div#container > article section.mainContainer main {
 	max-width: 800px;
 	padding-bottom: 10px;
 	margin-bottom: 10px;
@@ -216,38 +207,38 @@ div#container article section.mainContainer main {
 	font-size: 16px;
 	line-height: 26px;
 }
-div#container article section.mainContainer footer {
+div#container > article section.mainContainer footer {
 	padding: 10px;
 	border-top: 1px solid rgb(0, 0, 0);
 	box-shadow: 0px -2px 2px -1px rgba(127, 127, 127, 0.3);
 }
-div#container article section.mainContainer footer .title {
+div#container > article section.mainContainer footer .title {
 	margin-bottom: 10px;
 	font-size: 18px;
 	font-weight: bolder;
 }
-div#container article section.mainContainer footer .title:last-child {
+div#container > article section.mainContainer footer .title:last-child {
 	margin-bottom: 0px;
 }
-div#container article section.mainContainer footer ul {
+div#container > article section.mainContainer footer ul {
 	margin-top: 10px;
 	margin-bottom: 20px;
 	font-size: 15px;
 }
-div#container article section.mainContainer footer .title .text {
+div#container > article section.mainContainer footer .title .text {
 	margin-left: 20px;
 	margin-right: 20px;
 	font-size: 14px;
 	font-weight: normal;
 }
 
-div#container article section.mainContainer section#searchResultList {
+div#container > article section.mainContainer section#searchResultList {
 	display: none;
 	padding: 10px;
 	border-top: 1px solid rgb(0, 0, 0);
 	box-shadow: 0px -2px 2px -1px rgba(127, 127, 127, 0.3);
 }
-div#container article section.mainContainer section#searchResultList div.search_list_typename {
+div#container > article section.mainContainer section#searchResultList div.search_list_typename {
 	font-size: 16px;
 	font-weight: bolder;
 }

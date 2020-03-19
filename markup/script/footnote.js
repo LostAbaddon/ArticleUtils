@@ -1,8 +1,8 @@
-(() => {
+const InitNotes = UI => {
 	const NoteFrame = document.querySelector('#footnoteFrame');
 	NoteFrame._status = 0;
 
-	MUPreview.addEventListener('transitionstart', async evt => {
+	UI.addEventListener('transitionstart', async evt => {
 		var ele = evt.target, cn = ele.className;
 		if (cn === 'notemark' || cn ==='terminology') {
 			var css = ele.computedStyleMap();
@@ -14,7 +14,7 @@
 				var name = ele.getAttribute('href');
 				if (name.substr(0, 1) !== '#') return;
 				name = name.substring(1, name.length);
-				var info = MUPreview.querySelector('a[name="' + name + '"]');
+				var info = UI.querySelector('a[name="' + name + '"]');
 				if (!info) return;
 				var content = info.parentElement.innerHTML.replace(info.outerHTML, '');
 				var html = '';
@@ -70,4 +70,4 @@
 			}
 		}
 	});
-}) ();
+};

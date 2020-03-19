@@ -13,6 +13,7 @@ const ResourceTypes = {
 	common: '其它结果'
 };
 
+const ArticleContainer = document.querySelector('#articleContainer section.mainContainer');
 var archieveDB, menu, editing = false, translating = false;
 
 const num2time = num => {
@@ -107,7 +108,8 @@ const showArticle = async fingerprint => {
 	ele.innerText = num2time(article.update);
 
 	ele = document.querySelector('#articleContainer section.mainContainer main');
-	ele.innerText = article.content.replace(/^[ 　\n\t\r]+|[ 　\n\t\r]+$/gi, '').replace(/[\r\n]{2,}/gi, '\n\n');
+	// ele.innerText = article.content.replace(/^[ 　\n\t\r]+|[ 　\n\t\r]+$/gi, '').replace(/[\r\n]{2,}/gi, '\n\n');
+	ele.innerHTML = MarkUp.parse(article.content, { glossary: true, resources: true, classname: 'content markup' });
 
 	ele = document.querySelector('#articleContainer section.mainContainer footer ul');
 	ele.innerHTML = '';
@@ -120,6 +122,12 @@ const showArticle = async fingerprint => {
 		ui.appendChild(link);
 		ele.appendChild(ui);
 	});
+
+	ele = document.querySelector('#articleList menuitem[fingerprint="JumpToEditor"] a');
+	ele.href = '../markup/editor.html?article=' + fingerprint;
+
+	await wait(50);
+	ArticleContainer.scrollTo(0, 0);
 };
 
 const unarchieve = fingerprint => {
@@ -267,6 +275,17 @@ const gotSearchResult = (name, type, results) => {
 };
 
 (async () => {
+	var query = {};
+	var search = location.search;
+	search = search.substring(1, search.length);
+	search = search.split('&').map(k => k.trim()).filter(k => k.length > 0);
+	search.forEach(item => {
+		item = item.split('=');
+		var key = item.splice(0, 1)[0];
+		var value = item.join('=');
+		query[key] = value;
+	});
+
 	chrome.runtime.onMessage.addListener(msg => {
 		if (msg.event === "ArchieveDeleted") unarchieve(msg.fingerprint);
 		else if (msg.event === 'ArchieveTitleModified') titleModified(msg.fingerprint, msg.title, msg.ok, msg.err);
@@ -319,5 +338,7 @@ const gotSearchResult = (name, type, results) => {
 	menu.sort((arc1, arc2) => arc2[1] - arc1[1]);
 	menu = menu.map(item => [item[0], item[2]]);
 	generateMenu();
-	showArticle(menu[0][0]);
+	showArticle(!!query.fingerprint ? query.fingerprint : menu[0][0]);
 }) ();
+
+InitNotes(ArticleContainer);

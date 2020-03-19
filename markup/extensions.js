@@ -517,7 +517,7 @@ MarkUp.addExtension({
 	parse: (line, doc, caches) => {
 		var changed = false;
 
-		line = line.replace(/([!@#]?)\[([\w %'"\-\.\+=,;:\?!\\\/\u0800-\u9fa5]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
+		line = line.replace(/([!@#]?)\[([^\n]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
 			link = link.trim();
 			if (link.length === 0) return match;
 
@@ -560,3 +560,21 @@ MarkUp.addExtension({
 		return [line, changed];
 	},
 }, 0, 7);
+
+// URL 格式解析
+MarkUp.addExtension({
+	name: 'InlineLinks',
+	parse: (line, doc, caches) => {
+		var changed = false;
+
+		line = line.replace(/https?:\/\/[\w\-\+=\.;\?\\\/%]+/gi, (match, pos) => {
+			doc.links.push([match, match]);
+			var ui = '<a href="' + match + '" target="_blank">' + match + '</a>';
+			var key = 'link-' + generateRandomKey();
+			caches[key] = ui;
+			changed = true;
+			return '%' + key + '%';
+		});
+		return [line, changed];
+	},
+}, 0, 8);

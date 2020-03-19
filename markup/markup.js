@@ -414,7 +414,7 @@
 		prefix = prefix + '>';
 
 		// 解析段落
-		line = parseLine(line, doc);
+		// line = parseLine(line, doc);
 		if (line.length === 0) return '';
 		return prefix + line + postfix;
 	};
@@ -1550,17 +1550,17 @@
 				return '\n';
 			});
 		}
-		if (!metas.showtitle || ['on', 'yes', 'true'].includes(metas.showtitle.toLowerCase())) metas.showtitle = true;
+		if (!!metas.showtitle && ['on', 'yes', 'true'].includes(metas.showtitle.toLowerCase())) metas.showtitle = true;
 		else metas.showtitle = false;
-		if (!metas.glossary || ['on', 'yes', 'true'].includes(metas.glossary.toLowerCase())) metas.glossary = true;
+		if (!!metas.glossary && ['on', 'yes', 'true'].includes(metas.glossary.toLowerCase())) metas.glossary = true;
 		else metas.glossary = false;
-		if (!metas.links || ['on', 'yes', 'true'].includes(metas.links.toLowerCase())) metas.links = true;
+		if (!!metas.links && ['on', 'yes', 'true'].includes(metas.links.toLowerCase())) metas.links = true;
 		else metas.links = false;
-		if (!metas.refs || ['on', 'yes', 'true'].includes(metas.refs.toLowerCase())) metas.refs = true;
+		if (!!metas.refs && ['on', 'yes', 'true'].includes(metas.refs.toLowerCase())) metas.refs = true;
 		else metas.refs = false;
-		if (!metas.terms || ['on', 'yes', 'true'].includes(metas.terms.toLowerCase())) metas.terms = true;
+		if (!!metas.terms && ['on', 'yes', 'true'].includes(metas.terms.toLowerCase())) metas.terms = true;
 		else metas.terms = false;
-		if (!metas.resources || ['on', 'yes', 'true'].includes(metas.resources.toLowerCase())) metas.resources = true;
+		if (!!metas.resources && ['on', 'yes', 'true'].includes(metas.resources.toLowerCase())) metas.resources = true;
 		else metas.resources = false;
 		doc.metas = metas;
 		doc.metas.keyword = doc.metas.keyword || '';
@@ -1659,7 +1659,8 @@
 		text = getMetas(docTree, text);
 		if (!!config) Object.keys(config).forEach(key => {
 			key = key.toLowerCase();
-			docTree.metas[key] = config[key];
+			let value = config[key];
+			if (value !== undefined) docTree.metas[key] = value;
 		});
 
 		// 主体解析
@@ -1683,7 +1684,8 @@
 		// 处理系统级引用
 		text = applyMarkUpReference(text, docTree);
 
-		text = '<article>' + text.join('') + '</article>';
+		if (docTree.metas.classname) text = '<article class="' + docTree.metas.classname + '">' + text.join('') + '</article>';
+		else text = '<article>' + text.join('') + '</article>';
 
 		if (docTree.metas.fullexport) {
 			docTree.metas.style.forEach(line => {
