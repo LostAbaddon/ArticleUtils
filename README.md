@@ -2,7 +2,7 @@
 
 内容相关工具集（自带 MarkUp 解释器与编辑器哦~），很实用的瑞士军刀~
 
-- **版本**： 2.0.0
+- **版本**： 2.0.1
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 
