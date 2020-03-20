@@ -150,8 +150,16 @@ div.option-item div.option-switcher {
 	cursor: pointer;
 }
 
+div.option-item.button-group {
+	text-align: center;
+}
 div.option-item div.option-button {
 	cursor: pointer;
+}
+div.option-item.button-group div.option-button {
+	display: inline-block;
+	margin-left: 10px;
+	margin-right: 10px;
 }
 
 div.option-switch-container {

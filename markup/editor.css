@@ -226,3 +226,7 @@ div.icon-generator div.icon-line button {
 	color: rgb(225, 225, 227);
 	cursor: pointer;
 }
+
+#fileLoader {
+	display: none;
+}

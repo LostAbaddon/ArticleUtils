@@ -1,5 +1,6 @@
 const MUEditor = document.querySelector('#MUEditor');
 const MUPreview = document.querySelector('#MUPreview');
+const FileLoader = document.querySelector('#fileLoader');
 
 MathJax.Hub.Config({
 	extensions: ["tex2jax.js"],
@@ -219,7 +220,7 @@ const HistoryManager = {
 
 const ScrollSpeed = 50, ScrollRate = 0.15;
 
-var changer, lastContent = '', articleConfig = {}, helpContent = '', isHelping = false;
+var changer, lastContent = '', articleConfig = {}, helpContent = '', isHelping = false, localFileName = '';
 const onEdited = async (saveHistory=true) => {
 	if (!!changer) {
 		clearTimeout(changer);
@@ -257,9 +258,6 @@ const onEdited = async (saveHistory=true) => {
 	text = text.replace(/[a-z0-9]+/gi, 'X').replace(/ +/g, '');
 	var wordCount = text.length;
 	document.querySelector('div.controller.toolbar div.wordcount-hint span.count').innerText = wordCount;
-
-	var text = MarkUp.reverse(MUPreview);
-	console.log(text);
 };
 const onChange = () => {
 	if (!!changer) {
@@ -1234,14 +1232,52 @@ const showHelp = () => {
 	MUEditor.value = helpContent;
 	onEdited();
 };
+const download = (filename, content) => {
+	var blob = new Blob([content], { type: 'text/plain' });
+	var link = URL.createObjectURL(blob);
+	var downloader = document.createElement('a');
+	downloader.setAttribute('href', link);
+	downloader.setAttribute('download', filename);
+	downloader.click();
+};
 const saveDoc = () => {
 	var content = MUEditor.value;
+
+	if (!articleConfig.fingerprint) {
+		download(localFileName, content);
+		return;
+	}
+
 	var fingerprint = SHA256.FingerPrint(content);
 	chrome.runtime.sendMessage({
 		event: 'ModifyArchieve',
 		fingerprint: articleConfig.fingerprint,
 		content,
 	});
+};
+const openLocalFile = file => {
+	localFileName = file.name;
+	var reader = new FileReader();
+	reader.onload = () => {
+		MUEditor.value = reader.result;
+		HistoryManager.clear();
+		lastContent = '';
+		articleConfig = {
+			fingerprint: '',
+			title: file.name,
+			update: file.lastModifiedDate.getTime(),
+			content: reader.result,
+			usage: []
+		};
+		onEdited(false);
+		return;
+	};
+	reader.readAsText(file);
+};
+const readFile = () => {
+	var file = FileLoader.files[0];
+	if (!file) return;
+	openLocalFile(file);
 };
 
 const controlHandler = (key, fromKB=false) => {
@@ -1542,6 +1578,10 @@ const controlHandler = (key, fromKB=false) => {
 		saveDoc();
 		return true;
 	}
+	else if (key === 'open-local-article') {
+		FileLoader.accept = '.mu';
+		FileLoader.click();
+	}
 
 	else if (key === 'deleteLine') {
 		result = deleteLine();
@@ -1576,18 +1616,35 @@ const onKey = evt => {
 		if (controlHandler(shortcut, true)) evt.preventDefault();
 	}
 };
+const onDrop = evt => {
+	var file = evt.dataTransfer;
+	if (!file) return;
+	file = file.files;
+	if (!file) return;
+	file = file[0];
+	if (!file) return;
+	openLocalFile(file);
+	evt.preventDefault();
+};
 
 MUEditor.addEventListener('keydown', onKey);
 MUEditor.addEventListener('keyup', onChange);
 MUEditor.addEventListener('blur', onChange);
 MUEditor.addEventListener('mousewheel', onWheel);
 MUEditor.addEventListener('scroll', onWheel);
+MUEditor.addEventListener('drop', onDrop);
+MUPreview.addEventListener('drop', onDrop);
+
+FileLoader.addEventListener('change', readFile);
 
 const menuBar = new MenuBar(controlHandler);
 (() => {
 	var group, subgroup;
 
-	menuBar.add('保存', 'save', 'save-article', 'ctrl+S');
+	group = new MenuGroup();
+	group.add('保存', 'save', 'save-article', 'ctrl+S');
+	group.add('打开本地文档', 'file-word', 'open-local-article', 'ctrl+O');
+	menuBar.add(group);
 
 	menuBar.add(new MenuLine());
 
@@ -1710,6 +1767,17 @@ const menuBar = new MenuBar(controlHandler);
 
 var archieveDB;
 const loadArticle = fingerprint => new Promise(async res => {
+	if (!fingerprint) {
+		let article = {
+			fingerprint: '',
+			title: '无存档',
+			update: Date.now(),
+			content: '',
+			usage: []
+		};
+		return res(article);
+	}
+
 	archieveDB = new CachedDB('ArchieveCache', 1);
 	await archieveDB.connect();
 
