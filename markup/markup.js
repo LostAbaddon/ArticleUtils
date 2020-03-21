@@ -344,7 +344,7 @@
 			if (line.length === 0) return '';
 			var context = '';
 			if (outmost) {
-				let head = line.match(/^%([\w\W]+)%(\{[\w \-\.\u0800-\u9fa5]+\})*$/);
+				let head = line.match(/^%([\w\W]+)%(\{[\w \-\.\u0800-\uffff]+\})*$/);
 				if (!!head) {
 					context = restorePreserves(line, caches, false);
 				} else {
@@ -860,7 +860,7 @@
 				last = -1;
 				return;
 			}
-			var head = line.match(/^%([\w\W]+)%(\{[\w \-\.\u0800-\u9fa5]+\})*$/);
+			var head = line.match(/^%([\w\W]+)%(\{[\w \-\.\u0800-\uffff]+\})*$/);
 			if (!!head) {
 				last = -1;
 				return;
@@ -1411,12 +1411,14 @@
 		// 如果没生成过目录，且生成目录开关已打开，则在文档头补熵目录
 		if (doc.metas.toc && !doc.toced) {
 			let toc = generateTableOfContent(doc, '目录', 3);
-			toc = '<section>' + toc + '</section>';
-			if (doc.metas.showtitle) {
-				sections.splice(1, 0, toc);
-			}
-			else {
-				sections.unshift(toc);
+			if (toc.indexOf('<p class="content-') >= 0) {
+				toc = '<section>' + toc + '</section>';
+				if (doc.metas.showtitle) {
+					sections.splice(1, 0, toc);
+				}
+				else {
+					sections.unshift(toc);
+				}
 			}
 		}
 		return sections;
@@ -1552,7 +1554,7 @@
 		// 解析文档元数据
 		while (nonStop) {
 			nonStop = false;
-			text = text.replace(/\n([A-Z\u0800-\u9fa5]+?) *[:：] *([\w\W]*?)\n/, (match, key, value) => {
+			text = text.replace(/\n([A-Z\u0800-\uffff]+?) *[:：] *([\w\W]*?)\n/, (match, key, value) => {
 				if (value.length === 0) return match;
 				if (key === '标题') key = 'title';
 				else if (key === '作者') key = 'author';
@@ -1642,6 +1644,7 @@
 				if (!!word) return word;
 				return match;
 			});
+			var content = parseLine(line, doc);
 			doc.refs[key] = line;
 		});
 		Object.keys(doc.blocks).forEach(key => {
@@ -1860,7 +1863,6 @@
 			if (tag === 'a') {
 				let url = n.href;
 				if (url.indexOf('javascript:') === 0) url = '';
-				console.log('::::', url);
 				let inner = reverseLine(n, config);
 				if (!url || url.substr(0, 1) === '#') {
 					line += inner;
@@ -1924,7 +1926,6 @@
 		if (tag === 'a') {
 			let url = node.href;
 			if (url.indexOf('javascript:') === 0) url = '';
-			console.log('>>>>', url);
 			let inner = reverseLine(node, config);
 			if (!url || url.substr(0, 1) === '#') return [[inner], true];
 			if (!url.match(/^(ftp|https?):\/\//i)) url = config.host + url;

@@ -244,17 +244,34 @@ const onEdited = async (saveHistory=true) => {
 	MUPreview.innerHTML = html;
 	
 	// 获得 LaTeX 列表
+	var needRedraw = false;
 	MUPreview.querySelectorAll('.latex').forEach(latex => {
 		var inner = latex.innerText;
 		var output = LaTeXMap.get(inner);
 		latex.__latex = inner;
 		if (!!output) latex.innerHTML = '';
+		else needRedraw = true;
 	});
 
-	MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
-	// 缓存渲染完成的 LaTeX
-	MathJax.Hub.Queue((...args) => {
-		var count = 0;
+	if (needRedraw) {
+		MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+		// 缓存渲染完成的 LaTeX
+		MathJax.Hub.Queue((...args) => {
+			MUPreview.querySelectorAll('.latex').forEach(latex => {
+				var origin = latex.__latex;
+				var output = LaTeXMap.get(origin);
+
+				if (!!output) {
+					latex.innerHTML = output;
+				}
+				else {
+					output = latex.innerHTML;
+					LaTeXMap.set(origin, output);
+				}
+			});
+		});
+	}
+	else {
 		MUPreview.querySelectorAll('.latex').forEach(latex => {
 			var origin = latex.__latex;
 			var output = LaTeXMap.get(origin);
@@ -263,13 +280,11 @@ const onEdited = async (saveHistory=true) => {
 				latex.innerHTML = output;
 			}
 			else {
-				count ++;
 				output = latex.innerHTML;
 				LaTeXMap.set(origin, output);
 			}
 		});
-		console.log('xxxxxxxxxxxxxxxxxxxxxxxx', count);
-	});
+	}
 
 
 	if (saveHistory) {
@@ -1692,6 +1707,11 @@ const controlHandler = (key, fromKB=false) => {
 			location.href = addr;
 			return true;
 		}
+		else {
+			let addr = location.origin + '/library/index.html';
+			location.href = addr;
+			return true;
+		}
 	}
 	else if (key === 'save-article') {
 		saveDoc();
@@ -1985,6 +2005,7 @@ const loadHelp = () => new Promise(res => {
 	await Promise.all(actions);
 
 	if (!article || !article.content) {
+		if (!article) article = {};
 		if (query.action === 'NewFile') {
 			article.content = '标题：新文档\n简介：还没\n关键词：没有\n更新：' + num2time(Date.now()) + '\nTOC: on\nGLOSSARY: on\nRESOURCES: on\n\n请开始你的写作……';
 			article.title = '';
