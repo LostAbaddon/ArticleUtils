@@ -67,32 +67,59 @@ class Article extends ArticleInfo {
 	}
 }
 
+class Category {
+	name = '';
+	sups = [];
+	subs = [];
+	articles = [];
+	constructor (name) {
+		this.name = name;
+	}
+}
+
 class LibraryStorage {
 	static DBName = 'Library';
-	static DBVersion = 1;
+	static DBVersion = 2;
 
 	#cacheDB;
 	#info;
+	#categories;
 
 	init (onMigrate, callback) {
 		return new Promise(async res => {
 			this.#cacheDB = new CachedDB(LibraryStorage.DBName, LibraryStorage.DBVersion);
 			this.#cacheDB.onUpdate(() => {
 				this.#cacheDB.open('articles', 'id');
+				this.#cacheDB.open('category', 'name');
 				this.#cacheDB.open('info', 'id');
 				this.#cacheDB.open('status', 'name');
 				if (!!onMigrate) onMigrate(this.#cacheDB);
 			});
 			this.#cacheDB.onConnect(() => {
 				this.#cacheDB.cache('articles', 10);
+				this.#cacheDB.cache('category', 50);
 				this.#cacheDB.cache('info', 50);
 				this.#cacheDB.cache('status', 10);
 			});
 			await this.#cacheDB.connect();
 
-			var info = await this.#cacheDB.get('status', 'Info');
+			var [info, cateList] = await Promise.all([
+				this.#cacheDB.get('status', 'Info'),
+				this.#cacheDB.all('category')
+			]);
+
 			if (!info) this.#info = new LibraryStatus(0, 0);
 			else this.#info = new LibraryStatus(info.count, info.size);
+
+			if (!cateList) {
+				let cate = new Category('#root');
+				this.#categories = {};
+				this.#categories['#root'] = cate;
+			}
+			else {
+				this.#categories = cateList;
+				if (!this.#categories['#root']) this.#categories['#root'] = new Category('#root');
+			}
 
 			if (!!callback) callback(this);
 			res(this);
@@ -107,20 +134,49 @@ class LibraryStorage {
 				return res(false);
 			}
 			var ifo = article.getInfo();
-
 			var info = await this.#cacheDB.get('info', article.id);
+			var cateRemove = [];
 			if (!info) {
 				this.#info.totalArticle ++;
 				this.#info.totalSize += ifo.size;
 			}
 			else {
+				info.category.forEach(kw => {
+					if (!ifo.category.includes(kw)) cateRemove.push(kw);
+				});
 				this.#info.totalSize += ifo.size - info.size;
 			}
-			await Promise.all([
+
+			var actions = [
 				this.#cacheDB.set('articles', ifo.id, article),
 				this.#cacheDB.set('info', ifo.id, ifo),
 				this.#cacheDB.set('status', 'Info', this.#info),
-			]);
+			];
+
+			cateRemove.forEach(kw => {
+				var cate = this.#categories[kw];
+				if (!cate) return;
+				var idx = cate.articles.indexOf(ifo.id);
+				if (idx < 0) return;
+				cate.articles.splice(idx, 1);
+				actions.push(this.#cacheDB.set('category', cate.name, cate));
+			});
+			var cates = ifo.category.forEach(c => c);
+			if (cates.length === 0) cates.push('#root');
+			cates.forEach(kw => {
+				var cate = this.#categories[kw];
+				if (!cate) {
+					cate = new Category(kw);
+					this.#categories[kw] = cate;
+				}
+				else {
+					if (cate.articles.includes(ifo.id)) return;
+				}
+				cate.articles.push(ifo.id);
+				actions.push(this.#cacheDB.set('category', cate.name, cate));
+			});
+
+			await Promise.all(actions);
 
 			if (!!callback) callback(true);
 			res(true);
@@ -167,18 +223,30 @@ class LibraryStorage {
 				this.#cacheDB.get('info', id)
 			]);
 
+			var actions = [], cate, removes = [];
+			actions.push(this.#cacheDB.del('articles', id));
 			if (!!info) {
 				this.#info.totalArticle --;
 				this.#info.totalSize -= info.size;
-				await Promise.all([
-					this.#cacheDB.del('articles', id),
-					this.#cacheDB.del('info', id),
-					this.#cacheDB.set('status', 'Info', this.#info)
-				]);
+				actions.push(this.#cacheDB.del('info', id));
+				actions.push(this.#cacheDB.set('status', 'Info', this.#info));
+				cate = info.category;
 			}
 			else {
-				await this.#cacheDB.del('articles', id);
+				cate = article.category;
 			}
+			if (!!cate) {
+				cate.forEach(kw => {
+					var c = this.#categories[kw];
+					if (!c) return;
+					var idx = c.articles.indexOf(id);
+					if (idx < 0) return;
+					c.articles.splice(idx, 1);
+					actions.push(this.#cacheDB.del('category', kw));
+				});
+			}
+
+			await Promise.all(actions);
 
 			if (!!callback) callback();
 			res();
@@ -188,6 +256,7 @@ class LibraryStorage {
 		return new Promise(async res => {
 			await Promise.all([
 				this.#cacheDB.clear('articles'),
+				this.#cacheDB.clear('category'),
 				this.#cacheDB.clear('info'),
 				this.#cacheDB.clear('status'),
 			]);
@@ -202,18 +271,98 @@ class LibraryStorage {
 			res(list);
 		});
 	}
+	categories () {
+		return this.#categories;
+	}
+	async newCate (name) {
+		var cate = new Category(name);
+		if (!!this.#categories[name]) return false;
+		this.#categories[name] = cate;
+		await this.#cacheDB.set('category', name, cate);
+		return true;
+	}
+	setCate (cate) {
+		return new Promise(async res => {
+			var old = this.#categories[cate.name];
+			if (!old) {
+				this.#categories[cate.name] = cate;
+				await this.#cacheDB.set('category', cate.name, cate);
+				res(this.#categories);
+				return;
+			}
+			var actions = [];
+			actions.push(this.#cacheDB.set('category', cate.name, cate));
+			old.sups.forEach(kw => {
+				if (cate.sups.includes(kw)) return;
+				var c = this.#categories[kw];
+				var idx = c.subs.indexOf(cate.name);
+				if (idx < 0) return;
+				c.subs.splice(idx, 1);
+				actions.push(this.#cacheDB.set('category', kw, c));
+			});
+			cate.sups.forEach(kw => {
+				var c = this.#categories[kw];
+				var idx = c.subs.indexOf(cate.name);
+				if (idx >= 0) return;
+				c.subs.push(cate.name);
+				actions.push(this.#cacheDB.set('category', kw, c));
+			});
+			this.#categories[cate.name] = cate;
+			await Promise.all(actions);
+			res(this.#categories);
+		});
+	}
+	delCate (name) {
+		return new Promise(async res => {
+			var cate = this.#categories[name];
+			if (!cate || cate.articles.length > 0) {
+				res(this.#categories);
+				return;
+			}
+			var actions = [this.#cacheDB.del('category', name)];
+			Object.keys(this.#categories).forEach(kw => {
+				var c = this.#categories[kw];
+				var idx = c.sups.indexOf(name);
+				if (idx < 0) return;
+				c.sups.splice(idx, 1);
+				actions.push(this.#cacheDB.set('category', kw, c));
+			});
+			delete this.#categories[name];
+			await Promise.all(actions);
+			res(this.#categories);
+		});
+	}
 
 	refresh () {
 		return new Promise(async res => {
+			Object.keys(this.#categories).forEach(kw => {
+				var cate = this.#categories[kw];
+				cate.articles.splice(0, cate.articles.length);
+			});
 			var all = await this.#cacheDB.all('info');
 			var count = 0, size = 0;
 			Object.keys(all).forEach(id => {
+				var art = all[id];
 				count ++;
-				size += all[id].size;
+				size += art.size;
+				art.category.forEach(kw => {
+					var c = this.#categories[kw];
+					if (!c) {
+						c = new Category(kw);
+						this.#categories[kw] = c;
+					}
+					c.articles.push(id);
+				});
 			});
 			this.#info.totalArticle = count;
 			this.#info.totalSize = size;
-			await this.#cacheDB.set('status', 'Info', this.#info);
+
+			var actions = [this.#cacheDB.set('status', 'Info', this.#info)];
+			Object.keys(this.#categories).forEach(kw => {
+				actions.push(this.#cacheDB.set('category', kw, this.#categories[kw]));
+			});
+
+			await Promis.all(actions);
 			res();
 		});
 	}

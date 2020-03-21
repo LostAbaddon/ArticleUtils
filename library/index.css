@@ -38,7 +38,7 @@ header.page-title {
 	color: rgb(233, 231, 239);
 	box-shadow: 0px -2px 5px 2px rgb(233, 231, 239);
 }
-header.page-title span.new-file {
+header.page-title div.button-area {
 	position: absolute;
 	box-sizing: border-box;
 	right: 10px;
@@ -46,23 +46,100 @@ header.page-title span.new-file {
 	font-size: 12px;
 	line-height: 18px;
 	padding: 10px;
+}
+header.page-title div.button-area.left {
+	left: 10px;
+	right: auto;
+}
+header.page-title div.button-area .button {
+	margin-left: 20px;
+	margin-right: 20px;
 	cursor: pointer;
 }
 
+nav {
+	position: fixed;
+	top: 65px;
+	left: 0px;
+	right: 0px;
+	height: 20px;
+	padding: 0px 20px 2px 20px;
+	line-height: 18px;
+	font-size: 14px;
+	color: rgb(117, 138, 153);
+	border-bottom: 1px solid rgba(233, 231, 239, 0.3);
+	cursor: default;
+}
+nav a.nav-item,
+nav a.nav-item:hover,
+nav a.nav-item:visited {
+	margin-left: 5px;
+	margin-right: 5px;
+	padding-left: 1px;
+	padding-right: 1px;
+	color: rgb(117, 138, 153);
+	text-decoration: none;
+}
+nav a.nav-item[href],
+nav a.nav-item[href]:visited {
+	border-bottom: 0px solid rgba(117, 138, 153, 0);
+}
+nav a.nav-item[href]:hover {
+	border-bottom: 1px solid rgb(117, 138, 153);
+}
+
+section#ArticleMenu {
+	position: fixed;
+	box-sizing: border-box;
+	overflow: auto;
+	top: 88px;
+	bottom: 5px;
+	left: 10px;
+	width: 280px;
+	box-shadow: inset -5px 0px 5px -5px white;
+}
 section#ArticleContainer {
 	position: fixed;
 	display: flex;
 	box-sizing: border-box;
 	flex-flow: row wrap;
 	justify-content: space-around;
-	top: 60px;
-	bottom: 0px;
-	left: 0px;
-	right: 0px;
-	width: 100%;
-	padding: 5px;
+	top: 88px;
+	bottom: 5px;
+	left: 300px;
+	right: 10px;
+	padding: 0px;
 	overflow: auto;
 	text-align: center;
+}
+section#ArticleContainer:empty:after {
+	content: '本分类下无内容';
+	margin-top: 100px;
+	font-size: 18px;
+	font-weight: bolder;
+	text-align: center;
+	color: rgb(120, 126, 118);
+}
+
+section#ArticleMenu .cate-item {
+	margin-top: 5px;
+	margin-bottom: 5px;
+	font-size: 16px;
+	line-height: 24px;
+	color: rgb(227, 239, 253);
+}
+section#ArticleMenu .cate-item .cate-link,
+section#ArticleMenu .cate-item .cate-link:hover,
+section#ArticleMenu .cate-item .cate-link:visited {
+	color: rgb(227, 239, 253);
+	text-decoration: none;
+}
+section#ArticleMenu .cate-item .cate-link,
+section#ArticleMenu .cate-item .cate-link:visited {
+	border-bottom: 0px solid rgba(233, 231, 239, 0);
+}
+section#ArticleMenu .cate-item .cate-link:hover {
+	border-bottom: 1px solid rgb(233, 231, 239);
 }
 
 section#ArticleContainer > div.article-item {
@@ -192,4 +269,141 @@ section#ArticleContainer > div.article-item:hover > div.edit-article {
 	font-size: 16px;
 	line-height: 24px;
 	color: rgb(233, 231, 239);
+}
+
+#CategoryContainer {
+	position: absolute;
+	top: 65px;
+	bottom: 10px;
+	left: 10px;
+	right: 10px;
+	font-size: 16px;
+	color: rgb(186, 202, 198);
+	overflow: auto;
+}
+#CategoryContainer .cate-title {
+	display: inline-block;
+	margin: 0px;
+	padding: 5px 10px 5px 0px;
+	cursor: pointer;
+}
+
+#MaskCover {
+	position: fixed;
+	display: none;
+	box-sizing: border-box;
+	z-index: 200;
+	top: 0px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	background-color: transparent;
+}
+
+#NewCategory,
+#CategoryModify {
+	position: fixed;
+	display: none;
+	box-sizing: border-box;
+	z-index: 201;
+	top: 50%;
+	left: 50%;
+	background-color: rgb(36, 36, 36);
+	box-shadow: 5px 5px 10px 2px black;
+	transform: translate(-50%, -50%);
+	transition: opacity 250ms ease-in-out;
+}
+#NewCategory {
+	width: 400px;
+	height: 200px;
+}
+#CategoryModify {
+	width: 400px;
+	max-height: 600px;
+}
+#NewCategory .title {
+	margin-top: 30px;
+	margin-bottom: 20px;
+	font-size: 24px;
+	font-weight: bolder;
+	text-align: center;
+	color: rgb(233, 231, 239);
+}
+#NewCategory .content {
+	margin-top: 20px;
+	text-align: center;
+}
+#CategoryModify .content.center {
+	text-align: center;
+}
+#NewCategory .content input {
+	width: 250px;
+	font-size: 18px;
+	line-height: 24px;
+	text-align: center;
+	color: rgb(233, 231, 239);
+	border: none;
+	border-bottom: 1px solid rgb(234, 205, 118);
+	outline: none;
+	resize: none;
+	background-color: transparent;
+}
+#NewCategory .content button,
+#CategoryModify .content button {
+	width: 65px;
+	padding: 5px 15px;
+	margin-left: 10px;
+	margin-right: 10px;
+	font-size: 16px;
+	line-height: 18px;
+	text-align: center;
+	color: rgb(233, 231, 239);
+	border: none;
+	border-radius: 8px;
+	outline: none;
+	background-color: transparent;
+	box-shadow: 0px 0px 2px 1px rgb(233, 231, 239);
+	cursor: pointer;
+}
+#CategoryModify .content {
+	margin: 10px;
+	font-size: 16px;
+	text-align: left;
+	color: rgb(233, 231, 239);
+}
+#CategoryModify .content > span:first-child {
+	font-weight: bolder;
+}
+#CategoryModify .content span.supCates,
+#CategoryModify .content span.subCates {
+	display: inline-block;
+}
+#CategoryModify .content span.supCates:empty:after,
+#CategoryModify .content span.subCates:empty:after {
+	content: '无';
+}
+
+#CategoryModify .content span.supCates .cate-item,
+#CategoryModify .content div.cateList .cate-item {
+	display: inline-block;
+	padding: 2px 8px;
+	margin-left: 5px;
+	margin-right: 5px;
+	border-radius: 10px;
+	box-shadow: 0px 0px 1px 1px rgba(242, 190, 69, 0.3), inset 0px 0px 1px 1px rgba(242, 190, 69, 0.3);
+	font-size: 16px;
+	line-height: 20px;
+	cursor: pointer;
+}
+#CategoryModify .content span.subCates .sub-cate {
+	display: inline-block;
+}
+#CategoryModify .content span.subCates .sub-cate:after {
+	content: '，';
+}
+#CategoryModify .content span.subCates .sub-cate:last-child:after {
+	content: '';
+}
+#CategoryModify .content div.cateList {
+	line-height: 36px;
 }

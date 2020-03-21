@@ -56,6 +56,10 @@ const onInit = config => {
 		else if (msg.event === 'GetArticleList') getArticleList(sender.tab.id);
 		else if (msg.event === 'SaveArticle') saveArticle(msg.article, sender.tab.id);
 		else if (msg.event === 'GetArticleByID') getArticleByID(msg.id, sender.tab.id);
+		else if (msg.event === 'GetArticleCategories') getArticleCategories(sender.tab.id);
+		else if (msg.event === 'AddCategories') addCategories(msg.name, sender.tab.id);
+		else if (msg.event === 'ModifyArticleCategories') modifyArticleCategories(msg.category, sender.tab.id);
+		else if (msg.event === 'DeleteArticleCategories') deleteArticleCategories(msg.target, sender.tab.id);
 	});
 
 	window.cacheStorage = new CacheStorage('ResourceCache', 1);
@@ -630,6 +634,22 @@ const saveArticle = async (article, tabID) => {
 	if (!article || !article.id) return;
 	var saved = await window.libraryStorage.set(article);
 	chrome.tabs.sendMessage(tabID, { event: 'SaveArticle', data: saved });
+};
+const getArticleCategories = tabID => {
+	chrome.tabs.sendMessage(tabID, { event: 'GetArticleCategories', data: libraryStorage.categories() });
+};
+const addCategories = async (cateName, tabID) => {
+	cateName = cateName.replace(/[ ,，；;、　\?？&!！=]+/g, '');
+	libraryStorage.newCate(cateName);
+	chrome.tabs.sendMessage(tabID, { event: 'GetArticleCategories', data: libraryStorage.categories() });
+};
+const modifyArticleCategories = async (category, tabID) => {
+	var list = await libraryStorage.setCate(category);
+	chrome.tabs.sendMessage(tabID, { event: 'GetArticleCategories', data: list });
+};
+const deleteArticleCategories = async (target, tabID) => {
+	var list = await libraryStorage.delCate(target);
+	chrome.tabs.sendMessage(tabID, { event: 'GetArticleCategories', data: list });
 };
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {

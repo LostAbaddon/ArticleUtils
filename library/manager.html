@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>本地文库 - 分类管理</title>
+<link type="text/css" rel="stylesheet" href="./index.css">
+</head>
+<body>
+<header class="page-title">本地文库 - 分类管理<div class="button-area left"><span id="GoBack" class="button">返回文库</span></div><div class="button-area"><span id="AddCategory" class="button">添加分类</span></div></header>
+<section id="CategoryContainer" class="scroller"></section>
+<div id="MaskCover"></div>
+<div id="NewCategory">
+	<div class="title">新分类名称：</div>
+	<div class="content"><input type="text" name="CateName"></div>
+	<div class="content"><button id="AddNewCate">确定</button></div>
+</div>
+<div id="CategoryModify">
+	<div class="content"><span>分类名：</span><span class="cateName"></span></div>
+	<div class="content"><span>父　类：</span><span class="supCates"></span></div>
+	<div class="content"><span>子　类：</span><span class="subCates"></span></div>
+	<div class="content"><span>请选择要添加的父类：</span></div>
+	<div class="content"><div class="cateList"></div></div>
+	<div class="content center"><button id="ModifyCate">确定</button><button id="DeleteCate">删除</button></div>
+</div>
+<script type="text/javascript" src="../common/common.js"></script>
+<script type="text/javascript" src="./manager.js"></script>
+</body>
+</html>

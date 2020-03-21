@@ -1545,6 +1545,16 @@
 		content = content.replace(/^(<\/?br>)+|(<\/?br>)+$/gi, '<br>');
 		return content;
 	};
+	const getKeywords = words => {
+		if (!words) return [];
+		words = words.keyword.split(/[ ,，；;、　]+/).filter(w => w.length > 0);
+		var list = [];
+		words.forEach(w => {
+			if (list.includes(w)) return;
+			list.push(w);
+		});
+		return list;
+	};
 
 	// 解析元数据
 	const getMetas = (doc, text) => {
@@ -1583,8 +1593,7 @@
 		if (!!metas.toc && ['on', 'yes', 'true'].includes(metas.toc.toLowerCase())) metas.toc = true;
 		else metas.toc = false;
 		doc.metas = metas;
-		doc.metas.keyword = doc.metas.keyword || '';
-		doc.metas.keyword = doc.metas.keyword.split(/[ ,，;；]+/);
+		doc.metas.keyword = getKeywords(doc.metas.keyword)
 		if (!!doc.metas.date) {
 			try {
 				doc.metas.date = (new Date(doc.metas.date)).getTime();
