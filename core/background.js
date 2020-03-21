@@ -44,12 +44,18 @@ const onInit = config => {
 
 			searchResources(msg.targets, msg.action, msg.engine, msg.force, engineList, sender.tab.id);
 		}
+
 		else if (msg.event === 'ToggleTranslation') launchTranslation(msg.target, sender.tab.id);
+
 		else if (msg.event === 'ArchieveArticle') archieveArticle(msg.fingerprint, msg.title, msg.content, msg.url, sender.tab.id);
 		else if (msg.event === 'ViewArchieve') viewArchieve();
 		else if (msg.event === 'DeleteArchieve') unarchieveArticle(msg.fingerprint, sender.tab.id);
 		else if (msg.event === 'ModifyArchieveTitle') modifyArchieveTitle(msg.fingerprint, msg.title, sender.tab.id);
 		else if (msg.event === 'ModifyArchieve') modifyArchieve(msg.fingerprint, msg.content, sender.tab.id);
+
+		else if (msg.event === 'GetArticleList') getArticleList(sender.tab.id);
+		else if (msg.event === 'SaveArticle') saveArticle(msg.article, sender.tab.id);
+		else if (msg.event === 'GetArticleByID') getArticleByID(msg.id, sender.tab.id);
 	});
 
 	window.cacheStorage = new CacheStorage('ResourceCache', 1);
@@ -93,6 +99,9 @@ const onInit = config => {
 
 	window.archieveCache = new CacheStorage('ArchieveCache', 1);
 	window.archieveCache.init(24 * 365, 24, 500); // 1 年过期，24 小时清理一次，总容量 500 MB
+
+	window.libraryStorage = new LibraryStorage();
+	window.libraryStorage.init();
 };
 const onUpdate = (key, value) => {
 	if (key === 'ResourceExpire') window.cacheStorage.changeExpire(value);
@@ -607,6 +616,20 @@ const modifyArchieve = async (fingerprint, content, tabID) => {
 		fingerprint: fingerprint,
 		ok: true
 	});
+};
+
+const getArticleList = async (tabID) => {
+	var list = await window.libraryStorage.all();
+	chrome.tabs.sendMessage(tabID, { event: 'GetArticleList', data: list });
+};
+const getArticleByID = async (id, tabID) => {
+	var article = await window.libraryStorage.get(id);
+	chrome.tabs.sendMessage(tabID, { event: 'GetArticleByID', data: article });
+};
+const saveArticle = async (article, tabID) => {
+	if (!article || !article.id) return;
+	var saved = await window.libraryStorage.set(article);
+	chrome.tabs.sendMessage(tabID, { event: 'SaveArticle', data: saved });
 };
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {

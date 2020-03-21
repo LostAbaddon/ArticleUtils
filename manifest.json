@@ -18,6 +18,7 @@
 			"common/LRUcache.js",
 			"common/cacheDB.js",
 			"common/cacheStorage.js",
+			"library/storage.js",
 			"config.js",
 			"core/background.js"
 		]

@@ -31,7 +31,7 @@ MarkUp.addExtension({
 		line = line.replace(/\$([\w\W]+?)\$/g, (match, content) => {
 			if (match.indexOf('$$') >= 0) return match;
 			var key = 'latex-' + generateRandomKey();
-			caches[MarkUp.SymHidden][key] = '$' + content + '$';
+			caches[MarkUp.SymHidden][key] = '<span class="latex inline">$' + content + '$</span>';
 			changed = true;
 			return '%' + key + '%';
 		});
@@ -59,7 +59,7 @@ MarkUp.addExtension({
 	parse: (line, doc, caches) => {
 		doc.links = doc.links || [];
 		var changed = false;
-		line = line.replace(/([!@#]?)\[([\w %'"\-\.\+=,;:\?!\\\/\u0800-\u9fa5]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
+		line = line.replace(/([!@#]?)\[([\w %'"\*_\^\|~\-\.\+=,;:\?!\\\/\u0800-\u9fa5]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
 			link = link.trim();
 			if (link.length === 0) return match;
 			if (!!caches[title]) return match;
@@ -76,7 +76,7 @@ MarkUp.addExtension({
 				else {
 					ui = ui + link + '" target="_blank">';
 				}
-				ui = ui + title + '</a>';
+				ui = ui + content + '</a>';
 				caches[key] = ui;
 				changed = true;
 				return '%' + key + '%';
@@ -517,7 +517,7 @@ MarkUp.addExtension({
 	parse: (line, doc, caches) => {
 		var changed = false;
 
-		line = line.replace(/([!@#]?)\[([^\n]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
+		line = line.replace(/([!@#])\[([^\n]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
 			link = link.trim();
 			if (link.length === 0) return match;
 

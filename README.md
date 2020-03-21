@@ -125,7 +125,7 @@ MarkUp 是在 MarkDown 基础上的增强型语言，支持 MarkDown 的所有�
 
 本插件自带本作者自制的最新 MarkUp 语法解释器，并用在存档内容编辑上。
 
-可打开本地 MarkDown / MarkUp 文档进行编辑。
+可打开本地 MarkDown / MarkUp 文档进行编辑（菜单打开与拖进编辑器打开都支持）。
 
 ## 其它说明
 

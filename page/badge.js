@@ -52,5 +52,5 @@ window.PageActions.ViewArchieve = () => {
 	chrome.tabs.create({ url: chrome.runtime.getURL('/page/archieve.html'), active: true });
 };
 window.PageActions.EnterEditor = () => {
-	chrome.tabs.create({ url: chrome.runtime.getURL('/markup/editor.html'), active: true });
+	chrome.tabs.create({ url: chrome.runtime.getURL('/library/index.html'), active: true });
 };

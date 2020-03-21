@@ -1,0 +1,195 @@
+html, body {
+	box-sizing: border-box;
+	width: 100%;
+	height: 100%;
+	margin: 0px;
+	padding: 0px;
+}
+body {
+	background-color: rgb(22, 24, 35);
+	font-size: 0px;
+}
+
+.scroller::-webkit-scrollbar {
+	width: 12px;
+	background-color: transparent;
+	cursor: default;
+}
+.scroller::-webkit-scrollbar-thumb {
+	border-radius: 5px;
+	background-color: rgb(57, 47, 65);
+	box-shadow: inset 2px 2px 3px rgba(186, 202, 198, 0.5);
+	cursor: default;
+}
+.scroller::-webkit-scrollbar-track {
+	border-radius: 6px;
+	background-color: rgba(186, 202, 198, 0.1);
+	box-shadow: inset 2px 2px 3px rgba(22, 24, 35, 0.2);
+	cursor: default;
+}
+
+header.page-title {
+	box-sizing: border-box;
+	padding: 10px;
+	font-size: 30px;
+	font-weight: bolder;
+	text-align: center;
+	line-height: 40px;
+	color: rgb(233, 231, 239);
+	box-shadow: 0px -2px 5px 2px rgb(233, 231, 239);
+}
+header.page-title span.new-file {
+	position: absolute;
+	box-sizing: border-box;
+	right: 10px;
+	top: 10px;
+	font-size: 12px;
+	line-height: 18px;
+	padding: 10px;
+	cursor: pointer;
+}
+
+section#ArticleContainer {
+	position: fixed;
+	display: flex;
+	box-sizing: border-box;
+	flex-flow: row wrap;
+	justify-content: space-around;
+	top: 60px;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	width: 100%;
+	padding: 5px;
+	overflow: auto;
+	text-align: center;
+}
+
+section#ArticleContainer > div.article-item {
+	position: relative;
+	box-sizing: border-box;
+	display: block;
+	flex: 0.1 0.1 350px;
+	height: 250px;
+	margin: 10px;
+	padding: 10px;
+	box-shadow: 1px 1px 3px 1px rgba(233, 231, 239, 0.6);
+	overflow: hidden;
+	font-size: 16px;
+	cursor: pointer;
+	transition: all 200ms ease-in-out;
+}
+section#ArticleContainer > div.article-item:hover {
+	box-shadow: 2px 2px 5px 2px rgba(233, 231, 239, 0.7);
+	transform: scale(1.02);
+}
+section#ArticleContainer > div.article-item:after {
+	content: ' ';
+	position: absolute;
+	display: block;
+	bottom: 0px;
+	left: 0px;
+	width: 100%;
+	height: 5px;
+	background-color: rgb(22, 24, 35);
+	box-shadow: 0px -4.5px 5px 0px rgb(22, 24, 35);
+}
+section#ArticleContainer > div.article-item > div.article-title {
+	padding-bottom: 10px;
+	font-size: 18px;
+	font-weight: bolder;
+	text-align: center;
+	color: rgb(233, 231, 239);
+	box-shadow: 0px 5px 3px -3px rgba(233, 231, 239, 0.6);
+	pointer-events: none;
+	user-select: none;
+}
+section#ArticleContainer > div.article-item > div.article-desc {
+	margin-top: 10px;
+	font-size: 16px;
+	text-align: left;
+	color: rgb(186, 202, 198);
+	pointer-events: none;
+	user-select: none;
+}
+section#ArticleContainer > div.article-item > div.edit-article {
+	position: absolute;
+	box-sizing: border-box;
+	width: 60px;
+	bottom: 10px;
+	right: -60px;
+	padding: 5px;
+	border-radius: 10px 0px 0px 10px;
+	box-shadow: 3px 3px 5px 2px white;
+	font-size: 16px;
+	color: rgb(233, 231, 239);
+	text-align: center;
+	transition: all 250ms ease-in-out;
+}
+section#ArticleContainer > div.article-item:hover > div.edit-article {
+	right: 0px;
+}
+
+#ArticleTitle {
+	position: relative;
+	box-sizing: border;
+	margin-bottom: 5px;
+	padding: 20px;
+	border-bottom: 1px solid rgb(96, 96, 96);
+}
+#ArticleTitle > p {
+	margin: 0px;
+	padding: 0px;
+	font-size: 38px;
+	font-weight: bolder;
+	line-height: 42px;
+	color: rgb(233, 241, 246);
+	text-align: center;
+}
+#ArticleTitle > div.button {
+	position: absolute;
+	box-sizing: border-box;
+	width: 60px;
+	top: 25px;
+	padding: 5px;
+	font-size: 14px;
+	color: rgb(186, 202, 198);
+	box-shadow: 3px 3px 5px 2px rgba(233, 231, 239, 0.3);
+	text-align: center;
+	transition: all 250ms ease-in-out;
+	cursor: pointer;
+}
+#ArticleTitle > div.button.left {
+	left: -65px;
+	border-radius: 0px 10px 10px 0px;
+}
+#ArticleTitle > div.button.right {
+	right: -65px;
+	border-radius: 10px 0px 0px 10px;
+}
+#ArticleTitle:hover > div.button.left {
+	left: 0px;
+}
+#ArticleTitle:hover > div.button.right {
+	right: 0px;
+}
+#ArticleKeywords {
+	padding-right: 10px;
+	padding-bottom: 5px;
+	font-size: 12px;
+	color: rgb(186, 202, 198);
+	text-align: center;
+	border-bottom: 1px solid rgb(96, 96, 96);
+}
+#ArticleKeywords > span.keyword {
+	margin-left: 10px;
+}
+#ArticleContent {
+	max-width: 800px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-bottom: 50px;
+	font-size: 16px;
+	line-height: 24px;
+	color: rgb(233, 231, 239);
+}

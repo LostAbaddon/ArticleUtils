@@ -220,7 +220,9 @@ const HistoryManager = {
 
 const ScrollSpeed = 50, ScrollRate = 0.15;
 
-var changer, lastContent = '', articleConfig = {}, helpContent = '', isHelping = false, localFileName = '';
+var fileCatagory = 0, localFileName = '';
+var changer, lastContent = '', articleConfig = {}, helpContent = '', isHelping = false;
+var LaTeXMap = new Map();
 const onEdited = async (saveHistory=true) => {
 	if (!!changer) {
 		clearTimeout(changer);
@@ -240,7 +242,35 @@ const onEdited = async (saveHistory=true) => {
 	}
 
 	MUPreview.innerHTML = html;
+	
+	// 获得 LaTeX 列表
+	MUPreview.querySelectorAll('.latex').forEach(latex => {
+		var inner = latex.innerText;
+		var output = LaTeXMap.get(inner);
+		latex.__latex = inner;
+		if (!!output) latex.innerHTML = '';
+	});
+
 	MathJax.Hub.Queue(["Typeset", MathJax.Hub]);
+	// 缓存渲染完成的 LaTeX
+	MathJax.Hub.Queue((...args) => {
+		var count = 0;
+		MUPreview.querySelectorAll('.latex').forEach(latex => {
+			var origin = latex.__latex;
+			var output = LaTeXMap.get(origin);
+
+			if (!!output) {
+				latex.innerHTML = output;
+			}
+			else {
+				count ++;
+				output = latex.innerHTML;
+				LaTeXMap.set(origin, output);
+			}
+		});
+		console.log('xxxxxxxxxxxxxxxxxxxxxxxx', count);
+	});
+
 
 	if (saveHistory) {
 		let history = new HistoryItem();
@@ -309,6 +339,26 @@ const onWheel = () => {
 		mover = null;
 	}
 	mover = setTimeout(onMoved, 100);
+};
+
+const num2time = num => {
+	var time = new Date(num);
+	var Y = (time.getYear() + 1900) + '';
+	var M = (time.getMonth() + 1) + '';
+	var D = time.getDate() + '';
+	var h = time.getHours() + '';
+	var m = time.getMinutes() + '';
+	var s = time.getSeconds() + '';
+
+	if (M.length < 2) M = '0' + M;
+	if (D.length < 2) D = '0' + D;
+	if (h.length < 1) h = '00';
+	else if (h.length < 2) h = '0' + h;
+	if (m.length < 1) m = '00';
+	else if (m.length < 2) m = '0' + m;
+	if (s.length < 1) s = '00';
+	else if (s.length < 2) s = '0' + s;
+	return Y + '/' + M + '/' + D + ' ' + h + ':' + m + ':' + s;
 };
 
 const ContentController = {
@@ -1237,23 +1287,86 @@ const download = (filename, content) => {
 	var link = URL.createObjectURL(blob);
 	var downloader = document.createElement('a');
 	downloader.setAttribute('href', link);
-	downloader.setAttribute('download', filename);
+	if (!!filename) downloader.setAttribute('download', filename);
+	else downloader.setAttribute('download', 'untitled');
 	downloader.click();
+};
+const downloadMU = () => {
+	var filename = localFileName;
+	if (!filename) {
+		filename = MUPreview.querySelector('header.article-title').innerText + '.mu';
+	}
+	download(filename, MUEditor.value);
+};
+const downloadHTML = () => {
+	var title = MUPreview.querySelector('header.article-title').innerText;
+	var filename = localFileName;
+	if (!filename) {
+		filename = title + '.html';
+	}
+	else {
+		filename = filename.replace(/\.mu$/i, '') + '.html';
+	}
+
+	var xhr = new XMLHttpRequest();
+	xhr.open('get', './style/default.css', true);
+	xhr.onreadystatechange = () => {
+		if (xhr.readyState == 4) {
+			if (xhr.status === 0 || xhr.response === '') return res(null);
+			var text = xhr.responseText;
+			text = 'body{background-color: rgb(22, 24, 35);}\narticle{line-height: 24px;font-size: 16px;font-family: Georgia,Times New Roman,Times,Songti SC,serif;color: rgb(225, 225, 225);}\n' + text;
+			var html = '<html>\n<head>\n<meta charset="UTF-8">\n<title>' + title + '</title>\n<style>\n' + text + '\n</style>\n</head>\n';
+			html += content + '\n</html>';
+			download(filename, html);
+		}
+	};
+	xhr.send();
+
+	var content = MarkUp.parse(MUEditor.value, {
+		title,
+		fullexport: true,
+		showtitle: true,
+		showauthor: true,
+		glossary: true,
+		resources: true,
+		toc: true,
+	});
+	content = '<body>\n' + content + '\n</body>';
 };
 const saveDoc = () => {
 	var content = MUEditor.value;
-
-	if (!articleConfig.fingerprint) {
-		download(localFileName, content);
-		return;
-	}
-
 	var fingerprint = SHA256.FingerPrint(content);
-	chrome.runtime.sendMessage({
-		event: 'ModifyArchieve',
-		fingerprint: articleConfig.fingerprint,
-		content,
-	});
+
+	if (fileCatagory === 1) {
+		chrome.runtime.sendMessage({
+			event: 'ModifyArchieve',
+			fingerprint: articleConfig.fingerprint,
+			content,
+		});
+	}
+	else if (fileCatagory === 2) {
+		let article = { content, fingerprint };
+		article.id = articleConfig.id;
+		let info = MarkUp.fullParse(content);
+		article.title = info.title;
+		article.description = info.meta.description;
+		article.category = info.meta.keywords.filter(kw => kw.length > 0);
+		article.update = info.date || Date.now();
+		chrome.runtime.sendMessage({ event: 'SaveArticle', article });
+	}
+	else {
+		let article = { content, fingerprint };
+		let info = MarkUp.fullParse(content);
+		article.title = info.title;
+		article.description = info.meta.description;
+		article.category = info.meta.keywords.filter(kw => kw.length > 0);
+		article.update = info.date || Date.now();
+		if (articleConfig.fingerprint === 'NewFile') {
+			article.id = SHA256(content);
+		}
+		else article.id = articleConfig.fingerprint;
+		chrome.runtime.sendMessage({ event: 'SaveArticle', article });
+	}
 };
 const openLocalFile = file => {
 	localFileName = file.name;
@@ -1277,6 +1390,7 @@ const openLocalFile = file => {
 const readFile = () => {
 	var file = FileLoader.files[0];
 	if (!file) return;
+	fileCatagory = 0;
 	openLocalFile(file);
 };
 
@@ -1568,8 +1682,13 @@ const controlHandler = (key, fromKB=false) => {
 			onEdited();
 			return true;
 		}
-		else {
+		else if (fileCatagory === 1) {
 			let addr = location.origin + '/page/archieve.html?fingerprint=' + articleConfig.fingerprint;
+			location.href = addr;
+			return true;
+		}
+		else if (fileCatagory === 2) {
+			let addr = location.origin + '/library/view.html?id=' + articleConfig.id;
 			location.href = addr;
 			return true;
 		}
@@ -1580,7 +1699,17 @@ const controlHandler = (key, fromKB=false) => {
 	}
 	else if (key === 'open-local-article') {
 		FileLoader.accept = '.mu';
+		// FileLoader.onchange = readFile;
 		FileLoader.click();
+		return true;
+	}
+	else if (key === 'download-mu') {
+		downloadMU();
+		return true;
+	}
+	else if (key === 'download-html') {
+		downloadHTML();
+		return true;
 	}
 
 	else if (key === 'deleteLine') {
@@ -1634,8 +1763,11 @@ MUEditor.addEventListener('mousewheel', onWheel);
 MUEditor.addEventListener('scroll', onWheel);
 MUEditor.addEventListener('drop', onDrop);
 MUPreview.addEventListener('drop', onDrop);
-
 FileLoader.addEventListener('change', readFile);
+
+chrome.runtime.onMessage.addListener(msg => {
+	if (msg.event === "GetArticleByID") getArticleByID(msg.data);
+});
 
 const menuBar = new MenuBar(controlHandler);
 (() => {
@@ -1644,6 +1776,8 @@ const menuBar = new MenuBar(controlHandler);
 	group = new MenuGroup();
 	group.add('保存', 'save', 'save-article', 'ctrl+S');
 	group.add('打开本地文档', 'file-word', 'open-local-article', 'ctrl+O');
+	group.add('下载 MU', 'file-download', 'download-mu');
+	group.add('下载 HTML', 'file-export', 'download-html');
 	menuBar.add(group);
 
 	menuBar.add(new MenuLine());
@@ -1765,8 +1899,8 @@ const menuBar = new MenuBar(controlHandler);
 	document.querySelector('div.controller.toolbar').appendChild(menuBar.ui);
 }) ();
 
-var archieveDB;
-const loadArticle = fingerprint => new Promise(async res => {
+var archieveDB, backendResponser;
+const loadArchieve = fingerprint => new Promise(async res => {
 	if (!fingerprint) {
 		let article = {
 			fingerprint: '',
@@ -1797,6 +1931,16 @@ const loadArticle = fingerprint => new Promise(async res => {
 
 	res(article);
 });
+const loadArticle = id => new Promise(res => {
+	if (!!backendResponser) backendResponser();
+	backendResponser = res;
+	chrome.runtime.sendMessage({ event: 'GetArticleByID', id });
+});
+const getArticleByID = article => {
+	var cb = backendResponser;
+	backendResponser = null;
+	cb(article);
+};
 const loadHelp = () => new Promise(res => {
 	var xhr = new XMLHttpRequest();
 	xhr.open('get', './demo.mu', true);
@@ -1823,23 +1967,42 @@ const loadHelp = () => new Promise(res => {
 		query[key] = value;
 	});
 
-	var article, help;
+	var article, help, actions = [];
+	actions.push(new Promise(async res => {help = await loadHelp(); res();}));
 
-	await Promise.all([
-		new Promise(async res => {article = await loadArticle(query.article); res();}),
-		new Promise(async res => {help = await loadHelp(); res();})
-	]);
-
-	if (!article.content) {
-		article.content = help;
-		article.title = 'MarkUp 帮助文档';
+	if (!!query.article) {
+		fileCatagory = 1;
+		actions.push(new Promise(async res => {article = await loadArchieve(query.article); res();}));
 	}
+	else if (!!query.id) {
+		fileCatagory = 2;
+		actions.push(new Promise(async res => {article = await loadArticle(query.id); res();}));
+	}
+	else {
+		fileCatagory = 0;
+	}
+
+	await Promise.all(actions);
+
+	if (!article || !article.content) {
+		if (query.action === 'NewFile') {
+			article.content = '标题：新文档\n简介：还没\n关键词：没有\n更新：' + num2time(Date.now()) + '\nTOC: on\nGLOSSARY: on\nRESOURCES: on\n\n请开始你的写作……';
+			article.title = '';
+		}
+		else {
+			article.content = help;
+			article.title = 'MarkUp 帮助文档';
+		}
+	}
+
 	Object.keys(article).forEach(key => {
+		if (key === 'title' && fileCatagory !== 1) return;
 		var value = article[key];
-		if (!key) return;
+		if (!value) return;
 		articleConfig[key] = value;
 	});
 	articleConfig.showtitle = true;
+	if (query.action === 'NewFile') articleConfig.fingerprint = 'NewFile';
 
 	helpContent = help;
 	MUEditor.value = article.content;

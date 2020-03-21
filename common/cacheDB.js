@@ -106,7 +106,7 @@
 					if (!list) return res(list);
 					var result = {};
 					list.forEach(item => {
-						result[item.url] = item.data
+						result[item[cache.keyPath]] = item.data
 					});
 					res(result);
 				};

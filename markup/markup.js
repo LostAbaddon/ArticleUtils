@@ -477,7 +477,7 @@
 			equaSection.push([equaBlocks[i][0], equaBlocks[i + 1][0]]);
 		}
 		equaSection.forEach(block => {
-			var ctx = ['<p>$$'];
+			var ctx = ['<p class="latex block">$$'];
 			for (let i = block[0] + 1; i < block[1]; i ++) {
 				ctx.push(contents[i]);
 			}
@@ -735,7 +735,7 @@
 			var info = blockMap[id - 1];
 			if (!info) {
 				let ctx = contents[id - 1];
-				if (!!ctx.match(/^%[\w\-]+%$/)) {
+				if (id === 0 || !!ctx.match(/^%[\w\-]+%$/)) {
 					headlines.push([id, contents[id].replace(/^[ 　\t]+|[ 　\t]+$/, '')[0]]);
 				}
 				else {
@@ -1377,6 +1377,7 @@
 						else level = n;
 					});
 				}
+				doc.toced = true;
 				return generateTableOfContent(doc, title, level);
 			});
 
@@ -1407,6 +1408,17 @@
 
 			return section;
 		});
+		// 如果没生成过目录，且生成目录开关已打开，则在文档头补熵目录
+		if (doc.metas.toc && !doc.toced) {
+			let toc = generateTableOfContent(doc, '目录', 3);
+			toc = '<section>' + toc + '</section>';
+			if (doc.metas.showtitle) {
+				sections.splice(1, 0, toc);
+			}
+			else {
+				sections.unshift(toc);
+			}
+		}
 		return sections;
 	};
 	const generateTableOfContent = (doc, title, level) => {
@@ -1566,9 +1578,18 @@
 		else metas.terms = false;
 		if (!!metas.resources && ['on', 'yes', 'true'].includes(metas.resources.toLowerCase())) metas.resources = true;
 		else metas.resources = false;
+		if (!!metas.toc && ['on', 'yes', 'true'].includes(metas.toc.toLowerCase())) metas.toc = true;
+		else metas.toc = false;
 		doc.metas = metas;
 		doc.metas.keyword = doc.metas.keyword || '';
 		doc.metas.keyword = doc.metas.keyword.split(/[ ,，;；]+/);
+		if (!!doc.metas.date) {
+			try {
+				doc.metas.date = (new Date(doc.metas.date)).getTime();
+			} catch {
+				delete doc.metas.date;
+			}
+		}
 		doc.metas.god = doc.metas.theone = '<a href="mailto:lostabaddon@gmail.com">LostAbaddon</a>';
 		if (doc.metas.script) {
 			doc.metas.script = doc.metas.script.split(/[,; 　\t]+/);
@@ -1655,9 +1676,10 @@
 		return text;
 	};
 
-	MarkUp.parse = (text, config) => {
+	MarkUp.fullParse = (text, config) => {
 		var docTree = {
-			finals: {}
+			finals: {},
+			toced: false,
 		};
 
 		text = prepare(text);
@@ -1665,7 +1687,7 @@
 		if (!!config) Object.keys(config).forEach(key => {
 			key = key.toLowerCase();
 			let value = config[key];
-			if (value !== undefined) docTree.metas[key] = value;
+			if (!!value) docTree.metas[key] = value;
 		});
 		docTree.parseLevel = 0;
 		docTree.mainParser = true;
@@ -1712,7 +1734,39 @@
 			});
 		});
 
-		return text;
+		var result = {};
+		result.content = text;
+		result.title = docTree.metas.title;
+
+		result.meta = {};
+		result.meta.author = docTree.metas.author;
+		result.meta.email = docTree.metas.email;
+		result.meta.description = docTree.metas.description;
+		result.meta.update = docTree.metas.date;
+		result.meta.keywords = docTree.metas.keyword.map(kw => kw);
+
+		result.terminology = {};
+		docTree.termList.forEach(item => {
+			result.terminology[item[0]] = item[1];
+		});
+
+		result.notes = {};
+		Object.keys(docTree.refs).forEach(name => {
+			result.notes[name] = docTree.refs[name];
+		});
+
+		result.blocks = {};
+		Object.keys(docTree.refs).forEach(name => {
+			result.blocks[name] = docTree.blocks[name];
+		});
+
+		return result;
+	};
+	MarkUp.parse = (text, config) => {
+		var result;
+		result = MarkUp.fullParse(text, config);
+		if (!result) return '';
+		return result.content;
 	};
 
 	const reverseSection = (section, config) => {
