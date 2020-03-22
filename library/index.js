@@ -87,7 +87,8 @@ Responsers.GetArticleCategories = list => {
 		});
 	}
 
-	cate = newEle('ul', 'cate-menu')
+	cate = newEle('ul', 'cate-menu');
+	var menuList = [];
 	menu.forEach(item => {
 		var ui = newEle('li', 'cate-item');
 		var link = newEle('a', 'cate-link');
@@ -106,9 +107,13 @@ Responsers.GetArticleCategories = list => {
 		link.href = './index.html?path=' + tmpPath.join(',');
 		ui.appendChild(link);
 		if (subs.children.length > 0) ui.appendChild(subs);
-
-		cate.appendChild(ui);
+		menuList.push([ui, count]);
 	});
+	if (menuList.length > 0) {
+		menuList.sort((a, b) => b[1] - a[1]);
+		menuList.forEach(ui => cate.appendChild(ui[0]));
+	}
+
 	ArticleMenu.innerHTML = '';
 	if (cate.children.length > 0) ArticleMenu.appendChild(cate);
 };
@@ -123,6 +128,7 @@ const analyzeSubMenu = (all, cates, container, path, used) => {
 		used.push(kw);
 		return true;
 	});
+	var subList = [];
 	availables.forEach(kw => {
 		var c = all[kw];
 		var mine = [...c.articles];
@@ -148,8 +154,12 @@ const analyzeSubMenu = (all, cates, container, path, used) => {
 		link.href = './index.html?path=' + tmpPath.join(',');
 		item.appendChild(link);
 		if (subs.children.length > 0) item.appendChild(subs);
-		container.appendChild(item);
+		subList.push([item, count]);
 	});
+	if (subList.length > 0) {
+		subList.sort((a, b) => b[1] - a[1]);
+		subList.forEach(item => container.appendChild(item[0]));
+	}
 	return totalArts;
 };
 const onClick = evt => {
