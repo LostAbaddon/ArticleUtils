@@ -1547,7 +1547,7 @@
 	};
 	const getKeywords = words => {
 		if (!words) return [];
-		words = words.keyword.split(/[ ,，；;、　]+/).filter(w => w.length > 0);
+		words = words.split(/[ ,，；;、　]+/).filter(w => w.length > 0);
 		var list = [];
 		words.forEach(w => {
 			if (list.includes(w)) return;
