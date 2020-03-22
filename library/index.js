@@ -20,7 +20,7 @@ const query = {};
 		let link = '/<a class="nav-item" href="./index.html?path=' + p.join(',') + '">' + q + '</a>';
 		nav += link;
 	}
-	nav += '/<a class="nav-item">' + query.path[t] + '</a>';
+	if (t >= 0) nav += '/<a class="nav-item">' + query.path[t] + '</a>';
 	CategoryNav.innerHTML = nav;
 }) ();
 
@@ -42,7 +42,7 @@ Responsers.GetArticleList = list => {
 		let temp = {};
 		Object.keys(list).forEach(id => {
 			var art = list[id];
-			if (art.category.length === 0) {
+			if (art.category.length === 0 || (art.category.length === 1 && art.category[0] === '#root')) {
 				temp[id] = art;
 			}
 		});
@@ -89,37 +89,66 @@ Responsers.GetArticleCategories = list => {
 	menu.forEach(item => {
 		var ui = newEle('li', 'cate-item');
 		var link = newEle('a', 'cate-link');
-		link.innerText = item.name + ' (' + item.articles.length + ')';
-		var temp = query.path.map(l => l);
-		temp.push(item.name);
-		link.href = './index.html?path=' + temp.join(',');
+		var subs = newEle('ul', 'cate-sub-menu');
+		var used = [item.name];
+		var tmpPath = [...query.path, item.name];
+		var subArts = analyzeSubMenu(list, list[item.name].subs, subs, tmpPath, used);
+		var myArts = [...item.articles];
+		subArts.forEach(art => {
+			if (myArts.includes(art)) return;
+			myArts.push(art);
+		});
+		var count = myArts.length;
+
+		link.innerText = item.name + ' (' + count + ')';
+		link.href = './index.html?path=' + tmpPath.join(',');
 		ui.appendChild(link);
+		if (subs.children.length > 0) ui.appendChild(subs);
+
 		cate.appendChild(ui);
 	});
 	ArticleMenu.innerHTML = '';
-	ArticleMenu.appendChild(cate);
+	if (cate.children.length > 0) ArticleMenu.appendChild(cate);
 };
 
-const getCateList = (cate, level, used) => {
-	if (!cate) return '';
-	if (used.includes(cate.name)) return '';
-	used.push(cate.name);
-
-	var name = cate.name;
-	if (name === '#root') name = '未分类';
-	name += ' (' + cate.articles.length + ')';
-	var ui = '<li class="level-' + level + '"><p class="cate-title" cateName="' + cate.name + '">' + name + '</p>';
-	var subUI = '';
-	cate.subs.forEach(sub => {
-		sub = Categories[sub];
-		subUI += getCateList(sub, level + 1, used);
+const analyzeSubMenu = (all, cates, container, path, used) => {
+	if (!cates || cates.length === 0) return [];
+	var totalArts = [];
+	var availables = cates.filter(kw => {
+		if (used.includes(kw)) return false;
+		var c = all[kw];
+		if (!c) return false;
+		used.push(kw);
+		return true;
 	});
-	if (subUI.length > 0) {
-		subUI = '<ul class="sub-cate-list">' + subUI + '</ul>';
-		ui += subUI;
-	}
-	ui += '</li>';
-	return ui;
+	availables.forEach(kw => {
+		var c = all[kw];
+		var mine = [...c.articles];
+
+		var item = newEle('li', 'cate-item');
+		var link = newEle('a', 'cate-link');
+		var subs = newEle('ul', 'cate-sub-menu');
+		var tmpPath = [...path, kw];
+
+		var artList = analyzeSubMenu(all, c.subs, subs, tmpPath, used);
+		artList.forEach(art => {
+			if (mine.includes(art)) return;
+			mine.push(art);
+		});
+
+		var count = mine.length;
+		mine.forEach(art => {
+			if (totalArts.includes(art)) return;
+			totalArts.push(art);
+		});
+
+		link.innerText = kw + ' (' + count + ')';
+		link.href = './index.html?path=' + tmpPath.join(',');
+		item.appendChild(link);
+		if (subs.children.length > 0) item.appendChild(subs);
+		container.appendChild(item);
+	});
+	return totalArts;
 };
 const onClick = evt => {
 	var ele = evt.target;
