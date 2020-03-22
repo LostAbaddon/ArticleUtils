@@ -218,7 +218,8 @@ section#ArticleContainer > div.article-item:hover > div.edit-article {
 
 #ArticleTitle {
 	position: relative;
-	box-sizing: border;
+	box-sizing: border-box;
+	overflow: hidden;
 	margin-bottom: 5px;
 	padding: 20px;
 	border-bottom: 1px solid rgb(96, 96, 96);
@@ -259,6 +260,7 @@ section#ArticleContainer > div.article-item:hover > div.edit-article {
 #ArticleTitle:hover > div.button.right {
 	right: 0px;
 }
+
 #ArticleKeywords {
 	padding-right: 10px;
 	padding-bottom: 5px;
@@ -267,9 +269,23 @@ section#ArticleContainer > div.article-item:hover > div.edit-article {
 	text-align: center;
 	border-bottom: 1px solid rgb(96, 96, 96);
 }
-#ArticleKeywords > span.keyword {
+#ArticleKeywords > a.keyword {
 	margin-left: 10px;
 }
+#ArticleKeywords > a.cate-link,
+#ArticleKeywords > a.cate-link:hover,
+#ArticleKeywords > a.cate-link:visited {
+	color: rgb(186, 202, 198);
+	text-decoration: none;
+}
+#ArticleKeywords > a.cate-link,
+#ArticleKeywords > a.cate-link:visited {
+	border-bottom: 0px solid rgba(186, 202, 198, 0);
+}
+#ArticleKeywords > a.cate-link:hover {
+	border-bottom: 1px solid rgba(186, 202, 198, 1);
+}
+
 #ArticleContent {
 	max-width: 800px;
 	margin-left: auto;

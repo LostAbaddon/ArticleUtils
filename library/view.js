@@ -35,8 +35,9 @@ Responsers.GetArticleByID = data => {
 	});
 
 	if (!!data.category) data.category.forEach(kw => {
-		var ui = newEle('span', 'keyword');
+		var ui = newEle('a', 'keyword cate-link');
 		ui.innerText = kw;
+		ui.href = './index.html?path=' + kw;
 		ArticleKeywords.appendChild(ui);
 	});
 };
