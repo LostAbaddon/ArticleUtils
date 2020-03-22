@@ -175,7 +175,8 @@
 		article = combineList(article);
 		article = article.map(c => {
 			c = c.toString(16);
-			if (c.length < 2) c = '0' + c;
+			if (c.length === 0) c = '00';
+			else if (c.length < 2) c = '0' + c;
 			return c;
 		}).join('');
 		return article;

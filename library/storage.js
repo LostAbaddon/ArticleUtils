@@ -161,7 +161,7 @@ class LibraryStorage {
 				cate.articles.splice(idx, 1);
 				actions.push(this.#cacheDB.set('category', cate.name, cate));
 			});
-			var cates = ifo.category.forEach(c => c);
+			var cates = ifo.category.map(c => c);
 			if (cates.length === 0) cates.push('#root');
 			cates.forEach(kw => {
 				var cate = this.#categories[kw];

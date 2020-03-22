@@ -214,6 +214,7 @@ section#ArticleContainer > div.article-item > div.edit-article {
 }
 section#ArticleContainer > div.article-item:hover > div.edit-article {
 	right: 0px;
+	background-color: rgb(22, 24, 35);
 }
 
 #ArticleTitle {

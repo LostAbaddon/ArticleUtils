@@ -220,7 +220,7 @@ const HistoryManager = {
 
 const ScrollSpeed = 50, ScrollRate = 0.15;
 
-var fileCatagory = 0, localFileName = '';
+var fileCategory = 0, localFileName = '';
 var changer, lastContent = '', articleConfig = {}, helpContent = '', isHelping = false;
 var LaTeXMap = new Map();
 const onEdited = async (saveHistory=true) => {
@@ -1352,14 +1352,14 @@ const saveDoc = () => {
 	var content = MUEditor.value;
 	var fingerprint = SHA256.FingerPrint(content);
 
-	if (fileCatagory === 1) {
+	if (fileCategory === 1) {
 		chrome.runtime.sendMessage({
 			event: 'ModifyArchieve',
 			fingerprint: articleConfig.fingerprint,
 			content,
 		});
 	}
-	else if (fileCatagory === 2) {
+	else if (fileCategory === 2) {
 		let article = { content, fingerprint };
 		article.id = articleConfig.id;
 		let info = MarkUp.fullParse(content);
@@ -1405,8 +1405,27 @@ const openLocalFile = file => {
 const readFile = () => {
 	var file = FileLoader.files[0];
 	if (!file) return;
-	fileCatagory = 0;
+	fileCategory = 0;
 	openLocalFile(file);
+};
+const saveToShelf = () => {
+	if (fileCategory !== 1) return;
+	var content = '\n' + MUEditor.value + '\n';
+	if (!content.match(/\n(DATE|更新)[:：][^\n]+/)) content = '更新：' + num2time(articleConfig.update) + '\n' + content;
+	if (!content.match(/\n(KEYWORD|关键词)[:：][^\n]+/)) content = '关键词：存档\n' + content;
+	if (!content.match(/\n(AUTHOR|作者)[:：][^\n]+/)) content = '作者：LostAbaddon的插件\n' + content;
+	if (!content.match(/\n(TITLE|标题)[:：][^\n]+/)) content = '标题：' + articleConfig.title + '\n' + content;
+	content = content.replace(/^\n+|\n+$/g, '');
+	var fingerprint = SHA256.FingerPrint(content);
+
+	var article = { content, fingerprint };
+	var info = MarkUp.fullParse(content);
+	article.title = articleConfig.title;
+	article.description = '';
+	article.category = info.meta.keywords.filter(kw => kw.length > 0);
+	article.update = articleConfig.update;
+	article.id = fingerprint;
+	chrome.runtime.sendMessage({ event: 'SaveArticle', article });
 };
 
 const controlHandler = (key, fromKB=false) => {
@@ -1697,12 +1716,12 @@ const controlHandler = (key, fromKB=false) => {
 			onEdited();
 			return true;
 		}
-		else if (fileCatagory === 1) {
+		else if (fileCategory === 1) {
 			let addr = location.origin + '/page/archieve.html?fingerprint=' + articleConfig.fingerprint;
 			location.href = addr;
 			return true;
 		}
-		else if (fileCatagory === 2) {
+		else if (fileCategory === 2) {
 			let addr = location.origin + '/library/view.html?id=' + articleConfig.id;
 			location.href = addr;
 			return true;
@@ -1729,6 +1748,10 @@ const controlHandler = (key, fromKB=false) => {
 	}
 	else if (key === 'download-html') {
 		downloadHTML();
+		return true;
+	}
+	else if (key === 'saveToShelf') {
+		saveToShelf();
 		return true;
 	}
 
@@ -1790,12 +1813,13 @@ chrome.runtime.onMessage.addListener(msg => {
 });
 
 const menuBar = new MenuBar(controlHandler);
-(() => {
+const buildToolBar = (editorType=0) => {
 	var group, subgroup;
 
 	group = new MenuGroup();
 	group.add('保存', 'save', 'save-article', 'ctrl+S');
 	group.add('打开本地文档', 'file-word', 'open-local-article', 'ctrl+O');
+	if (editorType === 1) group.add('转存到文库', 'copy', 'saveToShelf');
 	group.add('下载 MU', 'file-download', 'download-mu');
 	group.add('下载 HTML', 'file-export', 'download-html');
 	menuBar.add(group);
@@ -1917,7 +1941,7 @@ const menuBar = new MenuBar(controlHandler);
 	Object.keys(sc).forEach(key => ShortcutsMap[key] = sc[key]);
 
 	document.querySelector('div.controller.toolbar').appendChild(menuBar.ui);
-}) ();
+};
 
 var archieveDB, backendResponser;
 const loadArchieve = fingerprint => new Promise(async res => {
@@ -1991,15 +2015,18 @@ const loadHelp = () => new Promise(res => {
 	actions.push(new Promise(async res => {help = await loadHelp(); res();}));
 
 	if (!!query.article) {
-		fileCatagory = 1;
+		fileCategory = 1;
+		buildToolBar(1);
 		actions.push(new Promise(async res => {article = await loadArchieve(query.article); res();}));
 	}
 	else if (!!query.id) {
-		fileCatagory = 2;
+		fileCategory = 2;
+		buildToolBar(0);
 		actions.push(new Promise(async res => {article = await loadArticle(query.id); res();}));
 	}
 	else {
-		fileCatagory = 0;
+		fileCategory = 0;
+		buildToolBar(0);
 	}
 
 	await Promise.all(actions);
@@ -2017,7 +2044,7 @@ const loadHelp = () => new Promise(res => {
 	}
 
 	Object.keys(article).forEach(key => {
-		if (key === 'title' && fileCatagory !== 1) return;
+		if (key === 'title' && fileCategory !== 1) return;
 		var value = article[key];
 		if (!value) return;
 		articleConfig[key] = value;
@@ -2041,6 +2068,11 @@ chrome.runtime.onMessage.addListener(msg => {
 	if (msg.event === 'ArchieveModified') {
 		if (msg.ok) {
 			articleConfig.fingerprint = msg.fingerprint
+		}
+	}
+	else if (msg.event === 'SaveArticle') {
+		if (msg.saved && fileCategory === 1) {
+			location.href = './editor.html?id=' + msg.id;
 		}
 	}
 });

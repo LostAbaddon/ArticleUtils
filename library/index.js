@@ -27,6 +27,7 @@ const query = {};
 const Responsers = {};
 
 Responsers.GetArticleList = list => {
+	if (!list) return;
 	var cate = query.path[query.path.length - 1];
 	if (!!cate) {
 		let temp = {};
@@ -67,6 +68,7 @@ Responsers.GetArticleList = list => {
 	});
 };
 Responsers.GetArticleCategories = list => {
+	if (!list) return;
 	var cate = query.path[query.path.length - 1];
 	var menu = [];
 

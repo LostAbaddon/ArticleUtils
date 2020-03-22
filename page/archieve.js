@@ -68,7 +68,7 @@ const generateMenu = () => {
 	articleMenu.innerHTML = '';
 	var ele = newEle('menuitem');
 	ele.setAttribute('fingerprint', 'JumpToEditor');
-	ele.innerHTML = '<a href="../markup/editor.html">跳转到编辑器</a>';
+	ele.innerHTML = '<a href="../markup/editor.html">编辑本存档</a>';
 	articleMenu.appendChild(ele);
 
 	menu.forEach(item => {

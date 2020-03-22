@@ -633,7 +633,7 @@ const getArticleByID = async (id, tabID) => {
 const saveArticle = async (article, tabID) => {
 	if (!article || !article.id) return;
 	var saved = await window.libraryStorage.set(article);
-	chrome.tabs.sendMessage(tabID, { event: 'SaveArticle', data: saved });
+	chrome.tabs.sendMessage(tabID, { event: 'SaveArticle', saved, id: article.id });
 };
 const getArticleCategories = tabID => {
 	chrome.tabs.sendMessage(tabID, { event: 'GetArticleCategories', data: libraryStorage.categories() });
@@ -650,6 +650,9 @@ const modifyArticleCategories = async (category, tabID) => {
 const deleteArticleCategories = async (target, tabID) => {
 	var list = await libraryStorage.delCate(target);
 	chrome.tabs.sendMessage(tabID, { event: 'GetArticleCategories', data: list });
+};
+window.refreshLibrary = () => {
+	window.libraryStorage.refresh();
 };
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {
