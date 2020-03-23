@@ -249,17 +249,38 @@ section#ArticleContainer > div.article-item:hover > div.edit-article {
 	box-sizing: border-box;
 	overflow: hidden;
 	margin-bottom: 5px;
-	padding: 20px;
+	padding: 20px 20px 10px 20px;
 	border-bottom: 1px solid rgb(96, 96, 96);
 }
-#ArticleTitle > p {
+#ArticleTitle > p.title {
 	margin: 0px;
+	margin-bottom: 10px;
 	padding: 0px;
 	font-size: 38px;
 	font-weight: bolder;
 	line-height: 42px;
 	color: rgb(233, 241, 246);
 	text-align: center;
+}
+#ArticleTitle > p.info {
+	margin: 0px;
+	margin-top: 2px;
+	padding: 0px;
+	padding-right: 20px;
+	font-size: 12px;
+	line-height: 16px;
+	color: rgb(186, 202, 198);
+	text-align: right;
+}
+#ArticleTitle > p.info span.blank {
+	display: inline-block;
+	width: 25px;
+}
+#ArticleTitle > p.info a,
+#ArticleTitle > p.info a:hover,
+#ArticleTitle > p.info a:visited {
+	color: rgb(186, 202, 198);
+	text-decoration: none;
 }
 #ArticleTitle > div.button {
 	position: absolute;

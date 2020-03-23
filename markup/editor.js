@@ -1359,27 +1359,18 @@ const saveDoc = () => {
 			content,
 		});
 	}
-	else if (fileCategory === 2) {
-		let article = { content, fingerprint };
-		article.id = articleConfig.id;
-		let info = MarkUp.fullParse(content);
-		article.title = info.title;
-		article.description = info.meta.description;
-		article.category = info.meta.keywords.filter(kw => kw.length > 0);
-		article.update = info.date || Date.now();
-		chrome.runtime.sendMessage({ event: 'SaveArticle', article });
-	}
 	else {
 		let article = { content, fingerprint };
 		let info = MarkUp.fullParse(content);
+		if (fileCategory === 2) article.id = articleConfig.id;
+		else if (articleConfig.fingerprint === 'NewFile') article.id = SHA256(content);
+		else article.id = articleConfig.fingerprint;
 		article.title = info.title;
+		article.author = info.meta.author || '';
+		article.email = info.meta.email || '';
 		article.description = info.meta.description;
 		article.category = info.meta.keywords.filter(kw => kw.length > 0);
 		article.update = info.date || Date.now();
-		if (articleConfig.fingerprint === 'NewFile') {
-			article.id = SHA256(content);
-		}
-		else article.id = articleConfig.fingerprint;
 		chrome.runtime.sendMessage({ event: 'SaveArticle', article });
 	}
 };
@@ -1983,7 +1974,7 @@ const loadArticle = id => new Promise(res => {
 const getArticleByID = article => {
 	var cb = backendResponser;
 	backendResponser = null;
-	cb(article);
+	if (!!cb) cb(article);
 };
 const loadHelp = () => new Promise(res => {
 	var xhr = new XMLHttpRequest();

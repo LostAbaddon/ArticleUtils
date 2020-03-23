@@ -25,8 +25,54 @@ const query = {};
 
 const Responsers = {};
 
+const num2time = num => {
+	var time = new Date(num);
+	var Y = (time.getYear() + 1900) + '';
+	var M = (time.getMonth() + 1) + '';
+	var D = time.getDate() + '';
+	var h = time.getHours() + '';
+	var m = time.getMinutes() + '';
+	var s = time.getSeconds() + '';
+
+	if (M.length < 2) M = '0' + M;
+	if (D.length < 2) D = '0' + D;
+	if (h.length < 1) h = '00';
+	else if (h.length < 2) h = '0' + h;
+	if (m.length < 1) m = '00';
+	else if (m.length < 2) m = '0' + m;
+	if (s.length < 1) s = '00';
+	else if (s.length < 2) s = '0' + s;
+	return Y + '/' + M + '/' + D + ' ' + h + ':' + m + ':' + s;
+};
+
 Responsers.GetArticleByID = data => {
-	ArticleTitle.querySelector('p').innerText = data.title;
+	ArticleTitle.querySelector('p.title').innerText = data.title;
+	var info = [];
+	if (!!data.author && data.author.length > 0) {
+		if (!!data.email && data.email.length > 0) {
+			info.push('作者：<a class="author-email" href="mailto:' + data.email + '">' + data.author + '</a>');
+		}
+		else {
+			info.push('作者：' + data.author);
+		}
+	}
+	if (!!data.update && data.update > 0) {
+		info.push('更新于：' + num2time(data.update));
+	}
+	var wordCount = data.content.replace(/[ 　\t\n\+\-\*_\.,\?!\^\[\]\(\)\{\}$#@%&=\|\\\/<>~，。《》？‘’“”；：:、【】{}（）—…￥·`]+/g, ' ').replace(/ {2,}/g, ' ');
+	wordCount = wordCount.replace(/[a-z0-9]+/gi, 'X').replace(/ +/g, '');
+	wordCount = wordCount.length;
+	info.push('字数：' + wordCount);
+	info = info.join('<span class="blank"></span>')
+	ArticleTitle.querySelector('p.author').innerHTML = info;
+
+	if (!!data.fingerprint && data.fingerprint.length > 0) {
+		ArticleTitle.querySelector('p.fingerprint').innerHTML = '内容指纹：' + data.fingerprint;
+	}
+	else {
+		ArticleTitle.querySelector('p.fingerprint').style.display = 'none';
+	}
+
 	ArticleContent.innerHTML = MarkUp.parse(data.content, {
 		showtitle: false,
 		resources: true,

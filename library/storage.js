@@ -11,6 +11,8 @@ class ArticleInfo {
 	id = '';
 	fingerprint = '';
 	title = '';
+	author = '';
+	email = '';
 	description = '';
 	update = 0;
 	category = []; // 分类
@@ -26,6 +28,8 @@ class Article extends ArticleInfo {
 		info.fingerprint = this.fingerprint;
 		info.description = this.description;
 		info.title = this.title;
+		info.author = this.author;
+		info.email = this.email;
 		info.update = this.update;
 		info.category = this.category.map(c => c);
 		info.type = this.type;
@@ -38,6 +42,8 @@ class Article extends ArticleInfo {
 		article.fingerprint = json.fingerprint || SHA256.FingerPrint(json.content);
 		article.id = json.id || json.fingerprint;
 		article.title = json.title || '无名之文';
+		article.author = json.author || '';
+		article.email = json.email || '';
 		article.description = json.description || Article.getDescription(json.content);
 		article.content = json.content;
 		article.update = json.stamp || Date.now();
@@ -51,6 +57,8 @@ class Article extends ArticleInfo {
 		article.fingerprint = SHA256.FingerPrint(json.content);
 		article.id = json.fingerprint;
 		article.title = title || '无名之文';
+		article.author = '';
+		article.email = '';
 		article.description = Article.getDescription(content);
 		article.content = content;
 		article.update = Date.now();
