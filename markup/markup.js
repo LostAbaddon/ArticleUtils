@@ -980,7 +980,7 @@
 			if (row.length > cols) cols = row.length;
 		});
 		for (let j = cfgLine.length; j < cols; j ++) cfgLine.push('');
-		for (let i = 0; i < cols; i ++) {
+		for (let i = 0; i < rows.length - 1; i ++) {
 			let row = rows[i];
 			let rlen = !!row ? row.length : cols;
 			for (let j = row.length; j < cols; j ++) row.push('');

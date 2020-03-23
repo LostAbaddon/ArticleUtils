@@ -28,6 +28,10 @@ body {
 	cursor: default;
 }
 
+ul.cate-sub-menu {
+	padding-left: 20px;
+}
+
 header.page-title {
 	box-sizing: border-box;
 	padding: 10px;

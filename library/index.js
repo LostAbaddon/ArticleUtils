@@ -119,6 +119,7 @@ Responsers.GetArticleCategories = list => {
 };
 
 const analyzeSubMenu = (all, cates, container, path, used) => {
+	used = [...used];
 	if (!cates || cates.length === 0) return [];
 	var totalArts = [];
 	var availables = cates.filter(kw => {

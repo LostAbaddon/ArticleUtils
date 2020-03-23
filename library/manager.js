@@ -5,6 +5,7 @@ var NewCateName = NewCategory.querySelector('.content input');
 var currCate = null;
 
 const getCateList = (cate, level, used) => {
+	used = [...used];
 	if (!cate) return '';
 	if (used.includes(cate.name)) return '';
 	used.push(cate.name);
