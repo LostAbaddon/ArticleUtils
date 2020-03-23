@@ -1,35 +1,25 @@
 const query = {};
-(() => {
-	var search = location.search;
-	search = search.substring(1, search.length);
-	search = search.split('&').map(k => k.trim()).filter(k => k.length > 0);
-	search.forEach(item => {
-		item = item.split('=');
-		var key = item.splice(0, 1)[0];
-		var value = item.join('=');
-		query[key] = value;
-	});
-	query.path = decodeURIComponent(query.path || '');
-	query.path = query.path.split(',').filter(l => l.length > 0);
-
-	var nav = '<span><strong>导航：</strong></span><a class="nav-item" href="./index.html">根目录</a>';
-	var t = query.path.length - 1, p = [];
-	for (let i = 0; i < t; i ++) {
-		let q = query.path[i];
-		p.push(q);
-		let link = '/<a class="nav-item" href="./index.html?path=' + p.join(',') + '">' + q + '</a>';
-		nav += link;
-	}
-	if (t >= 0) nav += '/<a class="nav-item">' + query.path[t] + '</a>';
-	CategoryNav.innerHTML = nav;
-}) ();
-
 const Responsers = {};
 
+var CategoryList;
+var ArticleList;
+
 Responsers.GetArticleList = list => {
+	list = list || ArticleList;
 	if (!list) return;
+	ArticleList = list;
+	ArticleContainer.innerHTML = '';
+
 	var cate = query.path[query.path.length - 1];
-	if (!!cate) {
+	if (!!query.search && query.search.length > 0) {
+		let temp = {};
+		Object.keys(list).forEach(id => {
+			var art = list[id];
+			if (art.title.indexOf(query.search) >= 0 || query.search.indexOf(art.title) >= 0) temp[id] = art;
+		});
+		list = temp;
+	}
+	else if (!!cate) {
 		let temp = {};
 		Object.keys(list).forEach(id => {
 			var art = list[id];
@@ -68,11 +58,19 @@ Responsers.GetArticleList = list => {
 	});
 };
 Responsers.GetArticleCategories = list => {
+	list = list || CategoryList;
 	if (!list) return;
+	CategoryList = list;
 	var cate = query.path[query.path.length - 1];
 	var menu = [];
 
-	if (!!cate) {
+	if (!!query.search && query.search.length > 0) {
+		Object.keys(list).forEach(kw => {
+			if (kw.length == 0 || kw === '#root') return;
+			if (kw.indexOf(query.search) >= 0 || query.search.indexOf(kw) >= 0) menu.push(list[kw]);
+		});
+	}
+	else if (!!cate) {
 		Object.keys(list).forEach(kw => {
 			if (kw === '#root') return;
 			var c = list[kw];
@@ -91,7 +89,7 @@ Responsers.GetArticleCategories = list => {
 	var menuList = [];
 	menu.forEach(item => {
 		var ui = newEle('li', 'cate-item');
-		var link = newEle('a', 'cate-link');
+		var link = newEle('a', 'cate-link nav-link');
 		var subs = newEle('ul', 'cate-sub-menu');
 		var used = [item.name];
 		var tmpPath = [...query.path, item.name];
@@ -118,6 +116,19 @@ Responsers.GetArticleCategories = list => {
 	if (cate.children.length > 0) ArticleMenu.appendChild(cate);
 };
 
+const generateNav = () => {
+	var nav = '<span><strong>导航：</strong></span><a class="nav-item nav-link" href="./index.html">根目录</a>';
+	var t = query.path.length - 1, p = [];
+	for (let i = 0; i < t; i ++) {
+		let q = query.path[i];
+		if (q.length === 0) continue;
+		p.push(q);
+		let link = '/<a class="nav-item nav-link" href="./index.html?path=' + p.join(',') + '">' + q + '</a>';
+		nav += link;
+	}
+	if (t >= 0) nav += '/<a class="nav-item">' + query.path[t] + '</a>';
+	CategoryNav.innerHTML = nav;
+};
 const analyzeSubMenu = (all, cates, container, path, used) => {
 	used = [...used];
 	if (!cates || cates.length === 0) return [];
@@ -135,7 +146,7 @@ const analyzeSubMenu = (all, cates, container, path, used) => {
 		var mine = [...c.articles];
 
 		var item = newEle('li', 'cate-item');
-		var link = newEle('a', 'cate-link');
+		var link = newEle('a', 'cate-link nav-link');
 		var subs = newEle('ul', 'cate-sub-menu');
 		var tmpPath = [...path, kw];
 
@@ -180,15 +191,59 @@ const addFile = () => {
 const mgrCate = () => {
 	location.href = './manager.html';
 };
+const search = () => {
+	var keyword = SearchKeywords.value;
+	if (keyword.length === 0) return;
+	query.search = keyword;
+
+	Responsers.GetArticleCategories();
+	Responsers.GetArticleList();
+};
+const navGoto = evt => {
+	var btn = evt.target;
+	if (!btn.classList.contains('nav-link')) return;
+	var path = btn.href.split('path=');
+	path.splice(0, 1);
+	path = path.join('');
+	path = path.split('&')[0];
+	path = decodeURIComponent(path);
+	path = path.split(',').filter(p => p.length > 0);
+	query.path = path;
+	query.search = '';
+	generateNav();
+	Responsers.GetArticleCategories();
+	Responsers.GetArticleList();
+	history.pushState(null, '', './index.html?path=' + path.join(','));
+	evt.preventDefault();
+};
 
 ArticleContainer.addEventListener('click', onClick);
 AddNewFile.addEventListener('click', addFile);
 ManageCategory.addEventListener('click', mgrCate);
+SearchArticle.addEventListener('click', search);
+CategoryNav.addEventListener('click', navGoto);
+ArticleMenu.addEventListener('click', navGoto);
+SearchKeywords.addEventListener('keyup', evt => evt.which === 13 && search());
 
 chrome.runtime.onMessage.addListener(msg => {
 	var cb = Responsers[msg.event];
 	if (!!cb) cb(msg.data);
 });
+
+(() => {
+	var search = location.search;
+	search = search.substring(1, search.length);
+	search = search.split('&').map(k => k.trim()).filter(k => k.length > 0);
+	search.forEach(item => {
+		item = item.split('=');
+		var key = item.splice(0, 1)[0];
+		var value = item.join('=');
+		query[key] = value;
+	});
+	query.path = decodeURIComponent(query.path || '');
+	query.path = query.path.split(',').filter(l => l.length > 0);
+	generateNav();
+}) ();
 
 chrome.runtime.sendMessage({ event: 'GetArticleList' });
 chrome.runtime.sendMessage({ event: 'GetArticleCategories' });

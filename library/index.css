@@ -91,6 +91,29 @@ nav a.nav-item[href]:visited {
 nav a.nav-item[href]:hover {
 	border-bottom: 1px solid rgb(117, 138, 153);
 }
+nav.searchBar {
+	left: auto;
+	right: 10px;
+	border-bottom: none;
+}
+nav.searchBar input {
+	margin: 0px 10px;
+	padding: 1px 5px;
+	border: none;
+	border-bottom: 1px solid rgb(117, 138, 153);
+	outline: none;
+	color: rgb(117, 138, 153);
+	background-color: transparent;
+}
+nav.searchBar button {
+	margin: 0px;
+	padding: 0px;
+	border: none;
+	outline: none;
+	background-color: transparent;
+	color: rgb(117, 138, 153);
+	cursor: pointer;
+}
 
 section#ArticleMenu {
 	position: fixed;
