@@ -230,7 +230,9 @@ const onEdited = async (saveHistory=true) => {
 	}
 	var text = MUEditor.value;
 	if (lastContent === text) return;
+	var isFirst = lastContent === '';
 	lastContent = text;
+
 	var last = MUPreview.innerHTML;
 	var html;
 	try {
@@ -285,7 +287,6 @@ const onEdited = async (saveHistory=true) => {
 			}
 		});
 	}
-
 
 	if (saveHistory) {
 		let history = new HistoryItem();
@@ -1402,13 +1403,22 @@ const readFile = () => {
 const saveToShelf = () => {
 	if (fileCategory !== 1) return;
 	var content = '\n' + MUEditor.value + '\n';
+	var keywords = generateKeywords(content);
+	keywords.unshift('存档')
+	keywords = keywords.join('、');
 	if (!content.match(/\n(DATE|更新)[:：][^\n]+/)) content = '更新：' + num2time(articleConfig.update) + '\n' + content;
-	if (!content.match(/\n(KEYWORD|关键词)[:：][^\n]+/)) content = '关键词：存档\n' + content;
+	if (!content.match(/\n(KEYWORD|关键词)[:：][^\n]+/)) content = '关键词：' + keywords + '\n' + content;
 	if (!content.match(/\n(AUTHOR|作者)[:：][^\n]+/)) content = '作者：LostAbaddon的插件\n' + content;
 	if (!content.match(/\n(TITLE|标题)[:：][^\n]+/)) content = '标题：' + articleConfig.title + '\n' + content;
 	content = content.replace(/^\n+|\n+$/g, '');
-	var fingerprint = SHA256.FingerPrint(content);
+	if (articleConfig.usage.length > 0) {
+		content = content + '\n\n# 文章源：\n';
+		articleConfig.usage.forEach(usage => {
+			content = content + '\n-\t' + usage;
+		});
+	}
 
+	var fingerprint = SHA256.FingerPrint(content);
 	var article = { content, fingerprint };
 	var info = MarkUp.fullParse(content);
 	article.title = articleConfig.title;
@@ -1418,6 +1428,97 @@ const saveToShelf = () => {
 	article.id = fingerprint;
 	chrome.runtime.sendMessage({ event: 'SaveArticle', article });
 };
+const generateKeywords = content => {
+	var wordFreq = {};
+	content = content
+		.replace(/\n+([ 　\t>\-\+\*]+|\d+\.[ 　\t>]*)+/g, '\n')
+		.replace(/\n(#+[ 　\t]|`{3,}|\${2,})/g, '\n')
+		.replace(/[\*~_`\$\-\^]+/g, '')
+		.replace(/[!@#]\[([^\n]*?)\][ 　\t]*\([^\n]*?\)/g, (match, title) => ' ' + title + ' ')
+		.replace(/[\t 　,\.\(\)\{\}\[\]\?<>\\\/\!`~@#\$%\^&\*\-=_\+，。《》？、；：‘“’”'":;【】（）…—·！￥]+/g, ' ')
+		.replace(/ +/g, ' ')
+		.replace(/[a-z0-9\-\_\. ]+/gi, match => {
+			var words = match.trim().split(/ +/).filter(w => w.length > 0);
+			var line = [];
+			words.forEach(w => {
+				line.push(w);
+				var ws = line.join(' ');
+				if (!!ws.match(/^[\d\. ]+$/)) return;
+				wordFreq[ws] = (wordFreq[ws] || 0) + 1;
+			});
+			return '\n';
+		})
+		.split(/[ \n\r]+/)
+		.filter(l => l.length > 0)
+	;
+	content.forEach(chars => {
+		chars = chars.replace(/[ 　\t]+/g, '');
+		var len = chars.length;
+		if (len < 2) return;
+		for (let i = 2; i <= 10; i ++) {
+			for (let j = 0; j <= len - i; j ++) {
+				let w = chars.substr(j, i);
+				wordFreq[w] = (wordFreq[w] || 0) + 1;
+			}
+		}
+	});
+
+	var valueList = [];
+	var wordList = Object.keys(wordFreq).map(w => {
+		var v = w.replace(/[a-z0-9\-_\.]+/gi, 'X').replace(/ +/g, '');
+		v = v.length;
+		valueList[v] = (valueList[v] || 0) + 1;
+		var f = wordFreq[w];
+		var list = [], sep;
+		if (!!w.match(/^[a-z0-9\-_\. ]+$/i)) {
+			sep = ' ';
+		}
+		else {
+			sep = '';
+		}
+		let lst = w.split(sep);
+		let ll = lst.length - 1;
+		for (let i = 0; i < ll; i ++) {
+			let pre = [...lst].splice(0, i).join(sep);
+			let pst = [...lst].splice(ll + 1 - i, i).join(sep);
+			if (!list.includes(pre)) list.push(pre);
+			if (!list.includes(pst)) list.push(pst);
+		}
+		var item = [w, f, v, f * Math.sqrt(v + 1), list];
+		wordFreq[w] = item;
+		return item;
+	});
+	wordList.sort((wa, wb) => wb[2] - wa[2]);
+	wordList.forEach(item => {
+		var list = item[4], value = item[3] * Math.sqrt(item[2]);
+		list.forEach(w => {
+			var wf = wordList[w];
+			if (!wf) return;
+			wf[3] -= value;
+		});
+	});
+	wordList = wordList.filter(item => item[3] > 0);
+
+	var count = 0, total = 0, len = wordList.length;
+	for (let i = 0; i < len; i ++) {
+		let j = wordList[i][3];
+		let v = j;
+		count += v;
+		v *= j;
+		total += v;
+		wordList[i][4] = v;
+	}
+	for (let i = 0; i < len; i ++) {
+		let v = wordList[i][4];
+		v /= total;
+		v = 0 - Math.log(v) * v;
+		wordList[i][4] = v;
+	}
+	wordList.sort((wa, wb) => wb[3] - wa[3]);
+	wordList = wordList.splice(0, 10);
+	wordList = wordList.map(item => item[0]);
+	return wordList;
+};
 
 const controlHandler = (key, fromKB=false) => {
 	var result = false;
@@ -1425,8 +1526,20 @@ const controlHandler = (key, fromKB=false) => {
 	var saveHistory = true;
 	ContentController.update();
 
+	var content = MUEditor.value;
+	if (lastContent !== content) {
+		let history = new HistoryItem();
+		history.content = content;
+		history.start = MUEditor.selectionStart;
+		history.end = MUEditor.selectionEnd;
+		history.scroll = MUEditor.scrollTop;
+		HistoryManager.append(history);
+	}
+
+
 	if (key === 'restoreManipulation') {
 		saveHistory = false;
+
 		let item = HistoryManager.restore();
 		if (!!item) {
 			MUEditor.value = item.content;
@@ -1439,7 +1552,7 @@ const controlHandler = (key, fromKB=false) => {
 			return false;
 		}
 	}
-	else if (key === 'restoreManipulation') {
+	else if (key === 'redoManipulation') {
 		saveHistory = false;
 		let item = HistoryManager.redo();
 		if (!!item) {

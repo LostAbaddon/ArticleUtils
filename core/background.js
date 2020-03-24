@@ -586,7 +586,7 @@ const modifyArchieveTitle = async (fingerprint, title, tabID) => {
 	}
 	if (content.title === title) return;
 	content.title = title;
-	content.update = Date.now();
+	// content.update = Date.now();
 	await archieveCache.set(fingerprint, content);
 	chrome.tabs.sendMessage(tabID, {
 		event: 'ArchieveTitleModified',
@@ -600,7 +600,7 @@ const modifyArchieve = async (fingerprint, content, tabID) => {
 	if (!article) return;
 	if (article.content === content) return;
 	article.content = content;
-	article.update = Date.now();
+	// article.update = Date.now();
 	var fp = SHA256.FingerPrint(content);
 	if (fp === fingerprint) {
 		await archieveCache.set(fingerprint, article);

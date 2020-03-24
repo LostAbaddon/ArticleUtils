@@ -46,18 +46,30 @@ const num2time = num => {
 };
 
 Responsers.GetArticleByID = data => {
-	ArticleTitle.querySelector('p.title').innerText = data.title;
+	var article = MarkUp.fullParse(data.content, {
+		showtitle: false,
+		resources: true,
+		glossary: true,
+		toc: true
+	});
+	article.title = article.title || data.title;
+	article.meta.author = article.meta.author || data.author;
+	article.meta.email = article.meta.email || data.email;
+	article.meta.keywords = article.meta.keywords || data.category;
+	article.meta.update = article.meta.update || data.update;
+
+	ArticleTitle.querySelector('p.title').innerText = article.title;
 	var info = [];
-	if (!!data.author && data.author.length > 0) {
-		if (!!data.email && data.email.length > 0) {
-			info.push('作者：<a class="author-email" href="mailto:' + data.email + '">' + data.author + '</a>');
+	if (!!article.meta.author && article.meta.author.length > 0) {
+		if (!!article.meta.email && article.meta.email.length > 0) {
+			info.push('作者：<a class="author-email" href="mailto:' + article.meta.email + '">' + article.meta.author + '</a>');
 		}
 		else {
-			info.push('作者：' + data.author);
+			info.push('作者：' + article.meta.author);
 		}
 	}
-	if (!!data.update && data.update > 0) {
-		info.push('更新于：' + num2time(data.update));
+	if (!!article.meta.update && article.meta.update > 0) {
+		info.push('更新于：' + num2time(article.meta.update));
 	}
 	var wordCount = data.content.replace(/[ 　\t\n\+\-\*_\.,\?!\^\[\]\(\)\{\}$#@%&=\|\\\/<>~，。《》？‘’“”；：:、【】{}（）—…￥·`]+/g, ' ').replace(/ {2,}/g, ' ');
 	wordCount = wordCount.replace(/[a-z0-9]+/gi, 'X').replace(/ +/g, '');
@@ -73,14 +85,9 @@ Responsers.GetArticleByID = data => {
 		ArticleTitle.querySelector('p.fingerprint').style.display = 'none';
 	}
 
-	ArticleContent.innerHTML = MarkUp.parse(data.content, {
-		showtitle: false,
-		resources: true,
-		glossary: true,
-		toc: true
-	});
+	ArticleContent.innerHTML = article.content;
 
-	if (!!data.category) data.category.forEach(kw => {
+	if (!!article.meta.keywords) article.meta.keywords.forEach(kw => {
 		var ui = newEle('a', 'keyword cate-link');
 		ui.innerText = kw;
 		ui.href = './index.html?path=' + kw;
