@@ -325,6 +325,7 @@
 					if (!!info && (info[1] > 0 || info[2] > 0)) return; // 去除空行和分割线
 					if (!!line.match(/^[ 　\t>\+\-\*`\^\|_~=\{\}<]$/)) return; //去除引用列表等中的空行
 					if (!!line.match(/^[!@#]\[[^\(\)\[\]\{\}]*?(\[.*?\][ 　\t]*\(.*?\))*?[^\(\)\[\]\{\}]*?\](\([^\(\)\[\]\{\}]*?\))$/)) return; // 去除图片等资源
+					if (!!line.match(/^[!@#]\[[^\(\)\[\]\{\}]*?(\[.*?\][ 　\t]*\(.*?\))*?[^\(\)\[\]\{\}]*?\](\[[^\(\)\[\]\{\}]*?\])$/)) return; // 去除图片等资源
 					var tail = line.match(/\{[<\|>]\}$/);
 					if (!!tail) {
 						tail = tail[0];
@@ -879,7 +880,6 @@
 		// 分离出连续段落、资源、图片墙
 		var paragraphs = [], imagewalls = [], resources = [], last = -1;
 		contents.forEach((line, id) => {
-
 			if (!line || line.length === 0) {
 				last = -1;
 				return;
@@ -897,6 +897,7 @@
 			}
 			head = line.match(/^!\[[^\(\)\[\]\{\}]*?(\[.*?\][ 　\t]*\(.*?\))*?[^\(\)\[\]\{\}]*?\]\([^\(\)\[\]\{\}]*?\)$/);
 			var type = !!head ? 1 : 0;
+			if (!!head) console.log(line, id, head, type, last);
 			if (type === last) {
 				if (type === 0) {
 					paragraphs[paragraphs.length - 1].push([id, line]);
@@ -917,6 +918,7 @@
 		});
 		imagewalls = imagewalls.filter(wall => {
 			var isWall = wall.length > 1;
+			console.log(isWall, wall);
 			if (wall.length === 1) resources.push(wall[0]);
 			return isWall;
 		});
