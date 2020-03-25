@@ -2012,6 +2012,8 @@ const onDrop = evt => {
 };
 const onPaste = evt => {
 	var content = evt.clipboardData.getData('text/html');
+	if (content.length === 0) return;
+
 	var ele = newEle('div');
 	ele.innerHTML = content;
 	var result = MarkUp.reverse(ele);
