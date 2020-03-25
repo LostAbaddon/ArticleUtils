@@ -2012,11 +2012,11 @@ const onDrop = evt => {
 };
 const onPaste = evt => {
 	var content = evt.clipboardData.getData('text/html');
-	var frag = document.createDocumentFragment();
 	var ele = newEle('div');
-	frag.appendChild(ele);
 	ele.innerHTML = content;
 	var result = MarkUp.reverse(ele);
+	ele.innerHTML = '';
+	ele = null;
 
 	var content = MUEditor.value;
 	var start = MUEditor.selectionStart;
