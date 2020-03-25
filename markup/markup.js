@@ -897,7 +897,6 @@
 			}
 			head = line.match(/^!\[[^\(\)\[\]\{\}]*?(\[.*?\][ 　\t]*\(.*?\))*?[^\(\)\[\]\{\}]*?\]\([^\(\)\[\]\{\}]*?\)$/);
 			var type = !!head ? 1 : 0;
-			if (!!head) console.log(line, id, head, type, last);
 			if (type === last) {
 				if (type === 0) {
 					paragraphs[paragraphs.length - 1].push([id, line]);
@@ -918,7 +917,6 @@
 		});
 		imagewalls = imagewalls.filter(wall => {
 			var isWall = wall.length > 1;
-			console.log(isWall, wall);
 			if (wall.length === 1) resources.push(wall[0]);
 			return isWall;
 		});

@@ -2010,9 +2010,33 @@ const onDrop = evt => {
 	openLocalFile(file);
 	evt.preventDefault();
 };
+const onPaste = evt => {
+	var content = evt.clipboardData.getData('text/html');
+	var frag = document.createDocumentFragment();
+	var ele = newEle('div');
+	frag.appendChild(ele);
+	ele.innerHTML = content;
+	var result = MarkUp.reverse(ele);
+
+	var content = MUEditor.value;
+	var start = MUEditor.selectionStart;
+	var end = MUEditor.selectionEnd;
+	if (result.indexOf('\n') >= 0) {
+		result = result.replace(/^\n+|\n+$/g, '');
+		if (start > 0) result = '\n\n' + result;
+		if (end < content.length) result = result + '\n\n';
+	}
+
+	var bra = content.substr(0, start);
+	var ket = content.substr(end, content.length);
+	content = bra + result + ket;
+	MUEditor.value = content;
+	evt.preventDefault();
+};
 
 MUEditor.addEventListener('keydown', onKey);
 MUEditor.addEventListener('keyup', onChange);
+MUEditor.addEventListener('paste', onPaste);
 MUEditor.addEventListener('blur', onChange);
 MUEditor.addEventListener('mousewheel', onWheel);
 MUEditor.addEventListener('scroll', onWheel);

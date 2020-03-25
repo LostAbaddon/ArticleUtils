@@ -160,9 +160,7 @@ MarkUp 是在 MarkDown 基础上的增强型语言，支持 MarkDown 的所有�
 	+	根据术语表，在每个页面进行自动划词以便快捷搜索
 -	MarkUp 编辑器：
 	+	输入 Enter、 Tab、Ctrl+V 后的处理需要优化
-	+	双向滚动更自然
 	+	FileSystem 中的图片资源库
-	+	支持直接黏贴富文本内容
 	+	支持多页编辑
 	+	支持更多自定义 Extension
 	+	支持图表
