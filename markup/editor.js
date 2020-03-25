@@ -222,7 +222,7 @@ const ScrollSpeed = 50, ScrollRate = 0.15;
 
 var fileCategory = 0, localFileName = '';
 var changer, lastContent = '', articleConfig = {}, helpContent = '', isHelping = false;
-var LaTeXMap = new Map();
+var LaTeXMap = new Map(), contentMap = {};
 const onEdited = async (saveHistory=true) => {
 	if (!!changer) {
 		clearTimeout(changer);
@@ -232,19 +232,77 @@ const onEdited = async (saveHistory=true) => {
 	if (lastContent === text) return;
 	var isFirst = lastContent === '';
 	lastContent = text;
+	MUScrollView.innerText = '';
 
 	var last = MUPreview.innerHTML;
 	var html;
 	try {
-		if (isHelping) html = MarkUp.parse(text);
-		else html = MarkUp.parse(text, articleConfig);
+		if (isHelping) {
+			html = MarkUp.fullParse(text, { linenumber: true });
+			articleConfig.lineCount = html.lineCount || 0;
+			html = html.content;
+		}
+		else {
+			articleConfig.linenumber = true;
+			html = MarkUp.fullParse(text, articleConfig);
+			articleConfig.lineCount = html.lineCount || 0;
+			html = html.content;
+		}
 	} catch (err) {
 		html = last;
 		console.error(err);
 	}
 
 	MUPreview.innerHTML = html;
-	
+
+	var parsedList = [...MUPreview.querySelectorAll('span[name^="line"]')].map(ele => {
+		ele = ele.parentElement;
+		ele.__inner = ele.innerText.replace(/^[ 　\t\n\r]+|[ 　\t\n\r]+$/g, '');
+		return ele;
+	});
+	contentMap = {};
+	var lstIdx = 0, lstLen = parsedList.length;
+	text.split('\n').forEach((line, lid) => {
+		if (line.length === 0) return;
+		if (!!line.match(/^[=\-\+\*~\._#]{3,}$/)) return;
+		if (!!line.match(/^[ 　\t>\+\-\*`\^\|_~=\{\}<]$/)) return; //去除引用列表等中的空行
+		if (!!line.match(/^[!@#]\[[^\(\)\[\]\{\}]*?(\[.*?\][ 　\t]*\(.*?\))*?[^\(\)\[\]\{\}]*?\](\([^\(\)\[\]\{\}]*?\))$/)) return; // 去除图片等资源
+		if (!!line.match(/^\[([\w \-\.\+\=\\\/]+?)\] *[:：] *([\w\W]+?)$/)) return; // 去除图片等资源
+		line = line.replace(/^[ 　\t>\+\-\*`\^\|_~=\{\}<]+/g, '');
+		line = line.replace(/\\/g, '\\').replace(/\//g, '\/')
+			.replace(/\*/g, '*').replace(/\-/g, '-').replace(/\+/g, '+').replace(/\~/g, '~')
+			.replace(/\^/g, '^').replace(/\$/g, '$').replace(/\[/g, '[').replace(/\]/g, ']')
+			.replace(/\{/g, '{').replace(/\}/g, '}').replace(/\(/g, '(').replace(/\)/g, ')')
+			.replace(/\#/g, '#');
+		line = line.split(/[\+\-\*~>!@#\^\$\{\}\(\)\[\]]/)[0];
+		var idx = -1;
+		for (let i = lstIdx; i < lstLen; i ++) {
+			let l = parsedList[i];
+			if (l.__inner.indexOf(line) === 0) {
+				idx = i;
+				lstIdx = idx + 1;
+				break;
+			}
+		}
+		contentMap[lid] = parsedList[idx];
+	});
+
+	articleConfig.lineMap = [];
+	articleConfig.lineWordCount = 0;
+	if (articleConfig.lineCount > 0) {
+		for (let i = 0; i < articleConfig.lineCount; i ++) {
+			var mark = MUPreview.querySelector('span[name="line-' + i + '"]');
+			if (!mark) {
+				articleConfig.lineMap.push([i, 0]);
+				continue;
+			}
+			mark = mark.parentElement;
+			var count = mark.innerText.length;
+			articleConfig.lineWordCount += count;
+			articleConfig.lineMap.push([i, count]);
+		}
+	}
+
 	// 获得 LaTeX 列表
 	var needRedraw = false;
 	MUPreview.querySelectorAll('.latex').forEach(latex => {
@@ -287,6 +345,7 @@ const onEdited = async (saveHistory=true) => {
 			}
 		});
 	}
+	MUScrollView.innerText = text;
 
 	if (saveHistory) {
 		let history = new HistoryItem();
@@ -344,10 +403,59 @@ const onMoved = () => {
 		clearTimeout(scroller);
 		scroller = null;
 	}
-	var percent = MUEditor.scrollTop / (MUEditor.scrollHeight - MUEditor.offsetHeight);
-	var height = MUPreview.scrollHeight - MUPreview.offsetHeight;
-	height *= percent;
-	scrollViewTo(Math.floor(height));
+
+	MUScrollView.scrollTop = MUEditor.scrollTop;
+
+	if (!articleConfig.lineCount || articleConfig.lineCount === 0) {
+		let percent = MUEditor.scrollTop / (MUEditor.scrollHeight - MUEditor.offsetHeight);
+		let height = MUPreview.scrollHeight - MUPreview.offsetHeight;
+		height *= percent;
+		scrollViewTo(Math.floor(height));
+	}
+	else {
+		let percent = MUEditor.scrollTop / (MUEditor.scrollHeight - MUEditor.offsetHeight);
+		let target = MUEditor.offsetHeight * percent;
+		let index = -1;
+		let content = MUScrollView.innerText.split('\n');
+		[...MUScrollView.querySelectorAll('br')].some((ele, lid) => {
+			var {top} = ele.getBoundingClientRect();
+			if (top > target) return true;
+			index = lid;
+		});
+		target = null;
+		for (let i = index; i >= 0; i --) {
+			let e = contentMap[i];
+			if (!!e) {
+				target = e;
+				break;
+			}
+		}
+
+		if (!target) {
+			let pos = Math.round(articleConfig.lineWordCount * percent);
+			let count = 0;
+			index = 0;
+			articleConfig.lineMap.some(line => {
+				count += line[1];
+				index = line[0];
+				return count >= pos;
+			});
+			target = MUPreview.querySelector('span[name="line-' + index + '"]');
+			if (!!target) target = target.parentElement;
+		}
+		if (!target) {
+			let height = MUPreview.scrollHeight - MUPreview.offsetHeight;
+			height *= percent;
+			scrollViewTo(Math.floor(height));
+		}
+		else {
+			let {top, height} = target.getBoundingClientRect();
+			top -= 200;
+
+			let position = top + MUPreview.scrollTop + (height - MUPreview.offsetHeight + 150) * percent;
+			scrollViewTo(Math.floor(position));
+		}
+	}
 };
 const onWheel = () => {
 	if (!!mover) {

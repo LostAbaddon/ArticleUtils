@@ -179,7 +179,7 @@
 		return line;
 	};
 	// 解析段级样式
-	const parseSection = (content, doc, currLevel=-Infinity, caches) => {
+	const parseSection = (content, doc, currLevel=0, caches) => {
 		doc.parseLevel ++;
 
 		var sections = [];
@@ -314,6 +314,30 @@
 
 			// 表格
 			if (blocks.length > 0) changed = parseTable(blocks, blockMap, sections, doc, caches) || changed;
+
+			// 插入行号
+			if (outmost && currLevel === 0 && !!doc.metas.linenumber) {
+				let lineID = 0;
+				sections.forEach((line, id) => {
+					if (!line) return;
+					if (!!line.match(/^%[\w\-]+%$/)) return;
+					var info = blockMap[id];
+					if (!!info && (info[1] > 0 || info[2] > 0)) return; // 去除空行和分割线
+					if (!!line.match(/^[ 　\t>\+\-\*`\^\|_~=\{\}<]$/)) return; //去除引用列表等中的空行
+					if (!!line.match(/^[!@#]\[[^\(\)\[\]\{\}]*?(\[.*?\][ 　\t]*\(.*?\))*?[^\(\)\[\]\{\}]*?\](\([^\(\)\[\]\{\}]*?\))$/)) return; // 去除图片等资源
+					var tail = line.match(/\{[<\|>]\}$/);
+					if (!!tail) {
+						tail = tail[0];
+						line = line.substr(0, line.length - tail.length) + '<span name="line-' + lineID + '"></span>' + tail;
+					}
+					else {
+						line = line + '<span name="line-' + lineID + '"></span>';
+					}
+					lineID++;
+					sections[id] = line;
+				});
+				doc.metas.totalLineCount = lineID;
+			}
 
 			// 重排内容
 			[sections, blockMap] = squeezeContents(blocks, blockMap, sections);
@@ -1125,7 +1149,7 @@
 		list = list.replace(/^\n+|\n+$/g, '');
 
 		var html = '<blockquote class="' + type + '">';
-		list = parseSection(list, doc, 0, caches);
+		list = parseSection(list, doc, 2, caches);
 		html += list;
 		html += '</blockquote>';
 		var key = 'blockquote-' + generateRandomKey();
@@ -1184,7 +1208,7 @@
 		else html = '<ul>';
 		list.forEach(item => {
 			html += '<li>';
-			html += parseSection(item, doc, 0, caches);
+			html += parseSection(item, doc, 2, caches);
 			html += '</li>';
 		});
 		if (ordered) html += '</ol>';
@@ -1662,7 +1686,7 @@
 			line = line.trim();
 			var content;
 			if (!header) content = [parseLine(line, doc)];
-			else content = parseSection(line, doc);
+			else content = parseSection(line, doc, 1);
 			doc.blocks[key] = content.join('');
 		});
 
@@ -1749,6 +1773,7 @@
 		var result = {};
 		result.content = text;
 		result.title = docTree.metas.title;
+		result.lineCount = docTree.metas.totalLineCount;
 
 		result.meta = {};
 		result.meta.author = docTree.metas.author;
