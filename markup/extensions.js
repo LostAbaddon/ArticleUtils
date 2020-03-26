@@ -59,7 +59,7 @@ MarkUp.addExtension({
 	parse: (line, doc, caches) => {
 		doc.links = doc.links || [];
 		var changed = false;
-		line = line.replace(/([!@#]?)\[([\w %'"\*_\^\|~\-\.\+=,;:\?!\\\/\u0800-\uffff]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
+		line = line.replace(/([!@#]?)\[([\w %'"\*_\^\|~\-\.\+=·,;:\?!\\\/\u0800-\uffff]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
 			link = link.trim();
 			if (link.length === 0) return match;
 			if (!!caches[title]) return match;

@@ -233,6 +233,7 @@ const onEdited = async (saveHistory=true) => {
 	var isFirst = lastContent === '';
 	lastContent = text;
 	MUScrollView.innerText = '';
+	generateKeywords(text);
 
 	var last = MUPreview.innerHTML;
 	var html;
@@ -1573,10 +1574,10 @@ const generateKeywords = content => {
 	});
 
 	var valueList = [];
+	var total = 0;
 	var wordList = Object.keys(wordFreq).map(w => {
 		var v = w.replace(/[a-z0-9\-_\.]+/gi, 'X').replace(/ +/g, '');
 		v = v.length;
-		valueList[v] = (valueList[v] || 0) + 1;
 		var f = wordFreq[w];
 		var list = [], sep;
 		if (!!w.match(/^[a-z0-9\-_\. ]+$/i)) {
@@ -1586,29 +1587,74 @@ const generateKeywords = content => {
 			sep = '';
 		}
 		let lst = w.split(sep);
-		let ll = lst.length - 1;
-		for (let i = 0; i < ll; i ++) {
-			let pre = [...lst].splice(0, i).join(sep);
-			let pst = [...lst].splice(ll + 1 - i, i).join(sep);
-			if (!list.includes(pre)) list.push(pre);
-			if (!list.includes(pst)) list.push(pst);
+		let ll = lst.length;
+		for (let i = 2; i < ll; i ++) {
+			for (let j = 0; j <= ll - i; j ++) {
+				let s = [...lst].splice(j, i).join(sep);
+				if (!list.includes(s)) list.push(s);
+			}
 		}
-		var item = [w, f, v, f * Math.sqrt(v + 1), list];
-		wordFreq[w] = item;
+		list = list.map(l => l.trim()).filter(l => l.length > 0);
+		var wgt = f * Math.sqrt(v + 1);
+		total += wgt;
+		var item = [w, f, v, wgt, list, wgt];
+		valueList[w] = item;
 		return item;
 	});
-	wordList.sort((wa, wb) => wb[2] - wa[2]);
+	wordFreq = valueList;
+	valueList = null;
+	total /= wordList.length;
+	wordList = wordList.filter(item => item[3] >= total);
 	wordList.forEach(item => {
-		var list = item[4], value = item[3] * Math.sqrt(item[2]);
+		var list = item[4], value = item[3] / Math.sqrt(item[2]);
 		list.forEach(w => {
-			var wf = wordList[w];
+			var wf = wordFreq[w];
 			if (!wf) return;
-			wf[3] -= value;
+			if (item[3] > wf[3]) {
+				wf[5] -= value;
+			}
+			else {
+				item[5] -= wf[3] / Math.sqrt(wf[2]);
+			}
 		});
 	});
-	wordList = wordList.filter(item => item[3] > 0);
+	wordFreq = {};
+	wordList = wordList.filter(item => {
+		item[3] = item[5];
+		if (item[3] > 0) {
+			wordFreq[item[0]] = item;
+			return true;
+		}
+		return false;
+	});
+	wordList.forEach(item => {
+		var list = item[4], value = item[3] / Math.sqrt(item[2]);
+		list.forEach(w => {
+			var wf = wordFreq[w];
+			if (!wf) return;
+			if (item[3] > wf[3]) {
+				wf[5] -= value;
+			}
+			else {
+				item[5] -= wf[3] / Math.sqrt(wf[2]);
+			}
+		});
+	});
+	total = 0;
+	wordFreq = {};
+	wordList = wordList.filter(item => {
+		item[3] = item[5];
+		if (item[3] <= 0) return false;
+		wordFreq[item[0]] = item;
+		total += item[3];
+		return true;
+	});
+	total /= wordList.length;
+	wordList = wordList.filter(item => item[3] >= total);
 
-	var count = 0, total = 0, len = wordList.length;
+	wordList.sort((wa, wb) => wa[3] - wb[3]);
+	var count = 0, len = wordList.length;
+	total = 0;
 	for (let i = 0; i < len; i ++) {
 		let j = wordList[i][3];
 		let v = j;
@@ -1623,7 +1669,7 @@ const generateKeywords = content => {
 		v = 0 - Math.log(v) * v;
 		wordList[i][4] = v;
 	}
-	wordList.sort((wa, wb) => wb[3] - wa[3]);
+	wordList.sort((wa, wb) => wb[4] - wa[4]);
 	wordList = wordList.splice(0, 10);
 	wordList = wordList.map(item => item[0]);
 	return wordList;
