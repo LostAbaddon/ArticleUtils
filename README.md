@@ -5,9 +5,10 @@
 - **版本**： 2.0.2
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
-
 - **Chrome Web Store发行版本**：暂未发布
 - **Chrome Web Store发行地址**：暂未发布
+
+**开源证书：** GPL v3.0
 
 ## 主要功能：
 
