@@ -156,12 +156,24 @@ Responsers.GetArticleCategories = list => {
 
 	var cateTree = [];
 	cateTree.push(list['#root']);
+	var shouldRemoves = [];
 	Object.keys(list).forEach(kw => {
 		if (kw === '#root') return;
 		var c = list[kw];
-		if (c.sups.length === 0) cateTree.push(c);
-		if (c.sups.length === 1 && c.sups[0].name === '#root') cateTree.push(c);
+		var mayRemove = false;
+		if (c.sups.length === 0) mayRemove = true;
+		if (c.sups.length === 1 && c.sups[0].name === '#root') mayRemove = true;
+		if (mayRemove) {
+			cateTree.push(c);
+			if (c.articles.length === 0 && c.subs.length === 0) {
+				shouldRemoves.push(c);
+			}
+		}
 	});
+	if (shouldRemoves.length > 0) {
+		shouldRemoves = shouldRemoves.map(c => c.name);
+		chrome.runtime.sendMessage({ event: 'DeleteArticleCategories', target: shouldRemoves });
+	}
 
 	var html = '';
 	cateTree.forEach(cate => {

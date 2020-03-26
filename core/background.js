@@ -648,8 +648,14 @@ const modifyArticleCategories = async (category, tabID) => {
 	chrome.tabs.sendMessage(tabID, { event: 'GetArticleCategories', data: list });
 };
 const deleteArticleCategories = async (target, tabID) => {
-	var list = await libraryStorage.delCate(target);
-	chrome.tabs.sendMessage(tabID, { event: 'GetArticleCategories', data: list });
+	if (Array.isArray(target)) {
+		let actions = target.map(name => libraryStorage.delCate(name));
+		await Promise.all(actions);
+	}
+	else {
+		await libraryStorage.delCate(target);
+	}
+	chrome.tabs.sendMessage(tabID, { event: 'GetArticleCategories', data: libraryStorage.categories() });
 };
 window.refreshLibrary = () => {
 	window.libraryStorage.refresh();
