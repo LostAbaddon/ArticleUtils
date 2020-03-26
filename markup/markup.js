@@ -1888,7 +1888,7 @@
 		node.childNodes.forEach(n => {
 			var tag = n.tagName;
 			if (!tag) {
-				if (tag.nodeName === '#comment') return;
+				if (n.nodeName === '#comment') return;
 				let inner = n.textContent || '';
 				inner = inner.trim();
 				if (inner.length > 0) line += inner;
