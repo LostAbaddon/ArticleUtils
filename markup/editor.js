@@ -274,7 +274,8 @@ const onEdited = async (saveHistory=true) => {
 			.replace(/\^/g, '^').replace(/\$/g, '$').replace(/\[/g, '[').replace(/\]/g, ']')
 			.replace(/\{/g, '{').replace(/\}/g, '}').replace(/\(/g, '(').replace(/\)/g, ')')
 			.replace(/\#/g, '#');
-		line = line.split(/[\+\-\*~>!@#\^\$\{\}\(\)\[\]]/)[0];
+		line = line.split(/[\+\-\*~>!@#\^\$\{\}\(\)\[\]: ]/)[0];
+		if (line.length === 0) return;
 		var idx = -1;
 		for (let i = lstIdx; i < lstLen; i ++) {
 			let l = parsedList[i];
