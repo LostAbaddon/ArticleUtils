@@ -427,6 +427,11 @@ MarkUp.addExtension({
 
 		var changed = false;
 		line.replace(/(\^+)([\w\W]+?)(\^+)/, (match, pre, content, post, pos) => {
+			var checker = content.match(/(\\*)\[/);
+			if (!!checker) {
+				let len = checker[1].length;
+				if (len >> 1 << 1 === len) return match;
+			}
 			pre = pre.length;
 			post = post.length;
 			if (pre > post) {

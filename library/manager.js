@@ -153,6 +153,8 @@ const onDelete = async () => {
 
 Responsers.GetArticleCategories = list => {
 	Categories = list;
+	console.log(list);
+	window.test = list;
 
 	var cateTree = [];
 	cateTree.push(list['#root']);

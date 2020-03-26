@@ -370,7 +370,7 @@ class LibraryStorage {
 				actions.push(this.#cacheDB.set('category', kw, this.#categories[kw]));
 			});
 
-			await Promis.all(actions);
+			await Promise.all(actions);
 			res();
 		});
 	}
