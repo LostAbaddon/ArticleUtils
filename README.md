@@ -2,13 +2,13 @@
 
 内容相关工具集（自带 MarkUp 解释器与编辑器哦~），很实用的瑞士军刀~
 
-- **版本**： 2.0.2
+- **版本**： 2.0.3
 - **作者**： [LostAbaddon](mailto:lostabaddon@gmail.com)
 - **网址**： [GitHub](https://github.com/LostAbaddon/ArticleUtils)
 - **Chrome Web Store发行版本**：暂未发布
 - **Chrome Web Store发行地址**：暂未发布
 
-**开源证书：** GPL v3.0
+**开源协议：** GPLv3
 
 ## 主要功能：
 
@@ -170,3 +170,6 @@ MarkUp 是在 MarkDown 基础上的增强型语言，支持 MarkDown 的所有�
 	+	作品集、专题、书目的支持
 	+	划词评论的支持（对存档一样支持）
 	+	本地用户名与联系方式设置
+-	后台支持
+	+	增加后台支持，获得更多功能
+	+	可发布文件到后台

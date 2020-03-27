@@ -42,6 +42,11 @@
 		<div class="option-item">
 			<div class="option-switcher" target="ExportConfig">导出配置</div>
 		</div>
+		<div class="option-sepline"></div>
+		<div class="option-blankline"></div>
+		<div class="option-item">
+			<div class="option-switcher" target="BackendConfig">后台配置</div>
+		</div>
 	</div>
 	<div class="container-column column-4">
 		<div class="option-switch-container hidden" name="SearchConfig">
@@ -246,6 +251,15 @@
 				<div class="option-line option-button" hooker="UpdateConfig">点击导入</div>
 			</div>
 			<textarea id="extension-export-config" class="option-full-textarea"></textarea>
+		</div>
+		<div class="option-switch-container hidden" name="BackendConfig" action="LoadBackendCfg">
+			<div class="option-item">
+				<div class="option-list-line"><span class="hint">地址：</span><input type="text" name="host"></div>
+				<div class="option-list-line"><span class="hint">端口：</span><input type="number" name="port"></div>
+			</div>
+			<div class="option-item">
+				<div class="option-line option-button" hooker="ConfirmBackend">确定</div>
+			</div>
 		</div>
 	</div>
 </div>

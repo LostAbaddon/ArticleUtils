@@ -1,11 +1,11 @@
 {
 	"name": "内容辅助工具集",
-	"version": "2.0.2",
+	"version": "2.0.3",
 	"author": "LostAbaddon",
 	"homepage_url": "https://github.com/LostAbaddon/ArticleUtils",
 	"manifest_version": 2,
 	"description": "内容辅助实用工具集：显示 LaTeX；搜索当前页种的所有可下载资源；划词翻译",
-	"permissions": [ "storage", "contextMenus", "tabs", "downloads" ],
+	"permissions": [ "storage", "contextMenus", "tabs" ],
 	"web_accessible_resources": [ "keyseq/*", "search/*", "notifier/*", "archieve/*", "MathJax2.5/*" ],
 	"icons": {
 		"128": "utils.png"

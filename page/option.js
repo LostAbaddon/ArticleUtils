@@ -19,6 +19,30 @@ window.PageActions.UpdateConfig = () => {
 		ExtConfigManager.set(key, json[key]);
 	});
 };
+window.PageActions.LoadBackendCfg = () => {
+	var cfg = ExtConfigManager.all();
+	cfg.BackendServer = cfg.BackendServer || {
+		"host": "127.0.0.1",
+		"port": 8001
+	};
+	var ele = document.querySelector('div[name="BackendConfig"]');
+	ele.querySelector('input[name="host"]').value = cfg.BackendServer.host;
+	ele.querySelector('input[name="port"]').value = cfg.BackendServer.port;
+};
+window.PageActions.ConfirmBackend = () => {
+	var cfg = ExtConfigManager.all();
+	cfg.BackendServer = cfg.BackendServer || {
+		"host": "127.0.0.1",
+		"port": 8001
+	};
+	var ele = document.querySelector('div[name="BackendConfig"]');
+	var host = ele.querySelector('input[name="host"]').value || cfg.BackendServer.host;
+	var port = ele.querySelector('input[name="port"]').value * 1;
+	if (isNaN(port)) port = cfg.BackendServer.port;
+	cfg.BackendServer.host = host;
+	cfg.BackendServer.port = port;
+	ExtConfigManager.set("BackendServer", cfg.BackendServer);
+};
 
 window.PageActions.onLoad = config => {
 	var cfg = config.DefaultSearchEngine;

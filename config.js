@@ -6,6 +6,10 @@ window.DefaultExtConfig = {
 	"ResourceExpire": 48,
 	"ResourceGCInterval": 12,
 	"ResourceCacheLimit": 500,
+	"BackendServer": {
+		"host": "127.0.0.1",
+		"port": 8001
+	},
 	"DefaultSearchEngine": {
 		"article": true,
 		"book": true,
