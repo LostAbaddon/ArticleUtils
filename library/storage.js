@@ -15,6 +15,8 @@ class ArticleInfo {
 	email = '';
 	description = '';
 	update = 0;
+	published = false;
+	publishPack = -1;
 	category = []; // 分类
 	type = 0; // 0: 普通文章；1：书目；2：文集；3：专题
 	size = 0;
@@ -31,6 +33,8 @@ class Article extends ArticleInfo {
 		info.author = this.author;
 		info.email = this.email;
 		info.update = this.update;
+		info.published = this.published;
+		info.publishPack = this.publishPack;
 		info.category = this.category.map(c => c);
 		info.type = this.type;
 		info.size = this.size;
@@ -47,6 +51,8 @@ class Article extends ArticleInfo {
 		article.description = json.description || Article.getDescription(json.content);
 		article.content = json.content;
 		article.update = json.stamp || Date.now();
+		article.published = !!json.published;
+		article.publishPack = json.publishPack || -1;
 		article.category = json.category || [];
 		article.type = json.type || 0;
 		article.size = json.content.length;

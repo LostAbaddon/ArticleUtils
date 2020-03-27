@@ -60,6 +60,10 @@ const onInit = config => {
 		else if (msg.event === 'AddCategories') addCategories(msg.name, sender.tab.id);
 		else if (msg.event === 'ModifyArticleCategories') modifyArticleCategories(msg.category, sender.tab.id);
 		else if (msg.event === 'DeleteArticleCategories') deleteArticleCategories(msg.target, sender.tab.id);
+
+		else if (msg.event === 'GetBackendServer') getBackendServer(sender.tab.id);
+
+		else if (msg.event === 'PublishArticle') publishArticle(msg.id, sender.tab.id);
 	});
 
 	window.cacheStorage = new CacheStorage('ResourceCache', 1);
@@ -659,6 +663,19 @@ const deleteArticleCategories = async (target, tabID) => {
 };
 window.refreshLibrary = () => {
 	window.libraryStorage.refresh();
+};
+
+const getBackendServer = (tabID) => {
+	var bs = ExtConfigManager.get('BackendServer');
+	chrome.tabs.sendMessage(tabID, {
+		event: "GetBackendServer",
+		data: bs
+	});
+};
+
+const publishArticle = async (id, tabID) => {
+	var article = await window.libraryStorage.get(id);
+	chrome.tabs.sendMessage(tabID, { event: 'PublishArticle', data: article });
 };
 
 ExtConfigManager(DefaultExtConfig, (event, key, value) => {

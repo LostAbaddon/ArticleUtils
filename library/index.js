@@ -3,6 +3,7 @@ const Responsers = {};
 
 var CategoryList;
 var ArticleList;
+var Socket;
 
 Responsers.GetArticleList = list => {
 	list = list || ArticleList;
@@ -53,6 +54,10 @@ Responsers.GetArticleList = list => {
 		temp = newEle('div', 'edit-article');
 		temp.setAttribute('aid', item.id);
 		temp.innerText = "修改";
+		ele.appendChild(temp);
+		temp = newEle('div', 'publish-article');
+		temp.setAttribute('aid', item.id);
+		temp.innerText = "发布";
 		ele.appendChild(temp);
 		ArticleContainer.appendChild(ele);
 	});
@@ -115,7 +120,58 @@ Responsers.GetArticleCategories = list => {
 	ArticleMenu.innerHTML = '';
 	if (cate.children.length > 0) ArticleMenu.appendChild(cate);
 };
+Responsers.GetBackendServer = config => {
+	var url = 'http://' + config.host + ':' + config.port + '/socket.io/socket.io.js';
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', url, true);
+	xhr.onreadystatechange = () => {
+		if (xhr.readyState == 4) {
+			if (xhr.status === 0 || xhr.response === '') return rej(new Error('Connection Failed'));
+			try {
+				eval(xhr.responseText);
+				Socket = io.connect('http://' + config.host + ':' + config.port);
+				if (!!Socket) {
+					document.body.classList.add('socketed');
+					initSocket();
+				}
+			}
+			catch (err) {
+				console.error(err);
+			}
+		}
+	};
+	xhr.send();
+};
+Responsers.PublishArticle = article => {
+	var content = {
+		id: article.id,
+		fingerprint: article.fingerprint,
+		title: article.title,
+		author: article.author || '',
+		file: {
+			id: article.id,
+			fingerprint: article.fingerprint,
+			title: article.title,
+			author: article.author,
+			email: article.email,
+			description: article.description,
+			update: article.update,
+			category: article.category,
+			content: article.content
+		},
+		channel: 'ArticleMarket'
+	};
+	Socket.emit('__message__', {
+		event: 'publish',
+		data: content
+	});
+};
 
+const initSocket = () => {
+	Socket.on('__message__', msg => {
+		console.log(msg);
+	});
+};
 const generateNav = () => {
 	var nav = '<span><strong>导航：</strong></span><a class="nav-item nav-link" href="./index.html">根目录</a>';
 	var t = query.path.length - 1, p = [];
@@ -181,6 +237,12 @@ const onClick = evt => {
 	if (ele.classList.contains('edit-article')) {
 		location.href = '../markup/editor.html?id=' + articleID;
 	}
+	else if (ele.classList.contains('publish-article')) {
+		chrome.runtime.sendMessage({
+			event: 'PublishArticle',
+			id: articleID
+		});
+	}
 	else {
 		location.href = './view.html?id=' + articleID;
 	}
@@ -245,5 +307,6 @@ chrome.runtime.onMessage.addListener(msg => {
 	generateNav();
 }) ();
 
+chrome.runtime.sendMessage({ event: 'GetBackendServer' });
 chrome.runtime.sendMessage({ event: 'GetArticleList' });
 chrome.runtime.sendMessage({ event: 'GetArticleCategories' });
