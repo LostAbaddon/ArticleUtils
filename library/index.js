@@ -126,7 +126,7 @@ Responsers.GetBackendServer = config => {
 	xhr.open('GET', url, true);
 	xhr.onreadystatechange = () => {
 		if (xhr.readyState == 4) {
-			if (xhr.status === 0 || xhr.response === '') return rej(new Error('Connection Failed'));
+			if (xhr.status === 0 || xhr.response === '') return;
 			try {
 				eval(xhr.responseText);
 				Socket = io.connect('http://' + config.host + ':' + config.port);
