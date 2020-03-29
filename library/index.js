@@ -148,17 +148,9 @@ Responsers.PublishArticle = article => {
 		fingerprint: article.fingerprint,
 		title: article.title,
 		author: article.author || '',
-		file: {
-			id: article.id,
-			fingerprint: article.fingerprint,
-			title: article.title,
-			author: article.author,
-			email: article.email,
-			description: article.description,
-			update: article.update,
-			category: article.category,
-			content: article.content
-		},
+		description: article.description,
+		category: article.category,
+		file: article.content,
 		channel: 'ArticleMarket'
 	};
 	Socket.emit('__message__', {

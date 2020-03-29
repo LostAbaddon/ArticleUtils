@@ -233,7 +233,6 @@ const onEdited = async (saveHistory=true) => {
 	var isFirst = lastContent === '';
 	lastContent = text;
 	MUScrollView.innerText = '';
-	generateKeywords(text);
 
 	var last = MUPreview.innerHTML;
 	var html;
