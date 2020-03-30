@@ -1723,7 +1723,7 @@
 		if (!!config) Object.keys(config).forEach(key => {
 			key = key.toLowerCase();
 			let value = config[key];
-			if (!!value) docTree.metas[key] = value;
+			if (value !== undefined && value !== null) docTree.metas[key] = value;
 		});
 		docTree.parseLevel = 0;
 		docTree.mainParser = true;
