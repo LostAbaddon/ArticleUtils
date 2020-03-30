@@ -18,6 +18,7 @@
 4.	文章存档
 5.	MarkUp 解释器与编辑器
 6.	本地文库
+7.	与 [Contverse-StarPort](https://github.com/LostAbaddon/ArticlePort) 配合使用，可发布文章到分布式系统中
 
 详细介绍见后文。
 

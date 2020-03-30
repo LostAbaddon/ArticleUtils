@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <title>本地文库</title>
 <link type="text/css" rel="stylesheet" href="./index.css">
+<link type="text/css" rel="stylesheet" href="../page/alert.css">
 <link type="text/css" rel="stylesheet" href="../fontawesome/css/all.min.css">
 </head>
 <body>
@@ -12,7 +13,14 @@
 <nav class="searchBar"><i class="fas fa-search"></i><input type="text" id="SearchKeywords" placeholder="请输入要搜索的关键词"><button id="SearchArticle">搜索</button></nav>
 <section id="ArticleMenu" class="scroller"></section>
 <section id="ArticleContainer" class="scroller"></section>
+<div id="maskCover"></div>
+<div id="alertFrame" class="alertFrame">
+	<div class="title"></div>
+	<div class="content"></div>
+</div>
+<div id="notifyFrame"></div>
 <script type="text/javascript" src="../common/common.js"></script>
+<script type="text/javascript" src="../page/alert.js"></script>
 <script type="text/javascript" src="./index.js"></script>
 </body>
 </html>

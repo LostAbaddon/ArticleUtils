@@ -158,10 +158,15 @@ Responsers.PublishArticle = article => {
 		data: content
 	});
 };
+Responsers.articlePublished = info => {
+	Alert.show('文章已发布，地址为：\n\/ipfs\/' + info.file, '发布成功');
+};
 
 const initSocket = () => {
 	Socket.on('__message__', msg => {
-		console.log(msg);
+		cb = Responsers[msg.event];
+		if (!cb) return;
+		cb(msg.data);
 	});
 };
 const generateNav = () => {
