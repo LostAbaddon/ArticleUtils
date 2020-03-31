@@ -54,7 +54,7 @@ const onInit = config => {
 		else if (msg.event === 'ModifyArchieve') modifyArchieve(msg.fingerprint, msg.content, sender.tab.id);
 
 		else if (msg.event === 'GetArticleList') getArticleList(sender.tab.id);
-		else if (msg.event === 'SaveArticle') saveArticle(msg.article, sender.tab.id);
+		else if (msg.event === 'SaveArticle') saveArticle(msg.article, msg.originID, sender.tab.id);
 		else if (msg.event === 'GetArticleByID') getArticleByID(msg.id, sender.tab.id);
 		else if (msg.event === 'GetArticleCategories') getArticleCategories(sender.tab.id);
 		else if (msg.event === 'AddCategories') addCategories(msg.name, sender.tab.id);
@@ -634,9 +634,12 @@ const getArticleByID = async (id, tabID) => {
 	var article = await window.libraryStorage.get(id);
 	chrome.tabs.sendMessage(tabID, { event: 'GetArticleByID', data: article });
 };
-const saveArticle = async (article, tabID) => {
+const saveArticle = async (article, originID, tabID) => {
 	if (!article || !article.id) return;
-	var saved = await window.libraryStorage.set(article);
+	var [saved, unused] = await Promise.all([
+		libraryStorage.set(article),
+		archieveCache.del(originID)
+	]);
 	chrome.tabs.sendMessage(tabID, { event: 'SaveArticle', saved, id: article.id });
 };
 const getArticleCategories = tabID => {

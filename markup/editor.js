@@ -1535,7 +1535,7 @@ const saveToShelf = () => {
 	article.category = info.meta.keywords.filter(kw => kw.length > 0);
 	article.update = articleConfig.update;
 	article.id = fingerprint;
-	chrome.runtime.sendMessage({ event: 'SaveArticle', article });
+	chrome.runtime.sendMessage({ event: 'SaveArticle', article, originID: articleConfig.fingerprint });
 };
 const generateKeywords = content => {
 	var wordFreq = {};
@@ -2078,7 +2078,10 @@ const onPaste = evt => {
 	var bra = content.substr(0, start);
 	var ket = content.substr(end, content.length);
 	content = bra + result + ket;
+	start += result.length;
 	MUEditor.value = content;
+	MUEditor.selectionStart = start;
+	MUEditor.selectionEnd = start;
 	evt.preventDefault();
 };
 

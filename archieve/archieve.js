@@ -256,7 +256,7 @@ window.Archieve.init = () => {
 			fingerprint,
 			title: Archieve._title,
 			content: text,
-			url: location.href.replace(location.search, '')
+			url: location.href
 		});
 	});
 	document.body.appendChild(Archieve._pad);
