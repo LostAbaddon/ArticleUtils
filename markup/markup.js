@@ -1685,6 +1685,7 @@
 			var header = line.match(/^\n+/);
 			line = line.trim();
 			var content;
+			doc.parseLevel = 0;
 			if (!header) content = [parseLine(line, doc)];
 			else content = parseSection(line, doc, 1);
 			doc.blocks[key] = content.join('');
@@ -1727,6 +1728,7 @@
 		});
 		docTree.parseLevel = 0;
 		docTree.mainParser = true;
+		docTree.metas.title = docTree.metas.title || '无名文';
 
 		// 主体解析
 		text = parseSection(text, docTree);
