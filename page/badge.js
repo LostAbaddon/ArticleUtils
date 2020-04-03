@@ -1,3 +1,5 @@
+var urlStarPort = '/library/index.html';
+
 window.PageActions = window.PageActions || {};
 
 window.PageActions.onLoad = config => {
@@ -40,6 +42,30 @@ window.PageActions.onLoad = config => {
 			ExtConfigManager.set('SilenceRules', cfg);
 		};
 	});
+
+	var config = ExtConfigManager.get('BackendServer');
+	var url = 'http://' + config.host + ':' + config.port + '/api/shakehand.js';
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', url, true);
+	xhr.onreadystatechange = () => {
+		if (xhr.readyState == 4) {
+			let json;
+			if (xhr.status === 0 || xhr.response === '') {
+				json.ok = false;
+			}
+			else {
+				try {
+					json = JSON.parse(xhr.responseText);
+				}
+				catch {
+					json.ok = false;
+				}
+			}
+			if (!json.ok) StarPort.style.display = 'none';
+			else urlStarPort = 'http://' + config.host + ':' + json.data.port;
+		}
+	};
+	xhr.send();
 };
 window.PageActions.ToggleArchieve = () => {
 	chrome.tabs.getSelected(tab => {
@@ -53,4 +79,7 @@ window.PageActions.ViewArchieve = () => {
 };
 window.PageActions.EnterEditor = () => {
 	chrome.tabs.create({ url: chrome.runtime.getURL('/library/index.html'), active: true });
+};
+window.PageActions.EnterStarPort = () => {
+	chrome.tabs.create({ url: urlStarPort, active: true });
 };

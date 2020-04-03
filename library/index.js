@@ -4,6 +4,7 @@ const Responsers = {};
 var CategoryList;
 var ArticleList;
 var Socket;
+var hasBackend = false;
 
 Responsers.GetArticleList = list => {
 	list = list || ArticleList;
@@ -121,6 +122,9 @@ Responsers.GetArticleCategories = list => {
 	if (cate.children.length > 0) ArticleMenu.appendChild(cate);
 };
 Responsers.GetBackendServer = config => {
+	if (hasBackend) return;
+	hasBackend = true;
+
 	var url = 'http://' + config.host + ':' + config.port + '/socket.io/socket.io.js';
 	var xhr = new XMLHttpRequest();
 	xhr.open('GET', url, true);
