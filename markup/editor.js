@@ -2058,7 +2058,43 @@ const onDrop = evt => {
 };
 const onPaste = evt => {
 	var content = evt.clipboardData.getData('text/html');
-	if (content.length === 0) return;
+	var files = evt.clipboardData.files;
+	if (content.length === 0 && files.length === 0) return;
+
+	if (files.length > 0 && !!Socket) {
+		[].forEach.call(files, file => {
+			if (file.type.indexOf('image') < 0) return;
+
+			var fid = generateRandomKey(16);
+			var content = MUEditor.value;
+			var start = MUEditor.selectionStart;
+			var end = MUEditor.selectionEnd;
+			var bra = content.substr(0, start);
+			var ket = content.substr(end, content.length);
+			var placeholder = '[图片(' + fid + ')上传中……]';
+			content = bra + '\n' + placeholder + '\n' + ket;
+			start ++;
+			end = placeholder.length;
+			MUEditor.value = content;
+			MUEditor.selectionStart = start;
+			MUEditor.selectionEnd = start + end;
+
+			var reader = new FileReader();
+			reader.onload = event => {
+				var data = event.target.result;
+				sendToServer('saveResource', {
+					data,
+					id: fid,
+					name: file.name,
+					type: file.type
+				});
+			};
+			reader.readAsArrayBuffer(file);
+		});
+
+		evt.preventDefault();
+		return;
+	}
 
 	var ele = newEle('div');
 	ele.innerHTML = content;
@@ -2286,6 +2322,47 @@ const loadHelp = () => new Promise(res => {
 	xhr.send();
 });
 
+var Socket;
+const Responsers = {};
+Responsers.saveResource = (data, err) => {
+	if (!data.ok) {
+		Alert.show(err.message || err, '上传失败');
+		return;
+	}
+	Alert.notify('上传成功');
+	var placeholder = '[图片(' + data.target + ')上传中……]';
+	var image = '![' + data.name + '](' + data.url + ')';
+
+	var content = MUEditor.value;
+	var start = MUEditor.selectionStart;
+	var end = MUEditor.selectionEnd;
+	var found = true;
+	while (found) {
+		found = false;
+		content = content.replace(placeholder, (match, pos) => {
+			found = true;
+			start = pos;
+			end = start + image.length;
+			return image;
+		});
+	}
+	MUEditor.value = content;
+	MUEditor.selectionStart = start;
+	MUEditor.selectionEnd = start + image.length;
+};
+const sendToServer = (event, data) => {
+	if (!Socket) return;
+	Socket.emit('__message__', {event, data});
+};
+const initSocket = () => {
+	Socket.on('__message__', msg => {
+		cb = Responsers[msg.event];
+		if (!cb) return;
+		cb(msg.data);
+	});
+};
+
+chrome.runtime.sendMessage({ event: 'GetBackendServer' });
 (async () => {
 	var query = {};
 	var search = location.search;
@@ -2361,6 +2438,28 @@ chrome.runtime.onMessage.addListener(msg => {
 		if (msg.saved && fileCategory === 1) {
 			location.href = './editor.html?id=' + msg.id;
 		}
+	}
+	else if (msg.event === 'GetBackendServer') {
+		let url = 'http://' + msg.data.host + ':' + msg.data.port + '/socket.io/socket.io.js';
+		let xhr = new XMLHttpRequest();
+		xhr.open('GET', url, true);
+		xhr.onreadystatechange = () => {
+			if (xhr.readyState == 4) {
+				if (xhr.status === 0 || xhr.response === '') return;
+				try {
+					eval(xhr.responseText);
+					Socket = io.connect('http://' + msg.data.host + ':' + msg.data.port);
+					if (!!Socket) {
+						document.body.classList.add('socketed');
+						initSocket();
+					}
+				}
+				catch (err) {
+					console.error(err);
+				}
+			}
+		};
+		xhr.send();
 	}
 });
 

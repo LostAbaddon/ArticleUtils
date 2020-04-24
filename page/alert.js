@@ -46,7 +46,7 @@
 		notify.classList.add('show');
 		notify.closer = setTimeout(() => {
 			notify.classList.remove('show');
-			notify.classList = null;
+			notify.className = '';
 		}, 3000);
 	};
 

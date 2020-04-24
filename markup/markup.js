@@ -48,9 +48,9 @@
 	const BlockRender = {}; // 主体处理结束后的后续处理插件
 	const FinalRender = {}; // 主体处理结束后的后续处理插件
 
-	const generateRandomKey = () => {
+	const generateRandomKey = (len=8) => {
 		var result = '';
-		for (let i = 0; i < 8; i ++) {
+		for (let i = 0; i < len; i ++) {
 			result += Math.floor(Math.random() * 10) + '';
 		}
 		return result;

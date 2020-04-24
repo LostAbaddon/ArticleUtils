@@ -243,3 +243,6 @@ div.icon-generator div.icon-line button {
 #fileLoader {
 	display: none;
 }
+#notifyFrame {
+	font-size: 14px;
+}
