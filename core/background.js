@@ -830,3 +830,12 @@ chrome.contextMenus.create({
 	title: '内容存档(Alt+A / ctrl+ctrl+A)',
 	contexts: [ 'page', 'selection' ]
 });
+chrome.webRequest.onBeforeRequest.addListener(req => {
+	console.log(req);
+	var config = ExtConfigManager.get('BackendServer');
+	var request = req.url.replace('http://starport.contverse.gfs/resource/', '');
+	request = request.split('.');
+	var url = 'http://' + config.host + ':' + config.port + '/resource/' + request[1] + '/' + request[0];
+	console.log(url);
+	return {redirectUrl: url};
+}, {urls: ['http://starport.contverse.gfs/resource/*']}, ['blocking']);
