@@ -105,6 +105,9 @@ article p.align-center {
 article p.align-right {
 	text-align: right;
 }
+article li p {
+	margin: 5px 0px;
+}
 
 article code {
 	margin: 0px 2px;

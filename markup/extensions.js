@@ -59,7 +59,7 @@ MarkUp.addExtension({
 	parse: (line, doc, caches) => {
 		doc.links = doc.links || [];
 		var changed = false;
-		line = line.replace(/([!@#]?)\[([\w %'"\*_\^\|~\-\.\+=·,;:\?!\\\/\u0800-\uffff]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
+		line = line.replace(/([!@#]?)\[([\w %'"\*_\^\|~\-\.\+=·,;:\?!\\\/&\u0800-\uffff]*?)\] *\((\@?[\w\W]*?)\)/g, (match, prev, title, link, pos) => {
 			link = link.trim();
 			if (link.length === 0) return match;
 			if (!!caches[title]) return match;
@@ -92,7 +92,7 @@ MarkUp.addExtension({
 	parse: (line, doc, caches) => {
 		var changed = false;
 
-		line = line.replace(/\[([\w %'"\-\.\+=,;:\?!\\\/\u0800-\uffff]*?)\] *\{([\w \-\.]+?)\}/g, (match, title, name, pos) => {
+		line = line.replace(/\[([\w %'"\-\.\+=,;:\?!\\\/&\u0800-\uffff]*?)\] *\{([\w \-\.]+?)\}/g, (match, title, name, pos) => {
 			name = name.trim();
 			title = title.trim();
 			if (name.length === 0) return match;
@@ -471,7 +471,7 @@ MarkUp.addExtension({
 	parse: (line, doc, caches) => {
 		var changed = false;
 
-		line = line.replace(/(\[([\w %'"\-\.\+=,;:\?!\\\/\u0800-\uffff]*?)\])?\[([\^:])([\w \-\.]+?)\]/g, (match, all, title='', prefix, name) => {
+		line = line.replace(/(\[([\w %'"\-\.\+=,;:\?!\\\/&\u0800-\uffff]*?)\])?\[([\^:])([\w \-\.]+?)\]/g, (match, all, title='', prefix, name) => {
 			name = name.trim();
 			if (name.length === 0) return match;
 			if (!doc.refs[name]) return match;
