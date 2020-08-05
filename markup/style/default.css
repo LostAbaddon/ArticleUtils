@@ -607,3 +607,7 @@ article > section > aside.content-table p.content-item span.content-indent {
 article > section > aside.content-table p.content-item a {
 	color: rgb(225, 225, 225);
 }
+
+.MathJax > nobr > span.math > span:empty {
+	visibility: hidden !important;
+}
