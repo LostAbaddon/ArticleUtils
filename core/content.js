@@ -102,6 +102,15 @@ const autoMath = () => new Promise(res => {
 		});`;
 	document.body.appendChild(config);
 
+	var cssFixer = document.querySelector('style[name="CSSFIXER"]');
+	if (!cssFixer) {
+		cssFixer = newEle('style');
+		cssFixer.name = 'CSSFIXER';
+		cssFixer.innerText = '.MathJax > nobr > span.math > span:empty {visibility: hidden !important;}';
+		document.body.appendChild(cssFixer);
+	}
+	console.log(cssFixer);
+
 	loadJS(chrome.extension.getURL('MathJax2.5/MathJax.js?config=TeX-AMS_HTML'), () => {
 		res();
 	});
