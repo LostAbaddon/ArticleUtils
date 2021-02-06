@@ -15,7 +15,7 @@ const Translators = {
 
 var showSearchNotify = false;
 var hideWeakResults = false;
-var otherFunctions = true; // 其它隐藏功能
+var otherFunctions = false; // 其它隐藏功能
 
 window.getLongestCommonPart = (stra, strb) => {
 	var lena = stra.length, lenb = strb.length, target = '';
