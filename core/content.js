@@ -15,6 +15,7 @@ const Translators = {
 
 var showSearchNotify = false;
 var hideWeakResults = false;
+var otherFunctions = true; // 其它隐藏功能
 
 window.getLongestCommonPart = (stra, strb) => {
 	var lena = stra.length, lenb = strb.length, target = '';
@@ -74,6 +75,10 @@ const onInit = async config => {
 			auto: true,
 			targets: content
 		});
+	}
+
+	if (otherFunctions) {
+		doubanFunctions();
 	}
 };
 const autoMath = () => new Promise(res => {
@@ -136,6 +141,135 @@ const initSearch = () => {
 		name: '其它'
 	}]);
 	if (showSearchNotify) TextNotifier.init();
+};
+
+const getWilsonHot = (foed, foer, total = 0, common = 0) => {
+	var q = 1 + 2 / foed;
+	var p = foer / foed;
+	var wilson = (q - 1 + 2 * p - Math.sqrt(Math.max(0, (q - 1 + 2 * p) ** 2 - 4 * q * (p ** 2)))) / (2 * q);
+	if (foed < 100) wilson *= (foed / 100) ** ((100 - foed) / 5);
+	wilson *= (foed + foer) / (500 + foed + foer);
+
+	if (total > 0) {
+		let rate = total / common;
+		rate = Math.log(rate);
+		rate = Math.sqrt(rate) * 0.9;
+		rate = Math.exp(-rate);
+		wilson *= 1 + rate;
+	}
+
+	wilson = Math.round(wilson * 100);
+	return wilson;
+};
+
+const doubanFunctions = () => {
+	if (location.hostname !== 'www.douban.com') return;
+	if (location.pathname === '/contacts/rlist') doubanContractListPageFunction();
+	else if (!!location.pathname.match(/\/people\/.+\//)) doubanUserPageFunction();
+};
+const doubanContractListPageFunction = () => {
+	var list = document.querySelectorAll('div#content ul.user-list li div.info');
+	[].forEach.call(list, (ele) => {
+		var nums = ele.querySelectorAll('p b');
+		var [foer, foed] = [].map.call(nums, n => (n.innerText * 1) || 0);
+		var name = ele.querySelector('h3 a');
+
+		var wilson = getWilsonHot(foed, foer, 0, 0);
+		if (wilson >= 15) {
+			name.innerHTML = '<span style="display:inline-block;min-width:150px;">' + name.innerHTML + '</span>　<span style="color:rgb(173,107,125);font-size:12px;font-weight:bolder;">（可关注度：' + wilson + '）</span>';
+		}
+		else {
+			name.innerHTML = '<span style="display:inline-block;min-width:150px;">' + name.innerHTML + '</span>　<span style="color:rgb(175,175,175);font-size:12px;">（可关注度：' + wilson + '）</span>';
+		}
+	});
+};
+const doubanUserPageFunction = () => {
+	var foed = document.querySelector('#friend h2 span.pl a');
+	var foer = document.querySelector('p.rev-link a');
+	foed = foed.innerText.match(/成员(\d+)/);
+	if (!foed) return;
+	foer = foer.innerText.match(/被(\d+)人关注/);
+	if (!foer) return;
+
+	foed = foed[1] * 1;
+	if (isNaN(foed)) return;
+	foer = foer[1] * 1;
+	if (isNaN(foer)) return;
+
+	var movies = document.querySelector('#movie h2 span.pl');
+	var books = document.querySelector('#book h2 span.pl');
+
+	if (!!movies) {
+		movies = movies.innerText;
+		movies = movies.match(/\d+部/g);
+		if (!!movies) {
+			movies = movies.reduce((val, ele) => {
+				var a = ele.match(/\d+/);
+				if (!a) return val;
+				a = a * 1;
+				if (isNaN(a)) return val;
+				return val + a;
+			}, 0);
+		}
+		else {
+			movies = 0;
+		}
+	}
+	else {
+		movies = 0;
+	}
+	if (!!books) {
+		books = books.innerText;
+		books = books.match(/\d+本/g);
+		if (!!books) {
+			books = books.reduce((val, ele) => {
+				var a = ele.match(/\d+/);
+				if (!a) return val;
+				a = a * 1;
+				if (isNaN(a)) return val;
+				return val + a;
+			}, 0);
+		}
+		else {
+			books = 0;
+		}
+	}
+	else {
+		books = 0;
+	}
+
+	var total = movies + books, common = 0;
+	if (total > 0) {
+		common = document.querySelector('#common h2');
+		if (!!common) {
+			common = common.innerText;
+			common = common.match(/\((\d+)\)/);
+			if (!!common) {
+				common = common[1] * 1;
+				if (isNaN(common)) common = 0;
+			}
+			else {
+				common = 0;
+			}
+		}
+		else {
+			common = 0;
+		}
+	}
+	var wilson = getWilsonHot(foed, foer, 0, 0);
+
+	var name = document.querySelector('#content .article .info h1');
+	var tag = newEle('span');
+	tag.innerText = '　（可关注度：' + wilson + '）　';
+	tag.style.fontSize = '12px';
+	if (wilson >= 15) {
+		tag.style.color = 'rgb(173,107,125)';
+		tag.style.fontWeight = 'bolder';
+	}
+	else {
+		tag.style.color = 'rgb(175,175,175)';
+	}
+	name.insertBefore(tag, name.firstElementChild);
 };
 
 const getSelectedText = () => {
