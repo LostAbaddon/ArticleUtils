@@ -114,7 +114,6 @@ const autoMath = () => new Promise(res => {
 		cssFixer.innerText = '.MathJax > nobr > span.math > span:empty {visibility: hidden !important;}';
 		document.body.appendChild(cssFixer);
 	}
-	console.log(cssFixer);
 
 	loadJS(chrome.extension.getURL('MathJax2.5/MathJax.js?config=TeX-AMS_HTML'), () => {
 		res();
@@ -164,8 +163,18 @@ const getWilsonHot = (foed, foer, total = 0, common = 0) => {
 
 const doubanFunctions = () => {
 	if (location.hostname !== 'www.douban.com') return;
+	doubanChangeNavBarStyle();
 	if (location.pathname === '/contacts/rlist') doubanContractListPageFunction();
 	else if (!!location.pathname.match(/\/people\/.+\//)) doubanUserPageFunction();
+};
+const doubanChangeNavBarStyle = () => {
+	var dbnbCSSOpt = document.querySelector('style[name="DOUBANNAVBAROPT"]');
+	if (!dbnbCSSOpt) {
+		dbnbCSSOpt = newEle('style');
+		dbnbCSSOpt.name = 'DOUBANNAVBAROPT';
+		dbnbCSSOpt.innerText = '#db-global-nav.global-nav{position:fixed;width:100%;z-index:9999;}\n#db-nav-sns.nav{padding-top:20px;margin-bottom:30px;}\n';
+		document.body.appendChild(dbnbCSSOpt);
+	}
 };
 const doubanContractListPageFunction = () => {
 	var list = document.querySelectorAll('div#content ul.user-list li div.info');
